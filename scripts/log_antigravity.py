@@ -202,6 +202,14 @@ def get_logged_entry_ids(log_file: Path) -> set[str]:
 # Iterating user inputs
 # ---------------------------------------------------------------------------
 
+def _find_transcript(conv_dir: Path) -> Path | None:
+    for name in ("transcript.jsonl", "overview.txt"):
+        p = conv_dir / ".system_generated" / "logs" / name
+        if p.exists() and p.stat().st_size > 0:
+            return p
+    return None
+
+
 def iter_user_inputs(brain_dirs: list[Path], cutoff: datetime | None,
                      only_conv: str | None, repo_root_n: str):
     """Yield user-input dicts from every matching conversation transcript."""
@@ -211,10 +219,8 @@ def iter_user_inputs(brain_dirs: list[Path], cutoff: datetime | None,
                 continue
             if only_conv and conv_dir.name != only_conv:
                 continue
-            transcript = (
-                conv_dir / ".system_generated" / "logs" / "transcript.jsonl"
-            )
-            if not transcript.exists() or transcript.stat().st_size == 0:
+            transcript = _find_transcript(conv_dir)
+            if transcript is None:
                 continue
 
             cwds = _conv_cwds(transcript)
