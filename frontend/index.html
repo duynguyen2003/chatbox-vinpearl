@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vinpearl AI Concierge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">V</div>
+        <div><strong>VINPEARL</strong><span>AI TRAVEL ASSISTANT</span></div>
+      </div>
+      <div class="header-actions">
+        <span class="online"><i></i> Online</span>
+        <button id="newChatBtn" class="outline-btn">+ Cuộc trò chuyện mới</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="hero">
+        <div class="shade"></div>
+        <div class="hero-copy">
+          <span class="eyebrow">TRẢI NGHIỆM VIỆT NAM THEO CÁCH RIÊNG</span>
+          <h1>Hành trình đáng nhớ<br><em>bắt đầu từ một câu hỏi</em></h1>
+          <p>Khám phá điểm đến, khu nghỉ dưỡng, VinWonders, golf, hội nghị, ưu đãi và hướng dẫn thanh toán bằng nhiều ngôn ngữ.</p>
+        </div>
+        <div class="quick-destinations">
+          <button data-question="Gợi ý cho tôi chuyến đi Phú Quốc dành cho gia đình có trẻ nhỏ"><strong>Phú Quốc</strong><span>Biển xanh & gia đình</span></button>
+          <button data-question="VinWonders Nha Trang có những trải nghiệm nổi bật nào?"><strong>Nha Trang</strong><span>Vui chơi trên đảo</span></button>
+          <button data-question="Tư vấn địa điểm tổ chức hội nghị cho khoảng 600 khách"><strong>MICE</strong><span>Hội nghị & sự kiện</span></button>
+        </div>
+      </section>
+
+      <section class="chat-card">
+        <div class="chat-head">
+          <div class="avatar">V</div>
+          <div><h2>Vinpearl AI Concierge</h2><p><i></i> Đang trực tuyến</p></div>
+          <button id="settingsBtn" class="icon-btn" aria-label="Cài đặt">⚙</button>
+        </div>
+
+        <div id="messages" class="messages">
+          <div class="message assistant">
+            <div class="avatar small">V</div>
+            <div class="bubble-wrap">
+              <div class="bubble">
+                Xin chào! Tôi có thể hỗ trợ bạn tìm hiểu về điểm đến, khách sạn, loại phòng, VinWonders, golf, sự kiện, ưu đãi và hướng dẫn thanh toán.
+              </div>
+              <small>Vừa xong</small>
+            </div>
+          </div>
+
+          <div id="suggestions" class="suggestions">
+            <button data-question="Gợi ý chuyến đi Phú Quốc cho gia đình có trẻ nhỏ">Phú Quốc cho gia đình</button>
+            <button data-question="Tìm địa điểm tổ chức sự kiện cho 600 khách">Hội nghị 600 khách</button>
+            <button data-question="VinWonders Grand Park có những hoạt động gì?">Khám phá VinWonders</button>
+            <button data-question="Hướng dẫn tôi xử lý lỗi thanh toán thường gặp">Hỗ trợ thanh toán</button>
+          </div>
+        </div>
+
+        <div class="composer-area">
+          <div id="errorBanner" class="error" hidden><span id="errorText"></span><button id="closeError">×</button></div>
+          <form id="chatForm" class="composer">
+            <textarea id="messageInput" rows="1" placeholder="Nhập câu hỏi của bạn..." required></textarea>
+            <button id="sendBtn" type="submit" aria-label="Gửi">➤</button>
+          </form>
+          <p class="note">AI có thể đưa ra thông tin chưa hoàn toàn chính xác. Vui lòng kiểm tra thông tin quan trọng trước khi đặt dịch vụ.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer><span>© 2026 Vinpearl AI Travel Assistant — MVP Demo</span><span>FastAPI · LangGraph · RAG</span></footer>
+  </div>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="settings-card">
+      <div class="dialog-title"><div><span class="eyebrow dark">CẤU HÌNH KẾT NỐI</span><h3>FastAPI endpoint</h3></div><button value="cancel">×</button></div>
+      <label>API URL</label>
+      <input id="apiUrl" type="url" value="http://127.0.0.1:8000/api/v1/chat" required>
+      <label>User ID</label>
+      <input id="userId" type="text" value="web-demo-user">
+      <div class="dialog-actions"><button value="cancel" class="secondary">Hủy</button><button id="saveSettings" value="default" class="primary">Lưu</button></div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>

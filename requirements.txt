@@ -21,5 +21,20 @@ langgraph>=0.2.0
 # Dev tools
 ruff>=0.8.0
 pytest>=8.0.0
+
 pytest-asyncio>=0.24.0
 httpx>=0.28.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+python-dotenv>=1.0.0
+openai>=1.60.0
+langgraph>=0.2.0
+chromadb>=0.5.0
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+httpx>=0.28.0
+sentence-transformers>=3.0.0
+torch>=2.2.0
+litellm>=1.75.0

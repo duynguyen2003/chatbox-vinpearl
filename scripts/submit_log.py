@@ -21,7 +21,9 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    load_dotenv(ROOT_DIR / ".env")
 except ImportError:
     pass
 

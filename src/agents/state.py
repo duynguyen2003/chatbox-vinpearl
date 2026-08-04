@@ -1,18 +1,21 @@
-from __future__ import annotations
+from typing import Any, Literal, TypedDict
 
-from typing import TypedDict
+
+RouteName = Literal["greeting", "out_of_scope", "rag"]
 
 
 class AgentState(TypedDict, total=False):
-    """State schema cho LangGraph agent.
+    user_message: str
+    session_id: str | None
+    user_id: str | None
 
-    Mỗi node đọc và ghi vào state này.
-    total=False cho phép tất cả fields là optional.
-    """
+    original_language: str
+    rag_query: str
+    route: RouteName
 
-    query: str
+    retrieved_documents: list[dict[str, Any]]
     context: str
-    analysis: str
-    response: str
-    error: str
-    metadata: dict
+    enough_information: bool
+
+    answer: str
+    ticket_id: str | None

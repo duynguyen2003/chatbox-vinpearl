@@ -1,33 +1,50 @@
 #!/usr/bin/env bash
 # Cross-platform Python launcher for AI log hooks.
-# Tries python3 → python → py -3 on PATH; on Windows, falls back to common
-# Python install locations because Git Bash launched by some hooks gets a
-# stripped PATH that omits the Windows Python directory.
-# Designed to be sourced or called as: bash scripts/_pyrun.sh <script> [args...]
-#
-# Exits 0 silently if no Python is found — hooks must never block the AI tool.
 set -u
 
-if command -v python3 >/dev/null 2>&1; then
-  PY=python3
+PY=""
+
+# Ưu tiên Python 3.11 thật trên máy Windows này
+WIN_PY="/c/Users/Admin/AppData/Local/Programs/Python/Python311/python.exe"
+
+if [ -x "$WIN_PY" ]; then
+  PY="$WIN_PY"
+elif command -v python3 >/dev/null 2>&1; then
+  PY="$(command -v python3)"
 elif command -v python >/dev/null 2>&1; then
-  PY=python
+  CANDIDATE="$(command -v python)"
+
+  # Bỏ qua Microsoft Store execution alias
+  if [[ "$CANDIDATE" != *"/Microsoft/WindowsApps/"* ]]; then
+    PY="$CANDIDATE"
+  fi
 elif command -v py >/dev/null 2>&1; then
-  PY="py -3"
-else
-  # PATH lookup failed — probe standard Windows install locations.
-  PY=""
+  exec py -3 "$@"
+fi
+
+# Nếu vẫn chưa tìm thấy, dò các vị trí Python phổ biến
+if [ -z "$PY" ]; then
   shopt -s nullglob 2>/dev/null || true
+
   for cand in \
+    /c/Users/*/AppData/Local/Programs/Python/Python311/python.exe \
     /c/Users/*/AppData/Local/Programs/Python/Python*/python.exe \
     "/c/Program Files/Python"*/python.exe \
     "/c/Program Files (x86)/Python"*/python.exe \
     /c/Python*/python.exe; do
-    if [ -x "$cand" ]; then PY="$cand"; break; fi
+
+    if [ -x "$cand" ]; then
+      PY="$cand"
+      break
+    fi
   done
+
   shopt -u nullglob 2>/dev/null || true
-  [ -n "$PY" ] || exit 0
 fi
 
-# shellcheck disable=SC2086
-exec $PY "$@"
+if [ -z "$PY" ]; then
+  echo "[ai-log] Python not found." >&2
+  exit 0
+fi
+
+exec "$PY" "$@"
