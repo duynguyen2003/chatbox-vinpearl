@@ -1,6 +1,23 @@
-version: "3.8"
-
 services:
+  db:
+    # Ảnh có sẵn pgvector để sau này làm lớp RAG khỏi phải đổi
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vinpearl}
+      POSTGRES_USER: ${POSTGRES_USER:-vinpearl}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?can POSTGRES_PASSWORD trong .env}
+    ports:
+      # Chỉ để dev chạy alembic/psql từ máy thật. Production thì bỏ dòng này
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vinpearl} -d ${POSTGRES_DB:-vinpearl}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: .
@@ -9,11 +26,20 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      # Trong mạng compose thì host là "db", không phải localhost
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER:-vinpearl}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vinpearl}
     volumes:
       - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
+
+volumes:
+  pgdata:

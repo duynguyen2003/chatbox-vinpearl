@@ -6,6 +6,7 @@ __pycache__/
 dist/
 build/
 .eggs/
+__init__.py
 
 # Virtual environments
 venv/

@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     embedding_device: str = "cpu"
     embedding_batch_size: int = 128
 
+    # Database
+    database_url: str = (
+        "postgresql+pg8000://vinpearl:vinpearl@localhost:5432/vinpearl"
+    )
+    db_echo: bool = False
+
     # Data
     data_dir: Path = Path("./data")
     chroma_dir: Path = Path("./storage/chroma_local")

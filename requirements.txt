@@ -38,3 +38,12 @@ httpx>=0.28.0
 sentence-transformers>=3.0.0
 torch>=2.2.0
 litellm>=1.75.0
+
+# Database
+sqlalchemy>=2.0.36
+alembic>=1.14.0
+pyyaml>=6.0.2
+# Driver PostgreSQL thuần Python. Chọn pg8000 vì psycopg[binary] và psycopg2-binary
+# đều bị Windows Application Control policy chặn không nạp được DLL trên máy dev.
+# Ở quy mô ~4.400 dòng thì chênh lệch tốc độ so với psycopg không đáng kể.
+pg8000>=1.31.0
