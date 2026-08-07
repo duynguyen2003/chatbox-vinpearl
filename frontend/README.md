@@ -67,3 +67,18 @@ Khi frontend và backend cùng domain, đổi trong `app.js`:
 ```javascript
 apiUrl: localStorage.getItem('vp_api_url') || '/api/v1/chat'
 ```
+
+## Session memory
+
+Frontend lưu `session_id` do backend trả về trong `localStorage` với khóa:
+
+```text
+vp_session_id
+```
+
+- Tin nhắn đầu tiên không tự tạo session ở trình duyệt; backend tạo và trả về.
+- Các tin nhắn sau tái sử dụng đúng `session_id` đó.
+- Tải lại trang vẫn giữ phiên hiện tại.
+- Nút **Cuộc trò chuyện mới** xóa session ở trình duyệt và gọi API xóa lịch sử cũ.
+
+Để kiểm tra, mở DevTools → Network → request `/api/v1/chat`. Từ request thứ hai trở đi, payload phải chứa cùng một `session_id`.

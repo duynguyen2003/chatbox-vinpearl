@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 from src.config import get_settings
@@ -18,6 +19,7 @@ class TicketService:
         session_id: str | None,
         user_id: str | None,
         reason: str,
+        conversation_turns: list[dict[str, Any]] | None = None,
     ) -> str:
         ticket_id = f"VP-{uuid4().hex[:10].upper()}"
         record = {
@@ -29,6 +31,7 @@ class TicketService:
             "session_id": session_id,
             "user_id": user_id,
             "reason": reason,
+            "conversation_turns": conversation_turns or [],
         }
 
         with self.path.open("a", encoding="utf-8") as file:

@@ -18,8 +18,9 @@ class SourceItem(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
+    session_id: str
     language: str
     route: str
     ticket_id: str | None = None
-    sources: list[SourceItem] = []
+    sources: list[SourceItem] = Field(default_factory=list)
     debug: dict[str, Any] | None = None

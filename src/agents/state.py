@@ -9,6 +9,9 @@ class AgentState(TypedDict, total=False):
     session_id: str | None
     user_id: str | None
 
+    conversation_turns: list[dict[str, Any]]
+    conversation_history: str
+
     original_language: str
     rag_query: str
     route: RouteName

@@ -17,22 +17,21 @@ class Settings(BaseSettings):
     llm_max_retries: int = 4
 
     # Local embedding
-    local_embedding_model: str = (
-        "intfloat/multilingual-e5-small"
-    )
+    local_embedding_model: str = "intfloat/multilingual-e5-small"
     embedding_device: str = "cpu"
     embedding_batch_size: int = 128
 
     # Data
     data_dir: Path = Path("./data")
     chroma_dir: Path = Path("./storage/chroma_local")
-    chroma_collection: str = (
-        "vinpearl_multilingual_e5_small"
-    )
+    chroma_collection: str = "vinpearl_multilingual_e5_small"
     ticket_file: Path = Path("./storage/tickets.jsonl")
-    chat_history_file: Path = Path(
-        "./storage/chat_history.jsonl"
-    )
+    chat_history_file: Path = Path("./storage/chat_history.jsonl")
+
+    # Conversation memory
+    memory_enabled: bool = True
+    memory_max_turns: int = 8
+    memory_max_chars: int = 6000
 
     # RAG
     top_k: int = 6

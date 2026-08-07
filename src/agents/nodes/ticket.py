@@ -10,18 +10,22 @@ def create_ticket(state: AgentState) -> AgentState:
         session_id=state.get("session_id"),
         user_id=state.get("user_id"),
         reason="Insufficient information in the Vinpearl knowledge base",
+        conversation_turns=state.get("conversation_turns", []),
     )
 
     llm = LLMService()
     answer = llm.text(
         system_prompt=(
-            "Reply in the user's original language. Explain that the available knowledge "
-            "base does not contain enough reliable information, that a support ticket "
-            "has been created, and a human support team will follow up. "
-            "Include the ticket ID exactly as provided."
+            "Reply in the user's current original language. Explain that the available "
+            "knowledge base does not contain enough reliable information, that a support "
+            "ticket has been created, and a human support team will follow up. Include "
+            "the ticket ID exactly as provided. Do not promise a response time."
         ),
         user_prompt=f"""
-Original request:
+Previous conversation:
+{state.get("conversation_history", "(no previous conversation)")}
+
+Current request:
 {state["user_message"]}
 
 Ticket ID:
