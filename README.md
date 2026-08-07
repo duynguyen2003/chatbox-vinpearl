@@ -17,8 +17,9 @@ python -m uvicorn src.backend.main:app --reload --port 8000
 # FE
 
 ```powershell
-cd frontend
-python -m http.server 5500
+cd D:\Demo-day\P-013
+npm install
+npm run dev
 ```
 
 http://127.0.0.1:5500
