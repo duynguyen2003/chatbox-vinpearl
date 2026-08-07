@@ -2,7 +2,6 @@ from src.config import get_settings
 from src.services.data_loader import load_json_documents
 from src.services.rag import RAGService
 
-
 # Number of records written to Chroma per upsert. The model itself uses
 # EMBEDDING_BATCH_SIZE from .env for local inference.
 UPSERT_BATCH_SIZE = 512
