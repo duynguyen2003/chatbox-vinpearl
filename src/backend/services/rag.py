@@ -3,7 +3,7 @@ from typing import Any
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-from src.config import get_settings
+from src.backend.config import get_settings
 
 
 class RAGService:

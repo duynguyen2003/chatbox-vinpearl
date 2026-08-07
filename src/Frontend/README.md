@@ -1,364 +1,207 @@
-# Tong quan Frontend
+# Frontend – Vinpearl AI Assistant
 
-Frontend cua du an la ung dung React chay bang Vite. Ma nguon FE nam chu yeu trong thu muc `src/Frontend`, con diem khoi dong React nam o `src/main.jsx` va `src/App.jsx`.
+Frontend là ứng dụng React 19 chạy bằng Vite 8. Toàn bộ mã nguồn giao diện nằm
+trong `src/Frontend`; các file cấu hình dùng chung như `package.json`,
+`vite.config.js` và `index.html` nằm ở thư mục gốc dự án.
 
-Ung dung dang mo phong website dat phong/nghi duong VinTravel, gom cac chuc nang chinh:
+## Chức năng hiện có
 
-- Trang chu hien thi hero search, diem den, resort noi bat va combo uu dai.
-- Trang tim kiem resort co bo loc theo diem den, loai hinh va gia toi da.
-- Trang chi tiet resort co gallery anh, danh sach phong, tien ich va chinh sach.
-- Chatbot AI Concierge, goi API backend neu co, fallback sang cau tra loi local neu backend loi.
-- Trang tao support ticket, goi API backend neu co, fallback sang ticket local.
-- Dang nhap/dang ky gia lap bang React Context.
-- Doi ngon ngu EN/VI, trong do KO/ZH hien dang fallback ve EN.
+- Trang chủ giới thiệu điểm đến, khách sạn, combo và AI Concierge.
+- Tìm kiếm khách sạn theo điểm đến, loại hình và mức giá.
+- Xem chi tiết khách sạn, phòng, tiện ích và chính sách.
+- Trang ưu đãi đọc dữ liệu thật từ PostgreSQL thông qua backend.
+- Chatbot đa ngôn ngữ, hiển thị nguồn tham khảo và support ticket.
+- Form gửi yêu cầu hỗ trợ.
+- Trang giới thiệu, quy định, đăng nhập và đăng ký.
+- Giao diện responsive cho desktop, tablet và mobile.
 
-## Cach chay Frontend
+## Yêu cầu môi trường
 
-Neu chay truc tiep bang Node:
+- Node.js 20 trở lên.
+- npm đi kèm Node.js.
+- Backend chạy tại `http://127.0.0.1:8000` nếu muốn dùng API thật.
 
-```bash
+Frontend không sử dụng `requirements.txt`. Dependency JavaScript được quản lý
+bởi `package.json` và khóa phiên bản trong `package-lock.json`.
+
+## Cài đặt và chạy
+
+Chạy các lệnh từ thư mục gốc dự án:
+
+```powershell
+cd D:\Demo-day\P-013
 npm install
 npm run dev
 ```
 
-Sau do mo URL Vite hien tren terminal, thuong la:
+Mở địa chỉ Vite hiển thị trên terminal, thông thường là:
 
 ```text
 http://localhost:5173
 ```
 
-Neu muon ben backend clone code ve va chay FE bang Docker Compose thi may host chi can Docker, khong can cai Node. Tuy nhien `docker-compose.yml` hien tai cua project moi co service `backend`, chua co service `frontend`. Can them service FE rieng neu muon compose dung ca BE va FE.
+Nếu PowerShell chặn `npm.ps1`, dùng:
 
-Vi du service FE co the them vao compose:
-
-```yaml
-frontend:
-  image: node:20
-  working_dir: /app
-  volumes:
-    - ./:/app
-  command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-  ports:
-    - "5173:5173"
-  depends_on:
-    - backend
+```powershell
+npm.cmd run dev
 ```
 
-## Luong khoi dong ung dung
+Các lệnh kiểm tra:
 
-### `src/main.jsx`
+```powershell
+npm.cmd run lint
+npm.cmd run build
+npm.cmd run preview
+```
 
-Day la entry point cua React. File nay:
+## Chạy cùng backend
 
-- Import `StrictMode` tu React.
-- Import `createRoot` tu `react-dom/client`.
-- Import CSS global tu `src/index.css`.
-- Render component `App` vao DOM element co id la `root` trong `index.html`.
+Mở terminal thứ nhất:
 
-### `src/App.jsx`
+```powershell
+cd D:\Demo-day\P-013\src\backend
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn src.main:app --reload --port 8000
+```
 
-Day la component goc cua ung dung. File nay boc toan bo app bang:
+Mở terminal thứ hai:
 
-- `BrowserRouter`: bat routing theo URL tren browser.
-- `LanguageProvider`: cung cap ngon ngu hien tai va object text `t`.
-- `AuthProvider`: cung cap thong tin user, ham login/logout.
-- `AppRoutes`: noi khai bao tat ca route/page.
+```powershell
+cd D:\Demo-day\P-013
+npm.cmd run dev
+```
 
-`div translate="no" className="notranslate"` dung de han che browser/extension tu dong dich noi dung UI.
+`vite.config.js` tự chuyển tiếp request `/api/*` sang
+`http://127.0.0.1:8000`. Lỗi `ECONNREFUSED 127.0.0.1:8000` nghĩa là backend
+chưa chạy hoặc đã dừng.
 
-## Cau truc thu muc FE
+## Điểm khởi động
+
+- `index.html` nằm ở thư mục gốc vì Vite dùng đây làm tài liệu HTML đầu vào.
+- `src/Frontend/main.jsx` gắn React vào phần tử `#root`.
+- `src/Frontend/App.jsx` khai báo Router, Language Context và Auth Context.
+- `src/Frontend/routes/AppRoutes.jsx` quản lý route và layout chung.
+- `src/Frontend/index.css` chứa CSS toàn cục.
+
+Không di chuyển `index.html` vào `src/Frontend` nếu chưa đồng thời thay đổi cấu
+hình Vite.
+
+## Cấu trúc thư mục
 
 ```text
 src/Frontend/
-  components/       Component tai su dung tren nhieu page
-  context/          React Context cho auth va ngon ngu
-  data/             Du lieu mock local
-  pages/            Cac man hinh chinh theo route
-  routes/           Cau hinh route va layout chung
-  services/         Lop goi API/fallback data
-  styles/           CSS tach theo component, page va route
+├── components/          Component dùng lại ở nhiều trang
+├── context/             Trạng thái đăng nhập và ngôn ngữ
+├── data/                Dữ liệu cục bộ và media dùng cho phần chưa có API
+├── pages/               Các trang theo route
+├── routes/              Router và layout chung
+├── services/            Hàm gọi backend API
+├── styles/
+│   ├── components/      CSS theo component
+│   ├── pages/           CSS theo trang
+│   └── routes/          CSS cho layout
+├── App.jsx              Component gốc
+├── main.jsx             Entry point React
+├── index.css            CSS toàn cục
+└── types.js             Kiểu dữ liệu JSDoc dùng chung
 ```
 
-## Routes
+## Các route chính
 
-### `routes/AppRoutes.jsx`
+| Đường dẫn | Trang | Chức năng |
+| --- | --- | --- |
+| `/` | `Home.jsx` | Trang chủ |
+| `/about` | `About.jsx` | Giới thiệu |
+| `/search` | `SearchResults.jsx` | Tìm kiếm khách sạn |
+| `/hotels/:hotelId` | `HotelDetail.jsx` | Chi tiết khách sạn |
+| `/promotions` | `Promotions.jsx` | Danh sách ưu đãi |
+| `/chat`, `/chatbot` | `Chatbot.jsx` | AI Concierge |
+| `/support` | `Ticket.jsx` | Gửi yêu cầu hỗ trợ |
+| `/regulations` | `Regulations.jsx` | Quy định và chính sách |
+| `/login` | `Login.jsx` | Đăng nhập |
+| `/register` | `Register.jsx` | Đăng ký |
 
-File nay khai bao ban do URL cua ung dung:
+Các trang nội dung dùng chung `Header`, `Footer` và `ChatWidget`. Trang đăng
+nhập và đăng ký sử dụng layout riêng.
 
-- `/`: trang chu `Home`.
-- `/search`: trang ket qua tim kiem `SearchResults`.
-- `/hotels/:hotelId`: trang chi tiet resort `HotelDetail`.
-- `/chat` va `/chatbot`: trang chatbot `Chatbot`.
-- `/support`: trang support ticket `Ticket`.
-- `/login`: trang dang nhap `Login`.
-- `/register`: trang dang ky `Register`.
-- `*`: route khong ton tai se redirect ve `/`.
+## Kết nối API
 
-Trong file nay co `AppLayout`, la layout chung cho cac page noi dung. Layout gom:
+Các lời gọi backend tập trung tại `src/Frontend/services/api.js`.
 
-- `Header`
-- `main`
-- `Footer`
-- `ChatWidget`
+| Chức năng | Endpoint chính |
+| --- | --- |
+| Chatbot | `POST /api/v1/chat` |
+| Ưu đãi | `GET /api/v1/promotions` |
+| Support ticket | API ticket được khai báo trong `services/api.js` |
 
-Hai page `Login` va `Register` khong dung `AppLayout`, vi day la man hinh auth rieng.
+Trang Promotions hỗ trợ:
 
-## Context
+- Lọc theo điểm đến và trạng thái.
+- Tìm kiếm theo tiêu đề hoặc nội dung.
+- Hiển thị sáu ưu đãi đầu tiên và nút “Xem thêm ưu đãi”.
+- Hiển thị ảnh từ bảng `media` thông qua trường `image_url`.
+- Dùng URL nguồn làm liên kết dự phòng khi ưu đãi không có `booking_url`.
+- Hiển thị trạng thái tải, rỗng, lỗi và nút thử lại.
 
-### `context/AuthContext.jsx`
+Chi tiết luồng dữ liệu Promotions nằm tại
+`docs/PROMOTIONS_DB_API_FE.md`.
 
-Quan ly trang thai dang nhap gia lap.
+## Dữ liệu cục bộ
 
-Noi dung chinh:
+`src/Frontend/data` vẫn chứa dữ liệu và media cục bộ cho các màn hình chưa được
+nối đầy đủ với database. Riêng trang Promotions đã dùng API thật, không dùng
+mock data cho danh sách ưu đãi, ảnh hay thời hạn áp dụng.
 
-- `user`: state luu user hien tai. Mac dinh dang co san user `Victoria Tran`.
-- `login(email, name)`: tao user moi tu email/name va set vao state.
-- `logout()`: set user ve `null`.
-- `useAuth()`: custom hook de component lay `user`, `login`, `logout`.
+## Ngôn ngữ
 
-Day chua phai authentication that voi backend. Password trong login/register hien chi dung de submit form, khong duoc gui len API.
+`LanguageContext.jsx` quản lý ngôn ngữ hiển thị. Tiếng Anh và tiếng Việt đã có
+nội dung chính; các ngôn ngữ chưa được dịch đầy đủ có thể dùng tiếng Anh làm
+phương án dự phòng.
 
-### `context/LanguageContext.jsx`
+Khi thêm nội dung tiếng Việt:
 
-Quan ly ngon ngu va text hien thi.
+- Viết đầy đủ dấu tiếng Việt.
+- Lưu file bằng UTF-8.
+- Không chuyển chuỗi có dấu sang dạng không dấu.
+- Kiểm tra lại cả giao diện desktop và mobile sau khi sửa nội dung dài.
 
-Noi dung chinh:
+## Quy ước phát triển
 
-- `EN`: bo text tieng Anh.
-- `VI`: bo text tieng Viet, ke thua `EN` va override cac key can dich.
-- `TRANSLATIONS`: map ngon ngu `EN`, `VI`, `KO`, `ZH`.
-- `language`: state ngon ngu hien tai, mac dinh la `EN`.
-- `setLanguage`: doi ngon ngu.
-- `t`: object text theo ngon ngu hien tai.
-- `useLanguage()`: custom hook de cac component lay `language`, `setLanguage`, `t`.
+- Component dùng lại đặt trong `components`.
+- Trang gắn với URL đặt trong `pages`.
+- Không gọi `fetch` trực tiếp rải rác trong component; thêm hàm vào
+  `services/api.js`.
+- Kiểu dữ liệu dùng chung được mô tả trong `types.js` bằng JSDoc.
+- CSS đặt đúng thư mục và đặt tên class theo phạm vi component hoặc trang.
+- Thành phần có thể bấm phải có trạng thái hover/focus và `cursor: pointer`.
+- Không commit `.env`, mật khẩu, token hoặc thông tin kết nối database.
+- Không sửa trực tiếp thư mục `dist`; đây là kết quả do Vite tạo ra.
 
-Hien tai `KO` va `ZH` dang tro ve `EN`, nen neu chon Korean/Chinese thi UI van hien text English.
+## Xử lý lỗi thường gặp
 
-## Data
+### Frontend gọi API nhưng báo `ECONNREFUSED`
 
-### `data/mockData.js`
+Khởi động backend ở port `8000`, sau đó tải lại trang.
 
-Chua du lieu local dung khi backend chua san sang hoac API loi.
+### Trang Promotions báo không tải được dữ liệu
 
-File nay export:
+Kiểm tra lần lượt:
 
-- `DESTINATIONS`: danh sach diem den nhu Phu Quoc, Nha Trang, Hoi An, Ha Long.
-- `HOTELS`: danh sach resort/hotel, gom id, ten, diem den, gia, rating, anh, tien ich, mo ta, chinh sach va cac loai phong.
-- `COMBOS`: cac goi uu dai/combo du lich hien tren trang chu.
+1. PostgreSQL đang chạy.
+2. `src/backend/.env` có `DATABASE_URL` hợp lệ.
+3. Backend mở được `http://localhost:8000/health`.
+4. Endpoint mở được tại `http://localhost:8000/api/v1/promotions`.
 
-Nhieu page va component doc data tu file nay de render UI.
+### Ảnh ưu đãi không hiển thị
 
-## Services
+Frontend sẽ tự dùng nền và icon mặc định nếu URL ảnh lỗi. Kiểm tra trường
+`image_url` trong response API và khả năng truy cập URL ảnh từ trình duyệt.
 
-### `services/api.js`
+### PowerShell không chạy được npm
 
-Day la lop giao tiep voi backend. File nay co chien luoc: thu goi API truoc, neu API loi thi fallback ve du lieu local.
+Dùng file thực thi Windows:
 
-Ham chinh:
-
-- `fetchHotels(filters)`: goi `/api/hotels` voi query `destination`, `type`, `maxPrice`. Neu fail thi loc `HOTELS` tren client.
-- `fetchHotelById(id)`: goi `/api/hotels/:id`. Neu fail thi tim hotel trong `HOTELS`.
-- `sendChatMessage(prompt, language, history)`: POST `/api/chat`. Neu fail thi tao cau tra loi local bang `generateFallbackResponse`.
-- `submitSupportTicket(ticketData)`: POST `/api/tickets`. Neu fail thi tao ticket local voi id dang `TK-xxxx`.
-- `fetchTickets()`: GET `/api/tickets`. Neu fail thi tra ve mot ticket mau.
-
-Voi Vite dev server, cac URL dang la relative path nhu `/api/chat`. Muon proxy sang backend port `8000` thi nen cau hinh proxy trong `vite.config.js`, hoac dam bao FE/BE cung domain khi deploy.
-
-## Pages
-
-### `pages/Home.jsx`
-
-Trang chu cua website.
-
-Noi dung chinh:
-
-- Render `HeroSearch`.
-- Render danh sach `DESTINATIONS` bang `DestinationCard`.
-- Render banner AI Concierge, link sang `/chat` va `/support`.
-- Render cac hotel co `featured: true` bang `HotelCard`.
-- Render danh sach combo tu `COMBOS`.
-- Co `VI_COMBO_COPY` de override noi dung combo khi ngon ngu la VI.
-
-### `pages/SearchResults.jsx`
-
-Trang ket qua tim kiem resort.
-
-Noi dung chinh:
-
-- Doc query params bang `useSearchParams`.
-- Quan ly filter: `destFilter`, `typeFilter`, `maxPrice`.
-- Goi `fetchHotels()` moi khi filter thay doi.
-- Hien skeleton khi loading.
-- Hien grid `HotelCard` khi co ket qua.
-- Hien empty state va nut sang chatbot khi khong co ket qua.
-- Dung `FilterSidebar` de nguoi dung dieu chinh bo loc.
-
-### `pages/HotelDetail.jsx`
-
-Trang chi tiet mot resort.
-
-Noi dung chinh:
-
-- Lay `hotelId` tu URL `/hotels/:hotelId`.
-- Goi `fetchHotelById()` de lay du lieu.
-- Hien gallery anh va thumbnail.
-- Co tab `rooms`, `overview`, `policies`.
-- Nut chon phong tao toast dat phong gia lap.
-- Nut lap lich trinh voi AI dieu huong sang `/chat?prompt=...`.
-
-### `pages/Chatbot.jsx`
-
-Trang chat day du voi AI Concierge.
-
-Noi dung chinh:
-
-- Lay `prompt` tu query string neu page duoc mo tu nut "Ask AI".
-- Luu danh sach message trong state.
-- Goi `sendChatMessage()` khi user gui prompt.
-- Auto scroll xuong message moi.
-- Co suggested prompts.
-- Neu response co `relatedHotels`, render them cac `HotelCard`.
-- Co nut reset conversation va link sang support ticket.
-
-### `pages/Ticket.jsx`
-
-Trang tao va xem support ticket.
-
-Noi dung chinh:
-
-- Form gom ten, email, phone, ngon ngu, subject, noi dung.
-- Goi `submitSupportTicket()` khi submit.
-- Goi `fetchTickets()` khi page mount de lay lich su ticket.
-- Hien success message sau khi submit.
-- Hien badge trang thai `Resolved`, `Processing`, hoac `Pending`.
-
-### `pages/Login.jsx`
-
-Trang dang nhap gia lap.
-
-Noi dung chinh:
-
-- Form email/password.
-- Khi submit, neu co email thi goi `login(email)`.
-- Sau login dieu huong ve `/`.
-- Link sang trang register.
-
-### `pages/Register.jsx`
-
-Trang dang ky gia lap.
-
-Noi dung chinh:
-
-- Form name/email/password.
-- Khi submit, neu co email thi goi `login(email, name)`.
-- Sau register dieu huong ve `/`.
-- Link sang trang login.
-
-## Components
-
-### `components/Header.jsx`
-
-Header chung cua app.
-
-Noi dung chinh:
-
-- Logo Vinpearl.
-- Navigation toi `/search`, `/`, `/chat`, `/support`.
-- Dropdown doi ngon ngu desktop.
-- Nut doi ngon ngu nhanh tren mobile.
-- Hien user/avatar/logout neu dang dang nhap.
-- Hien link sign in neu `user` la `null`.
-- Mobile drawer khi bam icon menu.
-
-### `components/Footer.jsx`
-
-Footer chung cua app. Thuong hien mo ta brand, cac diem den, dich vu AI, thong tin lien he va link phu.
-
-### `components/HeroSearch.jsx`
-
-Khu hero search tren trang chu.
-
-Noi dung chinh:
-
-- Form chon destination, check-in, check-out, guests.
-- Khi submit, dieu huong sang `/search` kem query params.
-- Nut "Ask AI" tao prompt tu destination/guests/budget va dieu huong sang `/chat`.
-- Hien metrics nhu so resort, rating, AI support.
-
-### `components/DestinationCard.jsx`
-
-Card hien thi mot diem den trong `DESTINATIONS`.
-
-Vai tro:
-
-- Hien anh, ten, mo ta, so luong property.
-- Thuong link/dieu huong sang trang search theo destination.
-
-### `components/HotelCard.jsx`
-
-Card hien thi tom tat mot hotel/resort.
-
-Vai tro:
-
-- Hien anh, ten, vi tri, rating, gia, loai hinh va tien ich ngan.
-- Link sang trang chi tiet `/hotels/:hotelId`.
-- Co the duoc tai su dung o trang chu, search va chatbot.
-
-### `components/FilterSidebar.jsx`
-
-Sidebar bo loc trong trang search.
-
-Vai tro:
-
-- Chon destination.
-- Chon property type.
-- Dieu chinh max price.
-- Reset filter.
-- Tra state filter ve `SearchResults` thong qua props setter.
-
-### `components/ChatWidget.jsx`
-
-Widget chat nho hien chung trong layout.
-
-Vai tro:
-
-- Cho user mo nhanh AI Concierge tu bat ky page nao dung `AppLayout`.
-- Co input/suggestion ngan.
-- Co link mo workspace chat day du.
-
-## Styles
-
-CSS duoc tach theo dung noi su dung:
-
-```text
-styles/components/  CSS cho component tai su dung
-styles/pages/       CSS cho tung page
-styles/routes/      CSS cho layout/routing
+```powershell
+npm.cmd run dev
 ```
 
-Vi du:
-
-- `styles/components/Header.css` style cho `Header.jsx`.
-- `styles/pages/Home.css` style cho `Home.jsx`.
-- `styles/routes/AppRoutes.css` style cho layout chua header/main/footer/widget.
-
-CSS global cua toan app nam o `src/index.css`, gom bien mau, reset co ban, style chung cho body, link, button/input/select/textarea va mot so utility class.
-
-## Luu y khi ket noi Backend
-
-Frontend hien goi API bang relative URL:
-
-```text
-/api/hotels
-/api/hotels/:id
-/api/chat
-/api/tickets
-```
-
-Neu chay FE o `localhost:5173` va BE o `localhost:8000`, can mot trong cac cach sau:
-
-- Them proxy trong `vite.config.js` de `/api` proxy sang `http://localhost:8000`.
-- Doi service API de dung base URL tu environment variable.
-- Deploy FE va BE cung domain/reverse proxy de `/api` tro ve backend.
-
-Vi `api.js` da co fallback local data, FE van hien duoc giao dien co ban ngay ca khi backend chua chay. Tuy nhien cac chuc nang that nhu chat AI, ticket persistence, authentication that can backend xu ly rieng.

@@ -1,7 +1,7 @@
-from src.agents.state import AgentState
-from src.config import get_settings
-from src.services.llm import LLMService
-from src.services.rag import RAGService
+from src.backend.agents.state import AgentState
+from src.backend.config import get_settings
+from src.backend.services.llm import LLMService
+from src.backend.services.rag import RAGService
 
 
 def retrieve_context(state: AgentState) -> AgentState:

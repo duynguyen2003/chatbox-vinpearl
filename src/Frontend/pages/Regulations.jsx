@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { BookOpen, ChevronRight, FileText, Search } from 'lucide-react'
-import regulationsData from '../../DataCrawl/Regulations/vinpearl_regulations.json'
+import regulationsData from '../../data_crawl/Regulations/vinpearl_regulations.json'
 import { useLanguage } from '../context/LanguageContext'
 import '../styles/pages/Regulations.css'
 

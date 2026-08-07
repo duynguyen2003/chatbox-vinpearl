@@ -1,5 +1,5 @@
-from src.agents.state import AgentState
-from src.services.llm import LLMService
+from src.backend.agents.state import AgentState
+from src.backend.services.llm import LLMService
 
 
 def classify_input(state: AgentState) -> AgentState:

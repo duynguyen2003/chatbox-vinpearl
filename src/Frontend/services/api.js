@@ -1,5 +1,28 @@
 import { HOTELS } from '../data/mockData';
-import regulationsData from '../../DataCrawl/Regulations/vinpearl_regulations.json';
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const CHAT_SESSION_KEY = 'vinpearl_chat_session_id';
+
+function createSessionId() {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function getChatSessionId() {
+  const existingSessionId = localStorage.getItem(CHAT_SESSION_KEY);
+  if (existingSessionId) return existingSessionId;
+
+  const sessionId = createSessionId();
+  localStorage.setItem(CHAT_SESSION_KEY, sessionId);
+  return sessionId;
+}
+
+export function resetChatSession() {
+  localStorage.removeItem(CHAT_SESSION_KEY);
+}
 
 export async function fetchHotels(filters) {
   try {
@@ -48,26 +71,84 @@ export async function fetchHotelById(id) {
   return HOTELS.find(h => h.id === id);
 }
 
-export async function sendChatMessage(
-  prompt,
-  language = 'EN',
-  history = []
-) {
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, language, history })
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (e) {
-    console.warn('Server chat route error, generating local smart response:', e);
+/**
+ * Fetch promotions from the PostgreSQL-backed API.
+ * @param {{destination?: string, status?: string, search?: string}} [filters]
+ * @returns {Promise<{items: import('../types').Promotion[], total: number}>}
+ */
+export async function fetchPromotions(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.destination && filters.destination !== 'all') {
+    params.set('destination', filters.destination);
+  }
+  if (filters.status && filters.status !== 'all') {
+    params.set('status', filters.status);
+  }
+  if (filters.search) {
+    params.set('search', filters.search);
+  }
+  params.set('page_size', String(filters.pageSize || 100));
+
+  const query = params.toString();
+  const res = await fetch(`${API_BASE_URL}/api/v1/promotions${query ? `?${query}` : ''}`);
+  if (!res.ok) {
+    throw new Error(`Promotions API returned status ${res.status}`);
   }
 
-  // Smart fallback using vinpearl_regulations.json data
-  return generateFallbackResponse(prompt, language);
+  const payload = await res.json();
+  if (Array.isArray(payload)) {
+    return { items: payload, total: payload.length };
+  }
+
+  return {
+    items: Array.isArray(payload.items) ? payload.items : [],
+    total: Number(payload.total ?? payload.items?.length ?? 0),
+  };
+}
+
+export async function sendChatMessage(prompt, language = 'EN') {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: prompt,
+        session_id: getChatSessionId(),
+        user_id: null,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => null);
+      const detail = typeof errorPayload?.detail === 'string'
+        ? errorPayload.detail
+        : `Chat API returned status ${res.status}`;
+      throw new Error(detail);
+    }
+
+    const result = await res.json();
+    return {
+      id: `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      sender: 'assistant',
+      text: result.answer,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      language: result.language || language,
+      route: result.route,
+      ticketId: result.ticket_id,
+      sources: result.sources || [],
+      relatedHotels: [],
+    };
+  } catch (e) {
+    if (import.meta.env.VITE_ENABLE_CHAT_FALLBACK === 'true') {
+      console.warn('Chat API failed, using local fallback:', e);
+      return generateFallbackResponse(prompt, language);
+    }
+
+    throw e;
+  }
 }
 
 export async function submitSupportTicket(ticketData) {

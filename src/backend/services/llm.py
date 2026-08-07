@@ -13,7 +13,7 @@ from litellm.exceptions import (
     Timeout,
 )
 
-from src.config import get_settings
+from src.backend.config import get_settings
 
 
 class LLMService:

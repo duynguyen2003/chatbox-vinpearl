@@ -1,6 +1,6 @@
-from src.agents.state import AgentState
-from src.services.llm import LLMService
-from src.services.ticket import TicketService
+from src.backend.agents.state import AgentState
+from src.backend.services.llm import LLMService
+from src.backend.services.ticket import TicketService
 
 
 def create_ticket(state: AgentState) -> AgentState:

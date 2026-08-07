@@ -6,12 +6,11 @@ import {
   RotateCcw,
   Send,
   ShieldAlert,
-  Sparkles,
   User,
 } from 'lucide-react'
 import HotelCard from '../components/HotelCard'
 import { useLanguage } from '../context/LanguageContext'
-import { sendChatMessage } from '../services/api'
+import { resetChatSession, sendChatMessage } from '../services/api'
 import '../styles/pages/Chatbot.css'
 
 function Chatbot() {
@@ -19,7 +18,7 @@ function Chatbot() {
   const [searchParams] = useSearchParams()
   const initialPrompt = searchParams.get('prompt') || ''
   const handledPromptRef = useRef(null)
-  const messagesEndRef = useRef(null)
+  const messagesContainerRef = useRef(null)
 
   const [messages, setMessages] = useState([
     {
@@ -72,7 +71,13 @@ function Chatbot() {
   ]
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const messagesContainer = messagesContainerRef.current
+    if (!messagesContainer) return
+
+    messagesContainer.scrollTo({
+      top: messagesContainer.scrollHeight,
+      behavior: messages.length > 1 ? 'smooth' : 'auto',
+    })
   }, [messages, loading])
 
   useEffect(() => {
@@ -101,8 +106,28 @@ function Chatbot() {
     setLoading(true)
 
     try {
-      const aiResponse = await sendChatMessage(promptText, language, messages)
+      const aiResponse = await sendChatMessage(promptText, language)
       setMessages((current) => [...current, aiResponse])
+    } catch (error) {
+      console.error('Chat request failed:', error)
+      setMessages((current) => [
+        ...current,
+        {
+          id: `error-${Date.now()}`,
+          sender: 'assistant',
+          text:
+            language === 'VI'
+              ? 'Không thể kết nối tới trợ lý lúc này. Vui lòng kiểm tra backend và thử lại.'
+              : 'The assistant is unavailable right now. Please check the backend and try again.',
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          language,
+          isError: true,
+          errorDetail: error instanceof Error ? error.message : String(error),
+        },
+      ])
     } finally {
       setLoading(false)
     }
@@ -114,6 +139,7 @@ function Chatbot() {
   }
 
   function resetConversation() {
+    resetChatSession()
     setMessages([
       {
         id: 'msg-reset',
@@ -178,7 +204,11 @@ function Chatbot() {
           ))}
         </section>
 
-        <section className="chatbot-page__messages" aria-label="Chat messages">
+        <section
+          ref={messagesContainerRef}
+          className="chatbot-page__messages"
+          aria-label="Chat messages"
+        >
           {messages.map((message) => (
             <article
               className={`chatbot-page__message-row ${
@@ -205,7 +235,9 @@ function Chatbot() {
                   className={`chatbot-page__bubble ${
                     message.sender === 'user'
                       ? 'chatbot-page__bubble--user'
-                      : 'chatbot-page__bubble--assistant'
+                      : message.isError
+                        ? 'chatbot-page__bubble--error'
+                        : 'chatbot-page__bubble--assistant'
                   }`}
                 >
                   {message.text}
@@ -213,6 +245,34 @@ function Chatbot() {
                     {message.timestamp}
                   </span>
                 </div>
+
+                {message.ticketId && (
+                  <div className="chatbot-page__ticket" role="status">
+                    <strong>{language === 'VI' ? 'Mã hỗ trợ' : 'Support ticket'}:</strong>{' '}
+                    <span>{message.ticketId}</span>
+                  </div>
+                )}
+
+                {message.sources && message.sources.length > 0 && (
+                  <details className="chatbot-page__sources">
+                    <summary>
+                      {language === 'VI'
+                        ? `${message.sources.length} nguồn tham khảo`
+                        : `${message.sources.length} sources`}
+                    </summary>
+                    <ol>
+                      {message.sources.map((source, index) => (
+                        <li key={`${message.id}-${source.source_file}-${source.path}-${index}`}>
+                          <span>{source.source_file}</span>
+                          {source.path && <code>{source.path}</code>}
+                          {typeof source.score === 'number' && (
+                            <small>{source.score.toFixed(4)}</small>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                )}
 
                 {message.relatedHotels && message.relatedHotels.length > 0 && (
                   <div className="chatbot-page__related-hotels">
@@ -236,8 +296,6 @@ function Chatbot() {
               </div>
             </article>
           )}
-
-          <div ref={messagesEndRef} />
         </section>
 
         <form className="chatbot-page__form" onSubmit={handleFormSubmit}>

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from src.config import get_settings
+from src.backend.config import get_settings
 
 
 class TicketService:

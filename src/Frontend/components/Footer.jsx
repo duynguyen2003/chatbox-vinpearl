@@ -67,7 +67,7 @@ function Footer() {
             <div className="footer__section">
               <h4 className="footer__heading">{t.vpAboutVinpearl}</h4>
               <ul className="footer__list">
-                <li><Link className="footer__link" to="/">{t.vpAboutUs}</Link></li>
+                <li><Link className="footer__link" to="/about">{t.vpAboutUs}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpContact}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpCareers}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpFAQ}</Link></li>
@@ -116,6 +116,7 @@ function Footer() {
             <div className="footer__section">
               <h4 className="footer__heading">{t.vpNewsAndEvents}</h4>
               <ul className="footer__list">
+                <li><Link className="footer__link" to="/promotions">{t.navOffers}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpNewsCompany}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpNewsGuide}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpNewsAchievements}</Link></li>

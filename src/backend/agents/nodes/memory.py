@@ -1,5 +1,5 @@
-from src.agents.state import AgentState
-from src.services.memory import MemoryService
+from src.backend.agents.state import AgentState
+from src.backend.services.memory import MemoryService
 
 
 def load_conversation_memory(state: AgentState) -> AgentState:

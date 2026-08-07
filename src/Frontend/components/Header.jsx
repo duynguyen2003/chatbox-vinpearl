@@ -5,7 +5,6 @@ import {
   Globe,
   LogOut,
   Menu,
-  Sparkles,
   User,
   X,
 } from 'lucide-react'
@@ -77,8 +76,8 @@ function Header() {
               {t.navExperiences}
             </Link>
             <Link
-              className={`header__link ${location.pathname === '/' && location.hash === '#offers' ? 'header__link--active' : ''}`}
-              to="/#offers"
+              className={`header__link ${location.pathname === '/promotions' ? 'header__link--active' : ''}`}
+              to="/promotions"
             >
               {t.navOffers}
             </Link>
@@ -200,7 +199,7 @@ function Header() {
           </Link>
           <Link
             className="header__drawer-link"
-            to="/"
+            to="/promotions"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.navExperiences}

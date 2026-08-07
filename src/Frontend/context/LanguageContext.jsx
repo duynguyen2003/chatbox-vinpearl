@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from 'react'
 
 const EN = {
   navHotels: 'Hotels & Resorts',
+  navAbout: 'About Us',
   navExperiences: 'Experiences',
   navOffers: 'Offers & Combos',
   navNews: 'News',
@@ -218,6 +219,7 @@ const EN = {
 
 const VI = {
   navHotels: 'Khách sạn',
+  navAbout: 'Giới thiệu',
   navExperiences: 'Trải nghiệm',
   navOffers: 'Ưu đãi & Combo',
   navNews: 'Tin tức',

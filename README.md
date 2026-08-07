@@ -11,7 +11,7 @@ python -m scripts.check_chroma
 # FAST_API
 
 ```powershell
-python -m uvicorn src.main:app --reload --port 8000
+python -m uvicorn src.backend.main:app --reload --port 8000
 ```
 
 # FE

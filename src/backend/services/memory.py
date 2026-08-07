@@ -4,7 +4,7 @@ from pathlib import Path
 from threading import RLock
 from typing import Any
 
-from src.config import get_settings
+from src.backend.config import get_settings
 
 
 class MemoryService:

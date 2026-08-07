@@ -1,16 +1,16 @@
 from langgraph.graph import END, START, StateGraph
 
-from src.agents.nodes.answer import generate_answer
-from src.agents.nodes.classify import classify_input
-from src.agents.nodes.language import detect_language_and_translate
-from src.agents.nodes.memory import (
+from src.backend.agents.nodes.answer import generate_answer
+from src.backend.agents.nodes.classify import classify_input
+from src.backend.agents.nodes.language import detect_language_and_translate
+from src.backend.agents.nodes.memory import (
     load_conversation_memory,
     save_conversation_memory,
 )
-from src.agents.nodes.retrieval import assess_information, retrieve_context
-from src.agents.nodes.static_responses import greeting_response, out_of_scope_response
-from src.agents.nodes.ticket import create_ticket
-from src.agents.state import AgentState
+from src.backend.agents.nodes.retrieval import assess_information, retrieve_context
+from src.backend.agents.nodes.static_responses import greeting_response, out_of_scope_response
+from src.backend.agents.nodes.ticket import create_ticket
+from src.backend.agents.state import AgentState
 
 
 def route_after_classification(state: AgentState) -> str:
