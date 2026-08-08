@@ -1,22 +1,38 @@
+from __future__ import annotations
+
+from math import ceil
 from typing import Any
 
 import chromadb
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from src.backend.config import get_settings
+from src.backend.services.query_parser import normalize_text, parse_retrieval_query
 
 
 class RAGService:
+    """Hybrid retriever: destination/entity keywords first, embeddings second.
+
+    Important guarantees:
+    - A detected destination is a hard constraint. We never fall back to the full
+      corpus when an explicit destination has no lexical candidates.
+    - Multi-destination comparison queries retrieve evidence for every detected
+      destination instead of collapsing to only the first one.
+    """
+
+    _corpus_cache: dict[str, Any] | None = None
+    _corpus_cache_collection: str | None = None
+    _corpus_cache_count: int = -1
+
     def __init__(self) -> None:
         settings = get_settings()
         settings.chroma_dir.mkdir(parents=True, exist_ok=True)
-
         self.settings = settings
         self.model = SentenceTransformer(
             settings.local_embedding_model,
             device=settings.embedding_device,
         )
-
         self.chroma = chromadb.PersistentClient(path=str(settings.chroma_dir))
         self.collection = self.chroma.get_or_create_collection(
             name=settings.chroma_collection,
@@ -43,16 +59,18 @@ class RAGService:
         )
         return embedding.tolist()
 
-    # Backward-compatible alias for old ingestion code.
     def embed(self, texts: list[str]) -> list[list[float]]:
         return self.embed_documents(texts)
 
-    def search(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
+    def _ensure_not_empty(self) -> None:
         if self.collection.count() == 0:
             raise RuntimeError(
-                "Vector database is empty. Run: python -m src.backend.services.ingest_postgres --reset"
+                "Vector database is empty. Run: "
+                "python -m src.backend.services.ingest_postgres --reset"
             )
 
+    def semantic_search(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
+        self._ensure_not_empty()
         query_embedding = self.embed_query(query)
         result = self.collection.query(
             query_embeddings=[query_embedding],
@@ -72,24 +90,444 @@ class RAGService:
                     "text": text,
                     "metadata": metadata or {},
                     "score": round(score, 4),
+                    "semantic_score": round(score, 4),
+                    "keyword_score": 0.0,
+                    "retrieval_mode": "semantic",
                 }
             )
         return output
+
+    def _load_corpus_cache(self) -> dict[str, Any]:
+        self._ensure_not_empty()
+        count = self.collection.count()
+        collection_name = self.collection.name
+
+        if (
+            RAGService._corpus_cache is not None
+            and RAGService._corpus_cache_collection == collection_name
+            and RAGService._corpus_cache_count == count
+        ):
+            return RAGService._corpus_cache
+
+        ids: list[str] = []
+        documents: list[str] = []
+        metadatas: list[dict[str, Any]] = []
+        normalized: list[str] = []
+
+        batch_size = 500
+        for offset in range(0, count, batch_size):
+            batch = self.collection.get(
+                limit=min(batch_size, count - offset),
+                offset=offset,
+                include=["documents", "metadatas"],
+            )
+            batch_ids = batch.get("ids", []) or []
+            batch_docs = batch.get("documents", []) or []
+            batch_meta = batch.get("metadatas", []) or []
+
+            for doc_id, text, metadata in zip(batch_ids, batch_docs, batch_meta):
+                text = text or ""
+                metadata = metadata or {}
+                searchable = " ".join(
+                    [
+                        text,
+                        str(metadata.get("entity_name") or ""),
+                        str(metadata.get("entity_type") or ""),
+                        str(metadata.get("destination_id") or ""),
+                        str(metadata.get("category") or ""),
+                    ]
+                )
+                ids.append(doc_id)
+                documents.append(text)
+                metadatas.append(metadata)
+                normalized.append(normalize_text(searchable))
+
+        cache = {
+            "ids": ids,
+            "documents": documents,
+            "metadatas": metadatas,
+            "normalized": normalized,
+        }
+        RAGService._corpus_cache = cache
+        RAGService._corpus_cache_collection = collection_name
+        RAGService._corpus_cache_count = count
+        print(f"[RAG] Built lexical cache: {count} Chroma documents")
+        return cache
+
+    @staticmethod
+    def _phrase_in_text(text: str, phrase: str) -> bool:
+        if not text or not phrase:
+            return False
+        return f" {phrase} " in f" {text} "
+
+    def keyword_candidates(
+        self,
+        destination: dict[str, Any] | None,
+        intent: str | None,
+        preferred_entity_types: set[str],
+        max_candidates: int = 300,
+    ) -> list[dict[str, Any]]:
+        if not destination:
+            return []
+
+        aliases = [normalize_text(a) for a in destination.get("aliases", [])]
+        aliases = [a for a in aliases if a]
+        destination_id = str(destination.get("id") or "")
+        normalized_destination_id = normalize_text(destination_id)
+
+        cache = self._load_corpus_cache()
+        candidates: list[dict[str, Any]] = []
+
+        for index, searchable in enumerate(cache["normalized"]):
+            metadata = cache["metadatas"][index]
+            entity_type = str(metadata.get("entity_type") or metadata.get("category") or "")
+            metadata_destination = normalize_text(str(metadata.get("destination_id") or ""))
+
+            matched_aliases = [
+                alias for alias in aliases if self._phrase_in_text(searchable, alias)
+            ]
+            destination_id_match = bool(
+                normalized_destination_id
+                and metadata_destination
+                and metadata_destination == normalized_destination_id
+            )
+            if not matched_aliases and not destination_id_match:
+                continue
+
+            keyword_score = 1.0 if destination_id_match else 0.75
+            if matched_aliases:
+                longest = max(len(alias.split()) for alias in matched_aliases)
+                keyword_score += min(0.15, longest * 0.05)
+            if preferred_entity_types and entity_type in preferred_entity_types:
+                keyword_score += 0.20
+
+            candidates.append(
+                {
+                    "id": cache["ids"][index],
+                    "text": cache["documents"][index],
+                    "metadata": metadata,
+                    "keyword_score": round(keyword_score, 4),
+                    "matched_aliases": matched_aliases[:5],
+                    "matched_destination_id": destination_id,
+                    "matched_destination_name": (
+                        destination.get("name_vi")
+                        or destination.get("name_en")
+                        or destination_id
+                    ),
+                    "intent": intent,
+                }
+            )
+
+        candidates.sort(
+            key=lambda item: (
+                float(item.get("keyword_score", 0.0)),
+                str(item.get("metadata", {}).get("entity_type") or ""),
+            ),
+            reverse=True,
+        )
+        return candidates[:max_candidates]
+
+    @staticmethod
+    def _is_broad_discovery_query(query: str, intent: str | None) -> bool:
+        normalized = normalize_text(query)
+        if intent not in {"attraction", "service", "hotel"}:
+            return False
+        broad_hints = (
+            "what is there", "what else", "things to do", "travel information",
+            "tourism information", "attractions and entertainment",
+            "attractions experiences", "services and attractions",
+            "co gi", "con gi", "du lich",
+        )
+        return any(hint in normalized for hint in broad_hints) or len(normalized.split()) <= 8
+
+    @staticmethod
+    def _entity_type_bonus(entity_type: str, intent: str | None, broad: bool) -> float:
+        if not broad:
+            return 0.0
+        if intent == "attraction":
+            return {
+                "complex": 0.18,
+                "destination_highlight": 0.15,
+                "destination": 0.14,
+                "attraction": 0.10,
+                "attraction_itinerary_day": 0.04,
+            }.get(entity_type, 0.0)
+        if intent == "service":
+            return {
+                "property": 0.16,
+                "complex": 0.15,
+                "destination_highlight": 0.14,
+                "dining_service": 0.10,
+                "amenity": 0.08,
+                "attraction": 0.08,
+            }.get(entity_type, 0.0)
+        if intent == "hotel":
+            return {
+                "property": 0.18,
+                "destination": 0.14,
+                "complex": 0.12,
+                "room": 0.08,
+                "dining_service": 0.06,
+            }.get(entity_type, 0.0)
+        return 0.0
+
+    @staticmethod
+    def _is_child_show_entity(entity_name: str) -> bool:
+        normalized = normalize_text(entity_name)
+        hints = (
+            "show", "performance", "street performance", "song",
+            "little mermaid", "once", "charm of venice", "quintessence",
+            "rhythm of ocean",
+        )
+        return any(hint in normalized for hint in hints)
+
+    @classmethod
+    def _select_diverse_ranked(
+        cls,
+        ranked: list[dict[str, Any]],
+        top_k: int,
+        intent: str | None,
+        broad: bool,
+    ) -> list[dict[str, Any]]:
+        if not broad:
+            return ranked[:top_k]
+
+        selected: list[dict[str, Any]] = []
+        seen_entities: set[str] = set()
+        seen_types: dict[str, int] = {}
+
+        # First pass: favor broad/parent entities and keep entity/type coverage.
+        broad_types = {
+            "destination", "complex", "destination_highlight", "property",
+            "attraction", "dining_service", "amenity",
+        }
+        for item in ranked:
+            metadata = item.get("metadata", {}) or {}
+            entity_type = str(metadata.get("entity_type") or metadata.get("category") or "")
+            entity_name = normalize_text(str(metadata.get("entity_name") or ""))
+            if entity_name and entity_name in seen_entities:
+                continue
+            if entity_type not in broad_types:
+                continue
+            # Do not let many child-show pages consume the context for a generic
+            # destination discovery question. One such page is enough as evidence.
+            if cls._is_child_show_entity(str(metadata.get("entity_name") or "")):
+                if seen_types.get("child_show", 0) >= 1:
+                    continue
+                seen_types["child_show"] = seen_types.get("child_show", 0) + 1
+            if seen_types.get(entity_type, 0) >= 3:
+                continue
+            selected.append(item)
+            if entity_name:
+                seen_entities.add(entity_name)
+            seen_types[entity_type] = seen_types.get(entity_type, 0) + 1
+            if len(selected) >= top_k:
+                return selected
+
+        # Second pass: fill remaining slots with the best distinct entities.
+        for item in ranked:
+            metadata = item.get("metadata", {}) or {}
+            entity_name = normalize_text(str(metadata.get("entity_name") or ""))
+            if entity_name and entity_name in seen_entities:
+                continue
+            selected.append(item)
+            if entity_name:
+                seen_entities.add(entity_name)
+            if len(selected) >= top_k:
+                break
+        return selected
+
+    def _rerank_candidates(
+        self,
+        query: str,
+        candidates: list[dict[str, Any]],
+        top_k: int,
+        preferred_entity_types: set[str],
+        intent: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if not candidates:
+            return []
+
+        query_vector = np.asarray(self.embed_query(query), dtype=np.float32)
+        candidate_texts = [item["text"] for item in candidates]
+        candidate_vectors = np.asarray(self.embed_documents(candidate_texts), dtype=np.float32)
+        semantic_scores = candidate_vectors @ query_vector
+        broad = self._is_broad_discovery_query(query, intent)
+
+        ranked: list[dict[str, Any]] = []
+        for item, semantic_score in zip(candidates, semantic_scores.tolist()):
+            metadata = item.get("metadata", {}) or {}
+            entity_type = str(metadata.get("entity_type") or metadata.get("category") or "")
+            entity_name = str(metadata.get("entity_name") or "")
+            preferred_bonus = 0.08 if preferred_entity_types and entity_type in preferred_entity_types else 0.0
+            coverage_bonus = self._entity_type_bonus(entity_type, intent, broad)
+            child_penalty = 0.0
+            if broad and self._is_child_show_entity(entity_name):
+                child_penalty = 0.08
+
+            keyword_score = float(item.get("keyword_score", 0.0))
+            final_score = (
+                0.67 * float(semantic_score)
+                + 0.25 * min(keyword_score, 1.0)
+                + preferred_bonus
+                + coverage_bonus
+                - child_penalty
+            )
+            ranked.append(
+                {
+                    "text": item["text"],
+                    "metadata": metadata,
+                    "score": round(max(0.0, min(1.0, final_score)), 4),
+                    "semantic_score": round(max(0.0, min(1.0, float(semantic_score))), 4),
+                    "keyword_score": round(keyword_score, 4),
+                    "retrieval_mode": "keyword_then_embedding",
+                    "matched_aliases": item.get("matched_aliases", []),
+                    "matched_destination_id": item.get("matched_destination_id"),
+                    "matched_destination_name": item.get("matched_destination_name"),
+                }
+            )
+
+        ranked.sort(key=lambda item: float(item.get("score", 0.0)), reverse=True)
+        return self._select_diverse_ranked(ranked, top_k=top_k, intent=intent, broad=broad)
+
+    @staticmethod
+    def _dedupe_documents(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        seen: set[tuple[str, str]] = set()
+        output: list[dict[str, Any]] = []
+        for item in documents:
+            metadata = item.get("metadata", {}) or {}
+            key = (
+                str(metadata.get("entity_type") or ""),
+                str(metadata.get("entity_id") or metadata.get("entity_name") or item.get("text", "")[:120]),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            output.append(item)
+        return output
+
+    def hybrid_search(
+        self,
+        query: str,
+        user_message: str = "",
+        top_k: int | None = None,
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        k = top_k or self.settings.top_k
+        parsed = parse_retrieval_query(user_message=user_message, rag_query=query)
+        destinations = list(parsed.get("destinations") or [])
+        intent = parsed.get("intent")
+        preferred_entity_types = set(parsed.get("preferred_entity_types") or [])
+
+        all_candidates = 0
+        missing_destination_ids: list[str] = []
+        documents: list[dict[str, Any]] = []
+
+        if destinations:
+            per_destination_k = max(2, ceil(k / max(1, len(destinations))))
+            per_destination_docs: list[list[dict[str, Any]]] = []
+
+            for destination in destinations:
+                candidates = self.keyword_candidates(
+                    destination=destination,
+                    intent=intent,
+                    preferred_entity_types=preferred_entity_types,
+                )
+                all_candidates += len(candidates)
+                if not candidates:
+                    missing_destination_ids.append(str(destination.get("id") or ""))
+                    per_destination_docs.append([])
+                    continue
+
+                ranked = self._rerank_candidates(
+                    query=query,
+                    candidates=candidates,
+                    top_k=per_destination_k,
+                    preferred_entity_types=preferred_entity_types,
+                    intent=intent,
+                )
+                per_destination_docs.append(ranked)
+
+            # Round-robin keeps comparison evidence balanced instead of letting one
+            # destination dominate all top-k positions.
+            max_len = max((len(group) for group in per_destination_docs), default=0)
+            for index in range(max_len):
+                for group in per_destination_docs:
+                    if index < len(group):
+                        documents.append(group[index])
+            documents = self._dedupe_documents(documents)
+
+            # For hard destination queries, never escape to unrelated full-corpus
+            # semantic results. Missing evidence should surface as missing, not as a
+            # confident-looking source from another city.
+            mode = (
+                "keyword_multi_destination"
+                if len(destinations) > 1
+                else "keyword_then_embedding"
+            )
+            if missing_destination_ids:
+                mode += "_partial"
+        else:
+            documents = self.semantic_search(query=query, top_k=k)
+            mode = "semantic_fallback"
+
+        primary = destinations[0] if destinations else None
+        destination_names = [
+            str(item.get("name_vi") or item.get("name_en") or item.get("id") or "")
+            for item in destinations
+        ]
+        destination_ids = [str(item.get("id") or "") for item in destinations]
+
+        diagnostics = {
+            "mode": mode,
+            "destination_id": primary.get("id") if primary else None,
+            "destination_name": (
+                primary.get("name_vi") or primary.get("name_en") if primary else None
+            ),
+            "destinations": destinations,
+            "destination_ids": destination_ids,
+            "destination_names": destination_names,
+            "intent": intent,
+            "keyword_candidate_count": all_candidates,
+            "missing_destination_ids": missing_destination_ids,
+        }
+
+        print(
+            "[RAG RETRIEVAL] "
+            f"mode={mode} destinations={destination_ids or 'none'} "
+            f"intent={intent} candidates={all_candidates} missing={missing_destination_ids}"
+        )
+        return documents, diagnostics
+
+    def search(
+        self,
+        query: str,
+        top_k: int | None = None,
+        user_message: str = "",
+    ) -> list[dict[str, Any]]:
+        documents, _ = self.hybrid_search(
+            query=query,
+            user_message=user_message,
+            top_k=top_k,
+        )
+        return documents
 
     def build_context(self, documents: list[dict[str, Any]]) -> str:
         blocks: list[str] = []
         total = 0
 
         for index, item in enumerate(documents, start=1):
-            metadata = item["metadata"]
+            metadata = item.get("metadata", {}) or {}
             block = (
                 f"[SOURCE {index}]\n"
                 f"type: {metadata.get('entity_type') or metadata.get('category')}\n"
                 f"name: {metadata.get('entity_name') or metadata.get('source_file')}\n"
-                f"destination: {metadata.get('destination')}\n"
+                f"destination: {item.get('matched_destination_name') or metadata.get('destination_id') or metadata.get('destination')}\n"
                 f"url: {metadata.get('source_url')}\n"
+                f"retrieval_mode: {item.get('retrieval_mode')}\n"
                 f"relevance_score: {item.get('score')}\n"
-                f"content:\n{item['text']}\n"
+                f"semantic_score: {item.get('semantic_score')}\n"
+                f"keyword_score: {item.get('keyword_score')}\n"
+                f"content:\n{item.get('text', '')}\n"
             )
             if total + len(block) > self.settings.max_context_chars:
                 break

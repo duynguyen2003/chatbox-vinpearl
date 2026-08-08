@@ -36,12 +36,12 @@ class Settings(BaseSettings):
 
     # Conversation memory
     memory_enabled: bool = True
-    memory_max_turns: int = 8
-    memory_max_chars: int = 6000
+    memory_max_turns: int = 16
+    memory_max_chars: int = 12000
 
     # RAG
-    top_k: int = 6
-    max_context_chars: int = 12000
+    top_k: int = 10
+    max_context_chars: int = 18000
     min_relevance_score: float = 0.35
 
     # API

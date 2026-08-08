@@ -5,9 +5,12 @@ from src.backend.services.memory import MemoryService
 def load_conversation_memory(state: AgentState) -> AgentState:
     memory = MemoryService()
     turns = memory.load_recent(state.get("session_id"))
+    recent_destinations = memory.extract_recent_destinations(turns)
     return {
         "conversation_turns": turns,
         "conversation_history": memory.format_for_prompt(turns),
+        "recent_destinations": recent_destinations,
+        "recent_destination_summary": memory.format_destination_summary(recent_destinations),
     }
 
 
@@ -21,5 +24,7 @@ def save_conversation_memory(state: AgentState) -> AgentState:
         route=state.get("route", "unknown"),
         rag_query=state.get("rag_query"),
         ticket_id=state.get("ticket_id"),
+        detected_destinations=state.get("detected_destinations", []),
+        detected_intent=state.get("detected_intent"),
     )
     return {}

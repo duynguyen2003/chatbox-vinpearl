@@ -138,8 +138,8 @@ function Chatbot() {
     handleSendPrompt(input)
   }
 
-  function resetConversation() {
-    resetChatSession()
+  async function resetConversation() {
+    await resetChatSession()
     setMessages([
       {
         id: 'msg-reset',

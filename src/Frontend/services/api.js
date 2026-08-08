@@ -1,7 +1,7 @@
 import { HOTELS } from '../data/mockData';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const CHAT_SESSION_KEY = 'vinpearl_chat_session_id';
+const CHAT_SESSION_KEY = 'vinpearl_chat_session_v2';
 
 function createSessionId() {
   if (globalThis.crypto?.randomUUID) {
@@ -11,17 +11,60 @@ function createSessionId() {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function getChatSessionId() {
-  const existingSessionId = localStorage.getItem(CHAT_SESSION_KEY);
-  if (existingSessionId) return existingSessionId;
+function currentPageBootId() {
+  // performance.timeOrigin changes after a real page reload, but remains stable
+  // across normal SPA navigation and Vite HMR. That gives one conversation
+  // session per loaded chat page without persisting forever in localStorage.
+  return String(Math.round(globalThis.performance?.timeOrigin || Date.now()));
+}
 
-  const sessionId = createSessionId();
-  localStorage.setItem(CHAT_SESSION_KEY, sessionId);
+function readStoredSession() {
+  try {
+    const raw = sessionStorage.getItem(CHAT_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredSession(sessionId) {
+  sessionStorage.setItem(
+    CHAT_SESSION_KEY,
+    JSON.stringify({
+      sessionId,
+      pageBootId: currentPageBootId(),
+    }),
+  );
   return sessionId;
 }
 
-export function resetChatSession() {
-  localStorage.removeItem(CHAT_SESSION_KEY);
+export function getChatSessionId() {
+  const stored = readStoredSession();
+  const pageBootId = currentPageBootId();
+
+  if (stored?.sessionId && stored?.pageBootId === pageBootId) {
+    return stored.sessionId;
+  }
+
+  return writeStoredSession(createSessionId());
+}
+
+export async function resetChatSession() {
+  const stored = readStoredSession();
+  const oldSessionId = stored?.sessionId;
+
+  // Clear backend memory for an explicit "new conversation" action.
+  if (oldSessionId) {
+    try {
+      await fetch(`${API_BASE_URL}/api/v1/chat/${encodeURIComponent(oldSessionId)}/history`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.warn('Could not clear previous backend chat memory:', error);
+    }
+  }
+
+  return writeStoredSession(createSessionId());
 }
 
 export async function fetchHotels(filters) {
@@ -138,6 +181,7 @@ export async function sendChatMessage(prompt, language = 'EN') {
       language: result.language || language,
       route: result.route,
       ticketId: result.ticket_id,
+      sessionId: result.session_id,
       sources: result.sources || [],
       relatedHotels: [],
     };
