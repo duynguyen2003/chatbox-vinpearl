@@ -31,7 +31,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db.base import Base, Timestamped
+from src.data_postgre.db.base import Base, Timestamped
 
 
 class AppUser(Base, Timestamped):

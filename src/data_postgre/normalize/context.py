@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from src.db import Base
-from src.normalize.common import domain_of, html_filename, language_from_url, stable_id
-from src.normalize.text import clean_text, normalize_alias
+from src.data_postgre.db import Base
+from src.data_postgre.normalize.common import domain_of, html_filename, language_from_url, stable_id
+from src.data_postgre.normalize.text import clean_text, normalize_alias
 
 # Thương hiệu trong hệ sinh thái, lấy từ source_brand và related_brands của promotion.
 BRANDS: dict[str, str] = {

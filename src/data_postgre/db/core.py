@@ -30,7 +30,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db.base import Base, Sourced, Timestamped
+from src.data_postgre.db.base import Base, Sourced, Timestamped
 
 # --------------------------------------------------------------------------
 # Vận hành

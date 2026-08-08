@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import PurePosixPath, PureWindowsPath
 from urllib.parse import urlparse
 
-from src.normalize.text import clean_text
+from src.data_postgre.normalize.text import clean_text
 
 # --------------------------------------------------------------------------
 # Khoá chính tất định

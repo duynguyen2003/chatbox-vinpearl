@@ -4,8 +4,11 @@
 py -3.11 -m venv .venv
 .venv\Scripts\activate
 python -m pip install -r requirements.txt
-python -m scripts.ingest_data
-python -m scripts.check_chroma
+
+chunk data posgre
+
+python -m src.backend.services.ingest_postgres --reset
+
 ```
 
 # FAST_API
@@ -22,4 +25,4 @@ npm install
 npm run dev
 ```
 
-http://127.0.0.1:5500
+

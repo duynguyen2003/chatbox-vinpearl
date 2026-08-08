@@ -50,7 +50,7 @@ class RAGService:
     def search(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
         if self.collection.count() == 0:
             raise RuntimeError(
-                "Vector database is empty. Run: python -m scripts.ingest_data"
+                "Vector database is empty. Run: python -m src.backend.services.ingest_postgres --reset"
             )
 
         query_embedding = self.embed_query(query)
@@ -84,9 +84,10 @@ class RAGService:
             metadata = item["metadata"]
             block = (
                 f"[SOURCE {index}]\n"
-                f"file: {metadata.get('source_file')}\n"
-                f"category: {metadata.get('category')}\n"
-                f"path: {metadata.get('path')}\n"
+                f"type: {metadata.get('entity_type') or metadata.get('category')}\n"
+                f"name: {metadata.get('entity_name') or metadata.get('source_file')}\n"
+                f"destination: {metadata.get('destination')}\n"
+                f"url: {metadata.get('source_url')}\n"
                 f"relevance_score: {item.get('score')}\n"
                 f"content:\n{item['text']}\n"
             )
