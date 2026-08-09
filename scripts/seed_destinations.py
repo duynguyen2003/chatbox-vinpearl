@@ -23,9 +23,9 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.config import get_settings
-from src.db import Complex, Destination, DestinationAlias
-from src.normalize.text import normalize_alias
+from src.backend.config import get_settings
+from src.data_postgre.db import Complex, Destination, DestinationAlias
+from src.data_postgre.normalize.text import normalize_alias
 
 YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "normalize" / "destinations.yaml"
 

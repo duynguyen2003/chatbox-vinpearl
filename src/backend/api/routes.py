@@ -1,11 +1,13 @@
 import re
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from ..agents.graph import agent_graph
 from ..models.chat import ChatRequest, ChatResponse, SourceItem
 from ..services.memory import MemoryService
+from ..services.auth import get_optional_user
+from src.data_postgre.db.app import AppUser
 from ..services.query_parser import load_destination_catalog, normalize_text
 from ..services.source_reranker import get_source_reranker
 
@@ -209,7 +211,7 @@ def _build_sources(state: dict) -> list[SourceItem]:
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest) -> ChatResponse:
+def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_optional_user)) -> ChatResponse:
     session_id = request.session_id or f"SES-{uuid4().hex}"
 
     try:
@@ -217,7 +219,7 @@ def chat(request: ChatRequest) -> ChatResponse:
             {
                 "user_message": request.message,
                 "session_id": session_id,
-                "user_id": request.user_id,
+                "user_id": str(current_user.id) if current_user else None,
             }
         )
     except Exception as exc:

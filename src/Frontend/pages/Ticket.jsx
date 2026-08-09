@@ -11,11 +11,13 @@ import {
   User,
 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 import { fetchTickets, submitSupportTicket } from '../services/api'
 import '../styles/pages/Ticket.css'
 
 function Ticket() {
   const { language, t } = useLanguage()
+  const { user } = useAuth()
   const [customerName, setCustomerName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -27,12 +29,17 @@ function Ticket() {
   const [submittedSuccess, setSubmittedSuccess] = useState(false)
 
   useEffect(() => {
-    fetchTickets().then((data) => setTickets(data))
-  }, [])
+    if (user) {
+      setCustomerName((current) => current || user.name || '')
+      setEmail((current) => current || user.email || '')
+      setPhone((current) => current || user.phone || '')
+    }
+    fetchTickets().then((data) => setTickets(data)).catch(() => setTickets([]))
+  }, [user])
 
   async function handleSubmit(event) {
     event.preventDefault()
-    if (!customerName || !email || !content) return
+    if (!customerName || (!email && !phone) || !content) return
 
     setSubmitting(true)
     try {
@@ -131,12 +138,11 @@ function Ticket() {
                 <div className="ticket-page__field">
                   <label className="ticket-page__label" htmlFor="ticket-email">
                     <Mail className="ticket-page__label-icon" />
-                    <span>{t.emailAddress} *</span>
+                    <span>{t.emailAddress}</span>
                   </label>
                   <input
                     id="ticket-email"
                     type="email"
-                    required
                     placeholder="guest@example.com"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -146,7 +152,7 @@ function Ticket() {
                 <div className="ticket-page__field">
                   <label className="ticket-page__label" htmlFor="ticket-phone">
                     <Phone className="ticket-page__label-icon" />
-                    <span>{t.phoneZalo}</span>
+                    <span>{t.phoneZalo} (cần email hoặc SĐT)</span>
                   </label>
                   <input
                     id="ticket-phone"

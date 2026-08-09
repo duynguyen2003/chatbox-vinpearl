@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     max_context_chars: int = 18000
     min_relevance_score: float = 0.35
 
+    # Authentication
+    auth_session_days: int = 7
+    password_pbkdf2_iterations: int = 600000
+    admin_bootstrap_key: str | None = None
+
     # API
     app_host: str = "0.0.0.0"
     app_port: int = 8000

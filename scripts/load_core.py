@@ -24,12 +24,12 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
-from src.config import get_settings
-from src.db import Base, DataQualityIssue, IngestRun
-from src.db.errors import describe, sqlstate
-from src.normalize.adapters import entertainment, hotels, promotions, simple
-from src.normalize.context import BRANDS, Context, Issue
-from src.normalize.text import normalize_alias
+from src.backend.config import get_settings
+from src.data_postgre.db import Base, DataQualityIssue, IngestRun
+from src.data_postgre.db.errors import describe, sqlstate
+from src.data_postgre.normalize.adapters import entertainment, hotels, promotions, simple
+from src.data_postgre.normalize.context import BRANDS, Context, Issue
+from src.data_postgre.normalize.text import normalize_alias
 
 YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "normalize" / "destinations.yaml"
 

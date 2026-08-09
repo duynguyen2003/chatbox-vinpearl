@@ -153,7 +153,7 @@ export async function sendChatMessage(prompt, language = 'EN') {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         message: prompt,
         session_id: getChatSessionId(),
@@ -196,49 +196,44 @@ export async function sendChatMessage(prompt, language = 'EN') {
 }
 
 export async function submitSupportTicket(ticketData) {
-  try {
-    const res = await fetch('/api/tickets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ticketData)
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (e) {
-    console.warn('Submit ticket server error, fallback to local creation:', e);
-  }
-
+  const payload = await apiJson('/api/v1/tickets', {
+    method: 'POST',
+    body: JSON.stringify({
+      customer_name: ticketData.customerName,
+      email: ticketData.email || null,
+      phone: ticketData.phone || null,
+      language: String(ticketData.language || 'vi').toLowerCase(),
+      subject: ticketData.subject || 'General inquiry',
+      content: ticketData.content,
+    }),
+  });
   return {
-    id: `TK-${Math.floor(1000 + Math.random() * 9000)}`,
-    ...ticketData,
-    status: 'Pending',
-    createdAt: new Date().toISOString().split('T')[0]
+    id: payload.id,
+    customerName: payload.customer_name,
+    email: payload.email,
+    phone: payload.phone,
+    language: payload.language,
+    subject: payload.subject,
+    content: payload.content,
+    status: payload.status === 'open' ? 'Pending' : payload.status === 'in_progress' ? 'Processing' : payload.status === 'resolved' ? 'Resolved' : 'Closed',
+    createdAt: new Date(payload.created_at).toLocaleDateString('vi-VN'),
   };
 }
 
 export async function fetchTickets() {
-  try {
-    const res = await fetch('/api/tickets');
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (e) {
-    console.warn('Fetch tickets error:', e);
-  }
-  return [
-    {
-      id: 'TK-8942',
-      customerName: 'Alex Johnson',
-      email: 'alex@example.com',
-      phone: '+84 901 234 567',
-      language: 'EN',
-      subject: 'Special Dietary Request for Booking #VT-9921',
-      content: 'Requesting gluten-free breakfast options during our 3-night stay at VinTravel Grand Phú Quốc.',
-      status: 'Processing',
-      createdAt: '2026-07-28'
-    }
-  ];
+  if (!getAuthToken()) return [];
+  const rows = await apiJson('/api/v1/tickets/mine');
+  return rows.map((payload) => ({
+    id: payload.id,
+    customerName: payload.customer_name,
+    email: payload.email,
+    phone: payload.phone,
+    language: payload.language,
+    subject: payload.subject,
+    content: payload.content,
+    status: payload.status === 'open' ? 'Pending' : payload.status === 'in_progress' ? 'Processing' : payload.status === 'resolved' ? 'Resolved' : 'Closed',
+    createdAt: new Date(payload.created_at).toLocaleDateString('vi-VN'),
+  }));
 }
 
 function generateFallbackResponse(prompt, language) {
@@ -312,4 +307,122 @@ function generateFallbackResponse(prompt, language) {
     language,
     relatedHotels
   };
+}
+
+// ---------------------------------------------------------------------------
+// Authentication / staff APIs
+// ---------------------------------------------------------------------------
+const AUTH_TOKEN_KEY = 'vinpearl_auth_token';
+
+export function getAuthToken() {
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+export function setAuthToken(token) {
+  if (token) localStorage.setItem(AUTH_TOKEN_KEY, token);
+  else localStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+function authHeaders(extra = {}) {
+  const token = getAuthToken();
+  return {
+    ...extra,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function apiJson(path, options = {}) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: authHeaders({
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {}),
+    }),
+  });
+  const payload = await res.json().catch(() => null);
+  if (!res.ok) {
+    let detail = payload?.detail || `API returned status ${res.status}`;
+    if (Array.isArray(detail)) detail = detail.map((item) => item.msg).join('; ');
+    throw new Error(detail);
+  }
+  return payload;
+}
+
+export async function registerAccount({ name, email, phone, password, locale = 'vi' }) {
+  const payload = await apiJson('/api/v1/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      name,
+      email: email || null,
+      phone: phone || null,
+      password,
+      locale,
+    }),
+  });
+  setAuthToken(payload.access_token);
+  return payload.user;
+}
+
+export async function loginAccount(identifier, password) {
+  const payload = await apiJson('/api/v1/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ identifier, password }),
+  });
+  setAuthToken(payload.access_token);
+  return payload.user;
+}
+
+export async function fetchCurrentUser() {
+  if (!getAuthToken()) return null;
+  try {
+    return await apiJson('/api/v1/auth/me');
+  } catch (error) {
+    setAuthToken(null);
+    return null;
+  }
+}
+
+export async function logoutAccount() {
+  try {
+    if (getAuthToken()) await apiJson('/api/v1/auth/logout', { method: 'POST' });
+  } finally {
+    setAuthToken(null);
+  }
+}
+
+export async function fetchStaffTickets(status = '') {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return apiJson(`/api/v1/staff/tickets${query}`);
+}
+
+export async function updateStaffTicket(ticketId, changes) {
+  return apiJson(`/api/v1/staff/tickets/${encodeURIComponent(ticketId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(changes),
+  });
+}
+
+export async function fetchStaffAccounts() {
+  return apiJson('/api/v1/auth/staff');
+}
+
+export async function createStaffAccount(data) {
+  return apiJson('/api/v1/auth/staff', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: data.name,
+      email: data.email || null,
+      phone: data.phone || null,
+      password: data.password,
+      role: data.role || 'staff',
+      locale: data.locale || 'vi',
+    }),
+  });
+}
+
+export async function updateStaffAccount(userId, changes) {
+  return apiJson(`/api/v1/auth/staff/${encodeURIComponent(userId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(changes),
+  });
 }
