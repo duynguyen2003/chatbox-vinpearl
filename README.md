@@ -36,7 +36,7 @@ npm run dev
 ```
 
 
-# User đầu
+# User đầu (admin)
 ```powershell
 $body = @{
   name = "P013 Admin"
@@ -53,3 +53,4 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body $body
 ```
+# web admin /admin/staff
