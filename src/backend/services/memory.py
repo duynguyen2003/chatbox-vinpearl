@@ -160,6 +160,9 @@ class MemoryService:
         ticket_id: str | None = None,
         detected_destinations: list[dict[str, Any]] | None = None,
         detected_intent: str | None = None,
+        detected_intents: list[str] | None = None,
+        request_mode: str | None = None,
+        resolution_mode: str | None = None,
     ) -> None:
         if not self.enabled or not session_id:
             return
@@ -193,6 +196,9 @@ class MemoryService:
             "ticket_id": ticket_id,
             "detected_destinations": compact_destinations,
             "detected_intent": detected_intent,
+            "detected_intents": list(detected_intents or []),
+            "request_mode": request_mode,
+            "resolution_mode": resolution_mode,
         }
 
         with self._lock:

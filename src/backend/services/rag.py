@@ -8,7 +8,11 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from src.backend.config import get_settings
-from src.backend.services.query_parser import normalize_text, parse_retrieval_query
+from src.backend.services.query_parser import (
+    build_intent_query,
+    normalize_text,
+    parse_retrieval_query,
+)
 
 
 class RAGService:
@@ -166,6 +170,7 @@ class RAGService:
         intent: str | None,
         preferred_entity_types: set[str],
         max_candidates: int = 300,
+        strict_entity_types: bool = False,
     ) -> list[dict[str, Any]]:
         if not destination:
             return []
@@ -192,6 +197,8 @@ class RAGService:
                 and metadata_destination == normalized_destination_id
             )
             if not matched_aliases and not destination_id_match:
+                continue
+            if strict_entity_types and preferred_entity_types and entity_type not in preferred_entity_types:
                 continue
 
             keyword_score = 1.0 if destination_id_match else 0.75
@@ -412,63 +419,141 @@ class RAGService:
         user_message: str = "",
         top_k: int | None = None,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        """Run destination-aware retrieval with native multi-intent support.
+
+        A multi-clause request such as "services + golf + events" is split into
+        independent intent retrieval branches. One missing branch does not erase the
+        evidence found for the others. The merged document set is still bounded by
+        the normal context budget downstream.
+        """
         k = top_k or self.settings.top_k
         parsed = parse_retrieval_query(user_message=user_message, rag_query=query)
         destinations = list(parsed.get("destinations") or [])
-        intent = parsed.get("intent")
-        preferred_entity_types = set(parsed.get("preferred_entity_types") or [])
+        intents = list(parsed.get("intents") or [])
+        primary_intent = parsed.get("intent")
+
+        # Keep legacy behavior for a query where no explicit intent can be detected.
+        retrieval_intents: list[str | None] = intents or [primary_intent]
+        is_multi_intent = len([item for item in retrieval_intents if item]) > 1
 
         all_candidates = 0
         missing_destination_ids: list[str] = []
         documents: list[dict[str, Any]] = []
+        intent_results: dict[str, dict[str, Any]] = {}
 
         if destinations:
-            per_destination_k = max(2, ceil(k / max(1, len(destinations))))
-            per_destination_docs: list[list[dict[str, Any]]] = []
+            # Allocate a useful minimum to each intent. The final merged context is
+            # bounded by max_context_chars, so 3-4 docs per intent is a good balance.
+            per_intent_k = max(2, ceil(k / max(1, len(retrieval_intents))))
+            per_intent_k = min(max(per_intent_k, 3 if is_multi_intent else 2), 5)
 
-            for destination in destinations:
-                candidates = self.keyword_candidates(
-                    destination=destination,
-                    intent=intent,
-                    preferred_entity_types=preferred_entity_types,
+            for raw_intent in retrieval_intents:
+                intent = raw_intent or primary_intent
+                preferred_entity_types = set(
+                    (parsed.get("preferred_entity_types_by_intent") or {}).get(intent or "", [])
                 )
-                all_candidates += len(candidates)
-                if not candidates:
-                    missing_destination_ids.append(str(destination.get("id") or ""))
-                    per_destination_docs.append([])
+                if not preferred_entity_types:
+                    preferred_entity_types = set(parsed.get("preferred_entity_types") or [])
+
+                focused_query = (
+                    build_intent_query(intent, destinations, query)
+                    if intent and is_multi_intent
+                    else query
+                )
+                branch_docs: list[dict[str, Any]] = []
+                branch_candidates = 0
+                branch_missing: list[str] = []
+
+                per_destination_k = max(2, ceil(per_intent_k / max(1, len(destinations))))
+                per_destination_docs: list[list[dict[str, Any]]] = []
+                for destination in destinations:
+                    candidates = self.keyword_candidates(
+                        destination=destination,
+                        intent=intent,
+                        preferred_entity_types=preferred_entity_types,
+                        strict_entity_types=is_multi_intent and bool(preferred_entity_types),
+                    )
+                    branch_candidates += len(candidates)
+                    all_candidates += len(candidates)
+                    if not candidates:
+                        destination_id = str(destination.get("id") or "")
+                        branch_missing.append(destination_id)
+                        if destination_id not in missing_destination_ids:
+                            missing_destination_ids.append(destination_id)
+                        per_destination_docs.append([])
+                        continue
+
+                    ranked = self._rerank_candidates(
+                        query=focused_query,
+                        candidates=candidates,
+                        top_k=per_destination_k,
+                        preferred_entity_types=preferred_entity_types,
+                        intent=intent,
+                    )
+                    for item in ranked:
+                        item["matched_intent"] = intent
+                        item["intent_query"] = focused_query
+                    per_destination_docs.append(ranked)
+
+                # Round-robin across destinations inside each intent branch.
+                max_len = max((len(group) for group in per_destination_docs), default=0)
+                for index in range(max_len):
+                    for group in per_destination_docs:
+                        if index < len(group):
+                            branch_docs.append(group[index])
+                branch_docs = self._dedupe_documents(branch_docs)[:per_intent_k]
+
+                intent_key = intent or "general"
+                best_score = max(
+                    (float(item.get("score", 0.0) or 0.0) for item in branch_docs),
+                    default=0.0,
+                )
+                intent_results[intent_key] = {
+                    "status": "found" if branch_docs else "not_found",
+                    "document_count": len(branch_docs),
+                    "candidate_count": branch_candidates,
+                    "best_score": round(best_score, 4),
+                    "query": focused_query,
+                    "missing_destination_ids": branch_missing,
+                }
+                documents.extend(branch_docs)
+
+            # Preserve one branch's evidence from being deduped by another intent.
+            seen: set[tuple[str, str, str]] = set()
+            merged: list[dict[str, Any]] = []
+            for item in documents:
+                metadata = item.get("metadata", {}) or {}
+                key = (
+                    str(item.get("matched_intent") or ""),
+                    str(metadata.get("entity_type") or ""),
+                    str(metadata.get("entity_id") or metadata.get("entity_name") or item.get("text", "")[:120]),
+                )
+                if key in seen:
                     continue
+                seen.add(key)
+                merged.append(item)
+            documents = merged
 
-                ranked = self._rerank_candidates(
-                    query=query,
-                    candidates=candidates,
-                    top_k=per_destination_k,
-                    preferred_entity_types=preferred_entity_types,
-                    intent=intent,
-                )
-                per_destination_docs.append(ranked)
-
-            # Round-robin keeps comparison evidence balanced instead of letting one
-            # destination dominate all top-k positions.
-            max_len = max((len(group) for group in per_destination_docs), default=0)
-            for index in range(max_len):
-                for group in per_destination_docs:
-                    if index < len(group):
-                        documents.append(group[index])
-            documents = self._dedupe_documents(documents)
-
-            # For hard destination queries, never escape to unrelated full-corpus
-            # semantic results. Missing evidence should surface as missing, not as a
-            # confident-looking source from another city.
-            mode = (
-                "keyword_multi_destination"
-                if len(destinations) > 1
-                else "keyword_then_embedding"
+            mode = "keyword_multi_intent" if is_multi_intent else (
+                "keyword_multi_destination" if len(destinations) > 1 else "keyword_then_embedding"
             )
-            if missing_destination_ids:
+            if any(result.get("status") == "not_found" for result in intent_results.values()):
                 mode += "_partial"
         else:
+            # Without a resolved destination, keep the existing semantic fallback. For
+            # multi-intent wording we still expose the detected intents in diagnostics.
             documents = self.semantic_search(query=query, top_k=k)
             mode = "semantic_fallback"
+            if intents:
+                for intent in intents:
+                    intent_results[intent] = {
+                        "status": "unknown",
+                        "document_count": 0,
+                        "candidate_count": 0,
+                        "best_score": 0.0,
+                        "query": query,
+                        "missing_destination_ids": [],
+                    }
 
         primary = destinations[0] if destinations else None
         destination_names = [
@@ -486,7 +571,9 @@ class RAGService:
             "destinations": destinations,
             "destination_ids": destination_ids,
             "destination_names": destination_names,
-            "intent": intent,
+            "intent": primary_intent,
+            "intents": intents,
+            "intent_results": intent_results,
             "keyword_candidate_count": all_candidates,
             "missing_destination_ids": missing_destination_ids,
         }
@@ -494,7 +581,8 @@ class RAGService:
         print(
             "[RAG RETRIEVAL] "
             f"mode={mode} destinations={destination_ids or 'none'} "
-            f"intent={intent} candidates={all_candidates} missing={missing_destination_ids}"
+            f"intents={intents or [primary_intent]} candidates={all_candidates} "
+            f"intent_results={intent_results}"
         )
         return documents, diagnostics
 
@@ -522,6 +610,7 @@ class RAGService:
                 f"type: {metadata.get('entity_type') or metadata.get('category')}\n"
                 f"name: {metadata.get('entity_name') or metadata.get('source_file')}\n"
                 f"destination: {item.get('matched_destination_name') or metadata.get('destination_id') or metadata.get('destination')}\n"
+                f"intent: {item.get('matched_intent') or 'general'}\n"
                 f"url: {metadata.get('source_url')}\n"
                 f"retrieval_mode: {item.get('retrieval_mode')}\n"
                 f"relevance_score: {item.get('score')}\n"

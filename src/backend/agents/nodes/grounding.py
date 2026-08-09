@@ -3,34 +3,44 @@ from src.backend.services.llm import LLMService
 
 
 def validate_grounding(state: AgentState) -> AgentState:
-    """Validate the drafted answer against RAG context and repair it once if needed."""
+    """Validate positive claims against context while allowing KB-absence statements."""
     draft = str(state.get("answer") or "").strip()
     context = str(state.get("context") or "").strip()
+    intent_results = state.get("intent_results", {}) or {}
 
-    if not draft or not context:
+    if not draft:
         return {
             "grounding_passed": False,
-            "grounding_reason": "Answer or retrieved context is empty.",
+            "grounding_reason": "Answer is empty.",
+        }
+
+    # A pure no-data response can legitimately have no retrieved context.
+    if not context and not intent_results:
+        return {
+            "grounding_passed": False,
+            "grounding_reason": "Answer and retrieval metadata cannot be grounded.",
         }
 
     llm = LLMService()
     result = llm.json(
         system_prompt=(
-            "You are a strict grounding validator for a RAG system. "
-            "Judge ONLY whether the DRAFT_ANSWER is supported by RETRIEVED_CONTEXT. "
-            "Do not use your own knowledge to validate a claim. "
-            "A claim is supported only when the retrieved context explicitly contains the fact "
-            "or directly supports the paraphrase. "
-            "Named entities not present in the retrieved context are unsupported. "
-            "URLs must appear exactly in the retrieved context to be supported. "
-            "Missing URL metadata does not invalidate other supported facts. "
-            "If unsupported content exists, return a corrected answer that removes all unsupported "
-            "claims and introduces NO new facts. Preserve the user's language. "
-            "Return JSON with exactly these keys: grounded, reason, unsupported_claims, corrected_answer."
+            "You are a strict grounding validator for a RAG system. Positive factual claims and "
+            "named entities are supported ONLY by RETRIEVED_CONTEXT. INTENT_RETRIEVAL_STATUS is "
+            "trusted system retrieval metadata and may support only a narrow statement such as "
+            "'the current knowledge base did not retrieve/record enough information for golf'. "
+            "It NEVER supports the stronger claim that golf or any entity does not exist in reality. "
+            "For multi-intent answers, validate each section independently. A missing branch may be "
+            "reported as KB-not-found while found branches must remain grounded in context. "
+            "If unsupported content exists, return a corrected answer removing only unsupported claims "
+            "and preserving grounded partial sections. Introduce no new facts. Preserve the user's language. "
+            "Return JSON with exactly: grounded, reason, unsupported_claims, corrected_answer."
         ),
         user_prompt=f"""
 USER_QUESTION:
 {state.get("user_message", "")}
+
+INTENT_RETRIEVAL_STATUS:
+{intent_results}
 
 RETRIEVED_CONTEXT:
 {context}

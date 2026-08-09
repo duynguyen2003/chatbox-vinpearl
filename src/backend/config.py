@@ -9,12 +9,13 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"
     llm_model: str = "gemini/gemini-2.0-flash"
     llm_api_key: str | None = None
+    llm_api_key_backup: str | None = None
     llm_base_url: str | None = None
 
     llm_temperature: float = 0.2
     llm_max_tokens: int = 1500
     llm_timeout: float = 60.0
-    llm_max_retries: int = 4
+    llm_max_retries: int = 2
 
     # Local embedding
     local_embedding_model: str = "intfloat/multilingual-e5-small"

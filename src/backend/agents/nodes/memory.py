@@ -26,5 +26,8 @@ def save_conversation_memory(state: AgentState) -> AgentState:
         ticket_id=state.get("ticket_id"),
         detected_destinations=state.get("detected_destinations", []),
         detected_intent=state.get("detected_intent"),
+        detected_intents=state.get("detected_intents", []),
+        request_mode=state.get("request_mode"),
+        resolution_mode=state.get("resolution_mode"),
     )
     return {}

@@ -241,6 +241,13 @@ def chat(request: ChatRequest) -> ChatResponse:
             "sources_without_url": sum(1 for item in sources if not item.path),
             "retrieval_mode": state.get("retrieval_mode"),
             "detected_destinations": state.get("detected_destination_names", []),
+            "detected_intent": state.get("detected_intent"),
+            "detected_intents": state.get("detected_intents", []),
+            "intent_results": state.get("intent_results", {}),
+            "request_mode": state.get("request_mode"),
+            "resolution_mode": state.get("resolution_mode"),
+            "support_triage_reason": state.get("support_triage_reason"),
+            "support_triage_confidence": state.get("support_triage_confidence"),
             "recent_destinations": state.get("recent_destination_summary"),
         },
     )
