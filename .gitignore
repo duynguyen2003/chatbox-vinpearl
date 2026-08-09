@@ -6,7 +6,7 @@ __pycache__/
 dist/
 build/
 .eggs/
-__init__.py
+
 
 # Virtual environments
 venv/
@@ -41,6 +41,7 @@ data/**
 
 *.db
 *.sqlite3
+!storage/chroma_local/chroma.sqlite3
 # Logs
 logs/
 *.log
