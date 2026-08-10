@@ -47,4 +47,5 @@ pyyaml>=6.0.2
 # đều bị Windows Application Control policy chặn không nạp được DLL trên máy dev.
 # Ở quy mô ~4.400 dòng thì chênh lệch tốc độ so với psycopg không đáng kể.
 pg8000>=1.31.0
-sqlalchemy=2.0.51
+redis>=5.0,<6.0
+psycopg2-binary>=2.9,<3.0
