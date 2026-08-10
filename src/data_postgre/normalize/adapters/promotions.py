@@ -14,14 +14,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     normalize_language,
     parse_int,
     parse_iso_date,
     stable_id,
 )
-from src.normalize.context import BRANDS, Context
-from src.normalize.text import clean_text
+from src.data_postgre.normalize.context import BRANDS, Context
+from src.data_postgre.normalize.text import clean_text
 
 GLOB = "data/promotion/*.json"
 

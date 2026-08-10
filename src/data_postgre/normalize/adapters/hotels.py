@@ -9,15 +9,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     parse_area,
     parse_int,
     parse_money,
     parse_time_range,
     stable_id,
 )
-from src.normalize.context import Context
-from src.normalize.text import clean_text, slugify
+from src.data_postgre.normalize.context import Context
+from src.data_postgre.normalize.text import clean_text, slugify
 
 SOURCE = "data/hotel/vinpearl_hotel_room_dining_rag.json"
 

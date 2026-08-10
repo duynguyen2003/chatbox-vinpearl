@@ -8,15 +8,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     normalize_language,
     parse_area,
     parse_int,
     parse_specifications,
     stable_id,
 )
-from src.normalize.context import Context
-from src.normalize.text import clean_text, slugify
+from src.data_postgre.normalize.context import Context
+from src.data_postgre.normalize.text import clean_text, slugify
 
 GOLF = "data/golf/golf.json"
 MICE = "data/event/vinpearl_mice_rag_en.json"
@@ -296,7 +296,7 @@ def _destination_in_text(ctx: Context, text: str | None) -> str | None:
     """Tìm tên địa danh nằm bên trong một chuỗi dài hơn."""
     if not text:
         return None
-    from src.normalize.text import normalize_alias
+    from src.data_postgre.normalize.text import normalize_alias
 
     haystack = normalize_alias(text)
     best: tuple[int, str] | None = None

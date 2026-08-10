@@ -1,4 +1,4 @@
-"""Kiểm chứng src/db/errors.py trên database thật.
+"""Kiểm chứng src/data_postgre/db/errors.py trên database thật.
 
 Bỏ qua nếu Postgres chưa chạy (``make db-up``), để pytest vẫn xanh trên máy
 chưa dựng database.
@@ -11,9 +11,9 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
-from src.config import get_settings
-from src.db import Complex, Destination, DestinationAlias, Property, Room
-from src.db.errors import (
+from src.backend.config import get_settings
+from src.data_postgre.db import Complex, Destination, DestinationAlias, Property, Room
+from src.data_postgre.db.errors import (
     CHECK_VIOLATION,
     FOREIGN_KEY_VIOLATION,
     UNIQUE_VIOLATION,

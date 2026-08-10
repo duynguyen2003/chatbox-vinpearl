@@ -12,7 +12,7 @@ from scripts.seed_destinations import (
     collect_source_strings,
     load_yaml,
 )
-from src.normalize.text import normalize_alias
+from src.data_postgre.normalize.text import normalize_alias
 
 SPEC = load_yaml()
 
@@ -33,7 +33,7 @@ def test_every_destination_string_in_data_resolves() -> None:
     }
     assert not unresolved, (
         f"{len(unresolved)} chuỗi địa danh chưa có bí danh: {unresolved}. "
-        "Thêm vào src/normalize/destinations.yaml."
+        "Thêm vào src/data_postgre/normalize/destinations.yaml."
     )
 
 

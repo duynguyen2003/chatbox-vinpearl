@@ -1,4 +1,4 @@
-"""Kiểm thử src/normalize/common.py.
+"""Kiểm thử src/data_postgre/normalize/common.py.
 
 Mọi ca đầu vào ở đây đều là chuỗi có thật lấy từ data/, không phải ví dụ bịa.
 """
@@ -10,7 +10,7 @@ from decimal import Decimal
 
 import pytest
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     domain_of,
     html_filename,
     language_from_url,

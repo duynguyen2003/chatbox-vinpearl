@@ -11,10 +11,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from src.config import get_settings
+from src.backend.config import get_settings
 
-# Import qua src.db để Base.metadata thấy đủ 48 bảng.
-from src.db import Base
+# Import qua src.data_postgre.db để Base.metadata thấy đủ 48 bảng.
+from src.data_postgre.db import Base
 
 config = context.config
 

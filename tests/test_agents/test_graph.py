@@ -11,7 +11,7 @@ Bản mới kiểm tra những gì xác minh được mà không cần gọi LLM
 
 import pytest
 
-from src.agents.graph import (
+from src.backend.agents.graph import (
     agent_graph,
     route_after_assessment,
     route_after_classification,

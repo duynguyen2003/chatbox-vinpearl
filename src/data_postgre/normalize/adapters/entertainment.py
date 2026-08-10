@@ -20,9 +20,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.normalize.common import normalize_language, parse_int, stable_id
-from src.normalize.context import Context
-from src.normalize.text import clean_text
+from src.data_postgre.normalize.common import normalize_language, parse_int, stable_id
+from src.data_postgre.normalize.context import Context
+from src.data_postgre.normalize.text import clean_text
 
 GLOB = "data/entertainment/*.json"
 

@@ -23,11 +23,11 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.config import get_settings
-from src.db import Complex, Destination, DestinationAlias
-from src.normalize.text import normalize_alias
+from src.backend.config import get_settings
+from src.data_postgre.db import Complex, Destination, DestinationAlias
+from src.data_postgre.normalize.text import normalize_alias
 
-YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "normalize" / "destinations.yaml"
+YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "data_postgre" / "normalize" / "destinations.yaml"
 
 
 def load_yaml() -> dict[str, Any]:
@@ -100,7 +100,7 @@ def check(spec: dict[str, Any]) -> int:
         print(f"\nTHIẾU BÍ DANH ({len(missing)}):")
         for value, where in sorted(missing.items()):
             print(f"  {value!r}  (xuất hiện ở: {', '.join(sorted(where))})")
-        print("\nThêm chúng vào src/normalize/destinations.yaml rồi chạy lại.")
+        print("\nThêm chúng vào src/data_postgre/normalize/destinations.yaml rồi chạy lại.")
         return 1
 
     print("\nMọi chuỗi địa danh trong data/ đều khớp được.")

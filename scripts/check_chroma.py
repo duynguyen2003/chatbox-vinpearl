@@ -1,4 +1,4 @@
-from src.services.rag import RAGService
+from src.backend.services.rag import RAGService
 
 
 def main() -> None:

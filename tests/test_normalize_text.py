@@ -1,4 +1,4 @@
-"""Kiểm thử src/normalize/text.py.
+"""Kiểm thử src/data_postgre/normalize/text.py.
 
 Các ca ở đây lấy từ chuỗi có thật trong data/, không phải ví dụ bịa.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.normalize.text import clean_text, normalize_alias, slugify, strip_accents
+from src.data_postgre.normalize.text import clean_text, normalize_alias, slugify, strip_accents
 
 
 @pytest.mark.parametrize(

@@ -1,21 +1,121 @@
-from src.data_postgre.db.base import Base
+"""Tầng cơ sở dữ liệu: ORM model cho lược đồ CORE + ứng dụng.
 
+Import ``Base`` từ đây để Alembic thấy đủ 48 bảng khi autogenerate.
+Đặc tả đầy đủ: docs/DATABASE.md
+"""
+
+from src.data_postgre.db.app import (
+    AppUser,
+    ChatSession,
+    EventLog,
+    Message,
+    MessageCitation,
+    MessageFeedback,
+    Ticket,
+)
+from src.data_postgre.db.base import Base, Sourced, Timestamped
 from src.data_postgre.db.core import (
-    IngestRun,
-    DataQualityIssue,
+    Amenity,
+    Attraction,
+    AttractionItineraryDay,
+    Brand,
     Complex,
+    DataQualityIssue,
     Destination,
     DestinationAlias,
+    DestinationHighlight,
+    DiningService,
+    EntitySource,
+    Faq,
+    GolfCourse,
+    GolfCourseMap,
+    GolfFeature,
+    IngestRun,
+    Media,
+    MiceRoom,
+    MiceRoomCapacity,
+    MiceVenue,
+    OrgHighlight,
+    OrgInfo,
+    PageLink,
+    PolicyBlock,
+    PolicyDocument,
+    PolicySection,
+    Promotion,
+    PromotionBenefit,
+    PromotionBlock,
+    PromotionCode,
+    PromotionDestination,
+    PromotionPropertyRaw,
+    PromotionRelation,
+    PromotionSection,
+    PromotionStep,
+    PromotionTag,
+    PromotionTerm,
+    Property,
+    Room,
+    RoomAmenity,
+    Source,
 )
-
-from src.data_postgre.db import core
-from src.data_postgre.db import app
 
 __all__ = [
     "Base",
+    "Sourced",
+    "Timestamped",
+    # vận hành
     "IngestRun",
     "DataQualityIssue",
-    "Complex",
+    # trục dùng chung
+    "Brand",
+    "Source",
     "Destination",
     "DestinationAlias",
+    "Complex",
+    "Media",
+    "EntitySource",
+    "PageLink",
+    # lưu trú
+    "Property",
+    "Room",
+    "Amenity",
+    "RoomAmenity",
+    "DiningService",
+    # trải nghiệm
+    "Attraction",
+    "DestinationHighlight",
+    "AttractionItineraryDay",
+    # golf & mice
+    "GolfCourse",
+    "GolfFeature",
+    "GolfCourseMap",
+    "MiceVenue",
+    "MiceRoom",
+    "MiceRoomCapacity",
+    # ưu đãi
+    "Promotion",
+    "PromotionBenefit",
+    "PromotionDestination",
+    "PromotionTag",
+    "PromotionCode",
+    "PromotionPropertyRaw",
+    "PromotionSection",
+    "PromotionBlock",
+    "PromotionStep",
+    "PromotionTerm",
+    "PromotionRelation",
+    # tri thức
+    "Faq",
+    "PolicyDocument",
+    "PolicySection",
+    "PolicyBlock",
+    "OrgInfo",
+    "OrgHighlight",
+    # ứng dụng
+    "AppUser",
+    "ChatSession",
+    "Message",
+    "MessageCitation",
+    "MessageFeedback",
+    "Ticket",
+    "EventLog",
 ]
