@@ -7,7 +7,7 @@ python -m pip install -r requirements.txt
 
 data to posgre
 check
-python -c "from src.db import Base; print(len(Base.metadata.tables)); print(list(Base.metadata.tables.keys()))"
+python -c "from src.data_postgre.db import CORE_TABLES, APP_TABLES; print(len(CORE_TABLES), 'core +', len(APP_TABLES), 'app'); print(sorted(CORE_TABLES))"
 create
 & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -c "CREATE USER vinpearl WITH PASSWORD '210303';"
 alembic current
@@ -19,6 +19,21 @@ chunk data posgre
 
 python -m src.backend.services.ingest_postgres --reset
 
+```
+
+Lược đồ chia ba schema — chi tiết ở [docs/DATABASE.md §18](docs/DATABASE.md):
+
+| Schema | Nội dung |
+|---|---|
+| `core` | 36 bảng nghiệp vụ + vận hành nạp |
+| `app` | 7 bảng hội thoại, ticket, nhật ký |
+| `api` | 11 view đọc đã gộp sẵn — `core.*` là bảng, `api.*` là cùng thứ đó đã join |
+
+`search_path` mặc định là `public, core, app, api` nên SQL không ghi schema vẫn chạy.
+
+```powershell
+# xem nhanh trong terminal
+docker compose exec db psql -U vinpearl -d vinpearl -c "SELECT * FROM api.destination"
 ```
 
 # FAST_API

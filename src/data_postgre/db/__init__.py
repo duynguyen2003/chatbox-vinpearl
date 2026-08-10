@@ -1,6 +1,7 @@
 """Tầng cơ sở dữ liệu: ORM model cho lược đồ CORE + ứng dụng.
 
-Import ``Base`` từ đây để Alembic thấy đủ 48 bảng khi autogenerate.
+Import ``Base`` (schema core) và ``AppBase`` (schema app) từ đây để Alembic
+thấy đủ 41 bảng khi autogenerate.
 Đặc tả đầy đủ: docs/DATABASE.md
 """
 
@@ -13,11 +14,10 @@ from src.data_postgre.db.app import (
     MessageFeedback,
     Ticket,
 )
-from src.data_postgre.db.base import Base, Sourced, Timestamped
+from src.data_postgre.db.base import AppBase, Base, Sourced, Timestamped, by_bare_name
 from src.data_postgre.db.core import (
     Amenity,
     Attraction,
-    AttractionItineraryDay,
     Brand,
     Complex,
     DataQualityIssue,
@@ -28,7 +28,6 @@ from src.data_postgre.db.core import (
     EntitySource,
     Faq,
     GolfCourse,
-    GolfCourseMap,
     GolfFeature,
     IngestRun,
     Media,
@@ -49,17 +48,22 @@ from src.data_postgre.db.core import (
     PromotionPropertyRaw,
     PromotionRelation,
     PromotionSection,
-    PromotionStep,
-    PromotionTag,
     PromotionTerm,
     Property,
     Room,
-    RoomAmenity,
     Source,
 )
 
+# Dung SAU khi core.py va app.py da import xong: luc base.py chay thi metadata
+# con rong. Khoa la ten tran ('room'), khong phai 'core.room'.
+CORE_TABLES = by_bare_name(Base.metadata)
+APP_TABLES = by_bare_name(AppBase.metadata)
+
 __all__ = [
     "Base",
+    "AppBase",
+    "CORE_TABLES",
+    "APP_TABLES",
     "Sourced",
     "Timestamped",
     # vận hành
@@ -78,29 +82,24 @@ __all__ = [
     "Property",
     "Room",
     "Amenity",
-    "RoomAmenity",
     "DiningService",
     # trải nghiệm
     "Attraction",
     "DestinationHighlight",
-    "AttractionItineraryDay",
     # golf & mice
     "GolfCourse",
     "GolfFeature",
-    "GolfCourseMap",
     "MiceVenue",
     "MiceRoom",
     "MiceRoomCapacity",
     # ưu đãi
     "Promotion",
     "PromotionBenefit",
-    "PromotionDestination",
-    "PromotionTag",
-    "PromotionCode",
-    "PromotionPropertyRaw",
     "PromotionSection",
     "PromotionBlock",
-    "PromotionStep",
+    "PromotionDestination",
+    "PromotionCode",
+    "PromotionPropertyRaw",
     "PromotionTerm",
     "PromotionRelation",
     # tri thức

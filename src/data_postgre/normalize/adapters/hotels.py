@@ -107,6 +107,15 @@ def _rooms(ctx: Context, hotel: dict, hotel_id: str, path: str) -> None:
             if b and b.lower() not in _NOT_A_BED
         ]
 
+        # _amenity() vừa ghi vào bảng từ điển ``amenity`` vừa trả về id, nên phải
+        # chạy TRƯỚC khi dựng dòng room — amenity_ids giờ là cột của chính nó.
+        # dict.fromkeys giữ thứ tự xuất hiện và loại trùng: một phòng có thể liệt
+        # kê 'Bathtub' và 'bathtub' cùng lúc, cả hai quy về một id.
+        amenity_ids = list(dict.fromkeys(
+            aid for aid in (_amenity(ctx, label) for label in room.get("amenities") or [])
+            if aid
+        ))
+
         ctx.rows.add("room", {
             "id": room_id,
             "property_id": hotel_id,
@@ -128,13 +137,9 @@ def _rooms(ctx: Context, hotel: dict, hotel_id: str, path: str) -> None:
             "has_wifi": room.get("wifi"),
             "image_url": clean_text(room.get("room_image_url")),
             "page_url": clean_text(room.get("room_page_url")),
+            "amenity_ids": amenity_ids or None,
             "source_id": room_source,
         })
-
-        for label in room.get("amenities") or []:
-            amenity_id = _amenity(ctx, label)
-            if amenity_id:
-                ctx.rows.add("room_amenity", {"room_id": room_id, "amenity_id": amenity_id})
 
         ctx.media("room", room_id, room.get("room_image_url"), role="hero")
 

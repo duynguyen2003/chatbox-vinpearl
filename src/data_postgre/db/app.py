@@ -31,7 +31,15 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.data_postgre.db.base import Base, Timestamped
+# AppBase mang schema 'app'; lớp CORE dùng Base mang schema 'core'. Đặt bí danh
+# để 7 khai báo bảng bên dưới không phải đổi.
+from src.data_postgre.db.base import AppBase as Base
+from src.data_postgre.db.base import Timestamped
+
+# none_as_null: Python None phải thành SQL NULL, không phải JSON 'null'.
+# Mặc định của SQLAlchemy biến None thành JSON null (một scalar), khiến
+# jsonb_array_length() báo 'cannot get array length of a scalar'.
+JSONB_NULL = JSONB(none_as_null=True)
 
 
 class AppUser(Base, Timestamped):
@@ -81,7 +89,7 @@ class ChatSession(Base, Timestamped):
     )
     last_activity_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # UA + platform. Đừng lưu đủ chi tiết để fingerprint thiết bị.
-    client_meta: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    client_meta: Mapped[dict[str, Any] | None] = mapped_column(JSONB_NULL)
 
     __table_args__ = (
         CheckConstraint(
@@ -236,6 +244,6 @@ class EventLog(Base):
         ForeignKey("session.id", ondelete="SET NULL")
     )
     event_type: Mapped[str] = mapped_column(Text, nullable=False)
-    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB_NULL)
 
     __table_args__ = (Index("ix_event_log_ts", "ts"),)

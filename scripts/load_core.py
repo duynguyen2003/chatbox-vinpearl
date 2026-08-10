@@ -25,7 +25,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.backend.config import get_settings
-from src.data_postgre.db import Base, DataQualityIssue, IngestRun
+from src.data_postgre.db import CORE_TABLES, DataQualityIssue, IngestRun
 from src.data_postgre.db.errors import describe, sqlstate
 from src.data_postgre.normalize.adapters import entertainment, hotels, promotions, simple
 from src.data_postgre.normalize.context import BRANDS, Context, Issue
@@ -64,7 +64,7 @@ def load_order(tables: list[str]) -> list[str]:
     Model cố ý không khai ``relationship()`` nên ``Session.flush`` KHÔNG tự sắp
     thứ tự INSERT — phải lấy từ metadata (docs/DATABASE.md §16.1).
     """
-    ordered = [t.name for t in Base.metadata.sorted_tables]
+    ordered = list(CORE_TABLES)
     return [t for t in ordered if t in set(tables)]
 
 
@@ -73,13 +73,21 @@ def upsert(session: Session, table_name: str, rows: list[dict[str, Any]],
     """Upsert theo lô; lô nào lỗi thì thử lại từng dòng để khoanh đúng dòng hỏng."""
     if not rows:
         return 0
-    table = Base.metadata.tables[table_name]
+    table = CORE_TABLES[table_name]
     columns = {c.name for c in table.columns}
     pk = [c.name for c in table.primary_key.columns]
     if "ingest_run_id" in columns:
         for row in rows:
             row["ingest_run_id"] = run_id
-    payload = [{k: v for k, v in row.items() if k in columns} for row in rows]
+    # Mọi dòng trong một lô phải có CÙNG tập khoá.
+    #
+    # insert().values([...]) lấy khoá của dòng ĐẦU TIÊN làm khuôn cho cả câu lệnh.
+    # Dòng nào mang thêm cột mà dòng đầu không có thì cột đó bị bỏ lặng lẽ — không
+    # lỗi, không cảnh báo, chỉ mất dữ liệu. Đây từng làm mất trắng duration_days,
+    # duration_nights, duration_label và itinerary của attraction, vì thẻ giới
+    # thiệu (không có mấy cột đó) luôn được thêm trước trang chi tiết.
+    keys = sorted({k for row in rows for k in row} & columns)
+    payload = [{k: row.get(k) for k in keys} for row in rows]
 
     # Bọc lô trong SAVEPOINT: lô hỏng chỉ huỷ tới điểm lưu, không giết giao dịch
     # ngoài. Dùng session.rollback() ở đây sẽ đóng luôn transaction và mọi bảng
@@ -123,11 +131,12 @@ def sweep_stale(session: Session, table_names: list[str], run_id: int) -> dict[s
     """
     swept: dict[str, int] = {}
     for name in table_names:
-        columns = {c.name for c in Base.metadata.tables[name].columns}
+        table = CORE_TABLES[name]
+        columns = {c.name for c in table.columns}
         if not {"ingest_run_id", "is_active"} <= columns:
             continue
         result = session.execute(
-            text(f"UPDATE {name} SET is_active = false, updated_at = now() "  # noqa: S608
+            text(f"UPDATE {table.fullname} SET is_active = false, updated_at = now() "  # noqa: S608
                  "WHERE is_active AND (ingest_run_id IS NULL OR ingest_run_id <> :run)"),
             {"run": run_id},
         )

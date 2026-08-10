@@ -1,6 +1,13 @@
 target-version = "py311"
 line-length = 120
 
+# Migration do Alembic tự sinh theo khuôn mẫu của nó — sửa cho hợp lint sẽ bị
+# ghi đè ở lần autogenerate sau. Nội dung đã áp dụng thì không nên đụng vào nữa.
+exclude = ["alembic/versions"]
+# Không có dòng này thì exclude bị bỏ qua khi truyền thẳng đường dẫn:
+# `ruff check alembic/` vẫn soi cả versions/.
+force-exclude = true
+
 [lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["E501"]

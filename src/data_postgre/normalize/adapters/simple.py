@@ -92,13 +92,23 @@ def parse_golf(ctx: Context) -> None:
 
         _golf_features(ctx, course, course_id, info)
 
+        # Ban do san cung chi la {ten, anh} gan voi mot san, giong het tien ich
+        # va trai nghiem -> vao chung golf_feature voi kind='map'.
+        base = len(ctx.rows.get("golf_feature"))
         for order, gmap in enumerate(course.get("golf_course_maps") or []):
-            ctx.rows.add("golf_course_map", {
-                "id": stable_id("golf_course_map", course_id, order),
+            title = clean_text(gmap.get("map_name")) or clean_text(gmap.get("course_type"))
+            if not title:
+                continue
+            ctx.rows.add("golf_feature", {
+                "id": stable_id("golf_feature", course_id, "map", order),
                 "course_id": course_id,
-                "course_type": clean_text(gmap.get("course_type")),
-                "map_name": clean_text(gmap.get("map_name")),
-                "map_url": clean_text(gmap.get("map_url")),
+                "kind": "map",
+                "title": title,
+                "description": None,
+                "image_url": clean_text(gmap.get("map_url")),
+                "detail_url": None,
+                "variant": clean_text(gmap.get("course_type")),
+                "sort_order": base + order,
                 "source_id": ctx.source(gmap.get("source_url")),
             })
             ctx.media("golf_course", course_id, gmap.get("map_url"), role="map",
@@ -358,7 +368,8 @@ def parse_regulations(ctx: Context) -> None:
                 "id": stable_id("policy_block", doc_id, order),
                 "document_id": doc_id, "ord": order, "block_type": "list",
                 "caption": None,
-                "payload": {"type": lst.get("type"), "items": lst.get("items") or []},
+                "payload": {"type": lst.get("type"),
+                            "items": lst.get("items") or []},
             })
             order += 1
 
