@@ -30,7 +30,7 @@ from sqlalchemy import create_engine, select
 
 from src.backend.config import get_settings
 from src.backend.services.data_loader import _chunk_text
-from src.data_postgre.db import Base
+from src.data_postgre.db import CORE_TABLES
 
 
 # ---------------------------------------------------------------------------
@@ -172,7 +172,7 @@ def _build_indexes(all_rows: dict[str, list[dict[str, Any]]]):
     source_urls: dict[str, str] = {}
 
     for table_name, rows in all_rows.items():
-        table = Base.metadata.tables[table_name]
+        table = CORE_TABLES[table_name]
         pk_columns = list(table.primary_key.columns)
 
         # Single-column PK tables are enough for normal FK resolution.
@@ -372,7 +372,7 @@ def load_postgres_documents(entity_types: Iterable[str] | None = None) -> list[d
 
     available_tables = {
         name
-        for name in Base.metadata.tables
+        for name in CORE_TABLES
         if name not in EXCLUDED_TABLES
     }
 
@@ -398,14 +398,14 @@ def load_postgres_documents(entity_types: Iterable[str] | None = None) -> list[d
         # Load all included tables first so FK labels can be resolved both ways.
         all_rows: dict[str, list[dict[str, Any]]] = {}
         for table_name in sorted(requested):
-            table = Base.metadata.tables[table_name]
+            table = CORE_TABLES[table_name]
             all_rows[table_name] = _get_rows(connection, table)
 
         # Reference targets may sit outside a limited --types request.
         # Load lightweight rows for ALL knowledge tables for label resolution.
         reference_rows = dict(all_rows)
         for table_name in sorted(available_tables - set(reference_rows)):
-            table = Base.metadata.tables[table_name]
+            table = CORE_TABLES[table_name]
             reference_rows[table_name] = _get_rows(connection, table)
 
         labels, source_urls = _build_indexes(reference_rows)
@@ -414,7 +414,7 @@ def load_postgres_documents(entity_types: Iterable[str] | None = None) -> list[d
         coverage_errors: list[str] = []
 
         for table_name in sorted(requested):
-            table = Base.metadata.tables[table_name]
+            table = CORE_TABLES[table_name]
             rows = all_rows[table_name]
             table_docs: list[dict[str, Any]] = []
 

@@ -14,14 +14,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     normalize_language,
     parse_int,
     parse_iso_date,
     stable_id,
 )
-from src.normalize.context import BRANDS, Context
-from src.normalize.text import clean_text
+from src.data_postgre.normalize.context import BRANDS, Context
+from src.data_postgre.normalize.text import clean_text
 
 GLOB = "data/promotion/*.json"
 
@@ -46,6 +46,7 @@ TERM_FIELDS = {
     "terms_and_conditions": "term",
     "combination_rules": "combination",
     "contact_information": "contact",
+    "redemption_steps": "step",
 }
 
 
@@ -111,6 +112,7 @@ def _one(ctx: Context, pid: str, promo: dict[str, Any], dests: set[str]) -> None
         "crawl_method": clean_text(promo.get("crawl_method")),
         "published_at": promo.get("published_at"),
         "source_updated_at": promo.get("updated_at"),
+        "tags": build_tags(promo),
         "source_id": source_id,
     }
     for prefix, source_key in PERIODS.items():
@@ -122,7 +124,6 @@ def _one(ctx: Context, pid: str, promo: dict[str, Any], dests: set[str]) -> None
 
     _destinations(ctx, pid, dests)
     _benefits(ctx, pid, promo)
-    _tags(ctx, pid, promo)
     _codes(ctx, pid, promo)
     _sections(ctx, pid, promo)
     _blocks(ctx, pid, promo)
@@ -183,14 +184,21 @@ def _benefits(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
         })
 
 
-def _tags(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
+def build_tags(promo: dict[str, Any]) -> dict[str, list[str]] | None:
+    """Gộp 5 chiều phân loại thành một JSONB {chiều: [giá trị]}.
+
+    Khoá chỉ lấy từ TAG_FIELDS — đây là chốt chặn thay cho CHECK constraint đã
+    mất khi bảng promotion_tag gộp vào cột. Chiều nào rỗng thì không có khoá,
+    để ``tags ? 'member_tier'`` phân biệt được "không có" với "rỗng".
+    """
+    tags: dict[str, list[str]] = {}
     for field_name, tag_type in TAG_FIELDS.items():
-        for value in promo.get(field_name) or []:
-            text = clean_text(value)
-            if text:
-                ctx.rows.add("promotion_tag", {
-                    "promotion_id": pid, "tag_type": tag_type, "tag_value": text,
-                })
+        values = [
+            v for v in (clean_text(x) for x in promo.get(field_name) or []) if v
+        ]
+        if values:
+            tags.setdefault(tag_type, []).extend(values)
+    return {k: list(dict.fromkeys(v)) for k, v in tags.items()} or None
 
 
 def _codes(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
@@ -225,50 +233,45 @@ def _sections(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
 
 def _blocks(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
     order = 0
-    for table in promo.get("tables") or []:
+    def block(block_type: str, ord_: int, **kw) -> None:
         ctx.rows.add("promotion_block", {
-            "id": stable_id("promotion_block", pid, order),
-            "promotion_id": pid, "ord": order, "block_type": "table",
-            "caption": clean_text(table.get("caption")),
-            "payload": {"rows": table.get("rows") or []},
+            "id": stable_id("promotion_block", pid, ord_),
+            "promotion_id": pid, "ord": ord_, "block_type": block_type, **kw,
         })
+
+    for table in promo.get("tables") or []:
+        block("table", order, caption=clean_text(table.get("caption")),
+              payload={"headers": table.get("headers") or [],
+                       "rows": table.get("rows") or []})
         order += 1
     for bullet in promo.get("bullet_lists") or []:
-        ctx.rows.add("promotion_block", {
-            "id": stable_id("promotion_block", pid, order),
-            "promotion_id": pid, "ord": order, "block_type": "bullet_list",
-            "caption": None,
-            "payload": {"type": bullet.get("type"), "items": bullet.get("items") or []},
-        })
+        # 'list' chứ không phải 'bullet_list' như bản đầu: cùng từ vựng với
+        # policy_block để hai bảng đọc như nhau dù không gộp.
+        block("list", order, caption=None,
+              payload={"type": bullet.get("type"),
+                       "items": bullet.get("items") or []})
         order += 1
     for heading in promo.get("headings") or []:
-        ctx.rows.add("promotion_block", {
-            "id": stable_id("promotion_block", pid, order),
-            "promotion_id": pid, "ord": order, "block_type": "heading",
-            "caption": None,
-            "payload": {"level": heading.get("level"), "text": heading.get("text")},
-        })
+        block("heading", order, caption=None,
+              payload={"level": heading.get("level"),
+                       "text": heading.get("text")})
         order += 1
 
 
 def _steps_and_terms(ctx: Context, pid: str, promo: dict[str, Any]) -> None:
-    for order, step in enumerate(promo.get("redemption_steps") or []):
-        text = clean_text(step)
-        if text:
-            ctx.rows.add("promotion_step", {
-                "id": stable_id("promotion_step", pid, order),
-                "promotion_id": pid, "ord": order, "text": text,
-            })
-    order = 0
+    """Bốn mảng văn bản có thứ tự, cùng vào promotion_term.
+
+    ``ord`` đếm riêng trong từng ``kind`` — "bước 3 của quy trình đổi thưởng"
+    độc lập với "điều khoản thứ 3".
+    """
     for field_name, kind in TERM_FIELDS.items():
-        for value in promo.get(field_name) or []:
+        for order, value in enumerate(promo.get(field_name) or []):
             text = clean_text(value)
             if text:
                 ctx.rows.add("promotion_term", {
-                    "id": stable_id("promotion_term", pid, order),
+                    "id": stable_id("promotion_term", pid, kind, order),
                     "promotion_id": pid, "kind": kind, "ord": order, "text": text,
                 })
-                order += 1
 
 
 def _relations(ctx: Context, pid: str, promo: dict[str, Any]) -> None:

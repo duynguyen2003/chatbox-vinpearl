@@ -20,9 +20,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.normalize.common import normalize_language, parse_int, stable_id
-from src.normalize.context import Context
-from src.normalize.text import clean_text
+from src.data_postgre.normalize.common import normalize_language, parse_int, stable_id
+from src.data_postgre.normalize.context import Context
+from src.data_postgre.normalize.text import clean_text
 
 GLOB = "data/entertainment/*.json"
 
@@ -306,23 +306,26 @@ class _Scope:
         if not isinstance(journey, dict):
             return
         duration = journey.get("duration") or {}
-        self.ctx.rows.add("attraction", {
-            "id": attraction_id,
-            "duration_days": parse_int(duration.get("days")),
-            "duration_nights": parse_int(duration.get("nights")),
-            "duration_label": clean_text(duration.get("label")),
-        })
+
+        # Lich trinh theo ngay di thang vao cot JSONB attraction.itinerary.
+        # Khong tach bang con: chi 7 ngay thuoc 3 hanh trinh, va khong ai truy
+        # van rieng mot ngay — ban than activities cung la van ban tuong thuat.
+        days: list[dict[str, Any]] = []
         for day in journey.get("itinerary") or []:
             number = parse_int(day.get("day_number"))
             if number is None:
                 continue
-            # activities de JSONB: van ban tuong thuat theo gio, khong ai truy van
-            # rieng mot hoat dong, va ban goc con co dong lap.
-            self.ctx.rows.add("attraction_itinerary_day", {
-                "id": stable_id("attraction_itinerary_day", attraction_id, number),
-                "attraction_id": attraction_id,
+            days.append({
                 "day_number": number,
                 "heading": clean_text(day.get("heading")),
                 "text": clean_text(day.get("text")),
                 "activities": day.get("activities") or None,
             })
+
+        self.ctx.rows.add("attraction", {
+            "id": attraction_id,
+            "duration_days": parse_int(duration.get("days")),
+            "duration_nights": parse_int(duration.get("nights")),
+            "duration_label": clean_text(duration.get("label")),
+            "itinerary": days or None,
+        })

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from src.data_postgre.db import Base
+from src.data_postgre.db import CORE_TABLES
 from src.data_postgre.normalize.common import domain_of, html_filename, language_from_url, stable_id
 from src.data_postgre.normalize.text import clean_text, normalize_alias
 
@@ -52,7 +52,7 @@ class Rows:
     def _pk(self, table: str) -> list[str]:
         if table not in self._pk_cache:
             self._pk_cache[table] = [
-                c.name for c in Base.metadata.tables[table].primary_key.columns
+                c.name for c in CORE_TABLES[table].primary_key.columns
             ]
         return self._pk_cache[table]
 

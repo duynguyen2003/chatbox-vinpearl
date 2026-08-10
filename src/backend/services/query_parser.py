@@ -61,24 +61,25 @@ INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
 
 INTENT_ENTITY_TYPES: dict[str, set[str]] = {
     "hotel": {
-        "property", "room", "room_amenity", "amenity",
+        "property", "room", "amenity", "dining_service",
         "destination", "destination_highlight", "complex",
     },
     "service": {
-        "property", "room", "room_amenity", "amenity", "dining_service",
-        "destination_highlight", "attraction", "complex",
+        "property", "room", "amenity", "dining_service",
+        "destination_highlight", "golf_feature", "mice_venue", "mice_room",
+        "attraction", "complex",
     },
     "dining": {"dining_service", "property", "amenity"},
     "promotion": {
         "promotion", "promotion_benefit", "promotion_block", "promotion_code",
         "promotion_destination", "promotion_property_raw", "promotion_relation",
-        "promotion_section", "promotion_step", "promotion_tag", "promotion_term",
+        "promotion_section", "promotion_term",
     },
     "attraction": {
-        "attraction", "attraction_itinerary_day", "destination_highlight", "complex",
+        "attraction", "destination_highlight", "complex",
     },
     "event": {"attraction", "destination_highlight", "complex"},
-    "golf": {"golf_course", "golf_course_map", "golf_feature"},
+    "golf": {"golf_course", "golf_feature"},
     "mice": {"mice_venue", "mice_room", "mice_room_capacity"},
     "policy": {"policy_document", "policy_section", "policy_block", "faq"},
     "payment": {"policy_document", "policy_section", "policy_block", "faq"},
@@ -117,7 +118,7 @@ def load_destination_catalog() -> dict[str, dict[str, Any]]:
     try:
         with engine.connect() as conn:
             rows = conn.execute(
-                text("SELECT id, name_en, name_vi, province FROM destination")
+                text("SELECT id, name_en, name_vi, province FROM core.destination")
             ).mappings()
             for row in rows:
                 destination_id = str(row["id"])
@@ -135,7 +136,7 @@ def load_destination_catalog() -> dict[str, dict[str, Any]]:
                 }
 
             alias_rows = conn.execute(
-                text("SELECT destination_id, alias, alias_normalized FROM destination_alias")
+                text("SELECT destination_id, alias, alias_normalized FROM core.destination_alias")
             ).mappings()
             for row in alias_rows:
                 destination_id = str(row["destination_id"])

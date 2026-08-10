@@ -27,10 +27,15 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.data_postgre.db.base import Base, Sourced, Timestamped
+
+# none_as_null: Python None phải thành SQL NULL, không phải JSON 'null'.
+# Mặc định của SQLAlchemy biến None thành JSON null (một scalar), khiến
+# jsonb_array_length() báo 'cannot get array length of a scalar'.
+JSONB_NULL = JSONB(none_as_null=True)
 
 # --------------------------------------------------------------------------
 # Vận hành
@@ -47,7 +52,7 @@ class IngestRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(Text, nullable=False)
     git_sha: Mapped[str | None] = mapped_column(Text)
-    stats: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    stats: Mapped[dict[str, Any] | None] = mapped_column(JSONB_NULL)
     notes: Mapped[str | None] = mapped_column(Text)
 
     __table_args__ = (
@@ -361,10 +366,18 @@ class Room(Base, Sourced):
         Boolean, server_default=text("false"), nullable=False
     )
 
-    bed_types: Mapped[list[str] | None] = mapped_column(JSONB)
+    bed_types: Mapped[list[str] | None] = mapped_column(JSONB_NULL)
     has_wifi: Mapped[bool | None] = mapped_column(Boolean)
     image_url: Mapped[str | None] = mapped_column(Text)
     page_url: Mapped[str | None] = mapped_column(Text)
+
+    # Thay bảng nối room_amenity (1.796 dòng thuần hai cột khoá).
+    #
+    # Postgres KHÔNG có khoá ngoại cho phần tử mảng, nên giá trị ở đây không được
+    # database bảo đảm là có thật trong ``amenity``. Bù lại bằng hai chốt chặn:
+    # adapter chỉ ghi id do chính nó vừa tạo trong ``amenity``, và
+    # tests/test_loaded_data.py kiểm tra không có id mồ côi.
+    amenity_ids: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
 
     __table_args__ = (
         UniqueConstraint("property_id", "room_index", name="uq_room_property_index"),
@@ -376,11 +389,17 @@ class Room(Base, Sourced):
             "price_from_amount",
             postgresql_where=text("price_from_amount IS NOT NULL"),
         ),
+        # GIN cho 'phòng nào có bồn tắm': WHERE amenity_ids @> ARRAY['bathtub']
+        Index("ix_room_amenity_ids", "amenity_ids", postgresql_using="gin"),
     )
 
 
 class Amenity(Base, Timestamped):
-    """~50 giá trị khác nhau cho 1.796 lần xuất hiện — lặp 36 lần mỗi giá trị."""
+    """Từ điển tiện nghi: ~50 giá trị cho 1.796 lần xuất hiện — lặp 36 lần mỗi giá trị.
+
+    Giữ lại làm từ vựng chuẩn (name_en/name_vi/category) sau khi bảng nối
+    ``room_amenity`` đã gộp vào ``room.amenity_ids``.
+    """
 
     __tablename__ = "amenity"
 
@@ -395,17 +414,6 @@ class Amenity(Base, Timestamped):
             "('bathroom','tech','comfort','service','other')",
             name="category_valid",
         ),
-    )
-
-
-class RoomAmenity(Base):
-    __tablename__ = "room_amenity"
-
-    room_id: Mapped[str] = mapped_column(
-        ForeignKey("room.id", ondelete="CASCADE"), primary_key=True
-    )
-    amenity_id: Mapped[str] = mapped_column(
-        ForeignKey("amenity.id", ondelete="CASCADE"), primary_key=True
     )
 
 
@@ -468,6 +476,11 @@ class Attraction(Base, Sourced):
     duration_days: Mapped[int | None] = mapped_column(Integer)
     duration_nights: Mapped[int | None] = mapped_column(Integer)
     duration_label: Mapped[str | None] = mapped_column(Text)
+    # Hành trình theo ngày, chỉ có ở kind='journey' — 3 topic, tổng 7 ngày.
+    # Để JSONB chứ không tách bảng con: không ai truy vấn riêng một ngày, và
+    # activities bên trong vốn đã là văn bản tường thuật theo giờ.
+    # Dạng: [{"day_number": 1, "heading": ..., "text": ..., "activities": [...]}]
+    itinerary: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB_NULL)
     sort_order: Mapped[int | None] = mapped_column(Integer)
 
     __table_args__ = (
@@ -506,29 +519,6 @@ class DestinationHighlight(Base, Sourced):
     sort_order: Mapped[int | None] = mapped_column(Integer)
 
 
-class AttractionItineraryDay(Base, Timestamped):
-    """7 ngày hành trình từ 3 topic có journey_data.
-
-    ``activities`` để JSONB chứ không phải bảng con: văn bản tường thuật theo giờ,
-    không ai truy vấn riêng một hoạt động, và bản gốc còn có dòng lặp.
-    """
-
-    __tablename__ = "attraction_itinerary_day"
-
-    id: Mapped[str] = mapped_column(Text, primary_key=True)
-    attraction_id: Mapped[str] = mapped_column(
-        ForeignKey("attraction.id", ondelete="CASCADE"), nullable=False
-    )
-    day_number: Mapped[int] = mapped_column(Integer, nullable=False)
-    heading: Mapped[str | None] = mapped_column(Text)
-    text_content: Mapped[str | None] = mapped_column("text", Text)
-    activities: Mapped[list[str] | None] = mapped_column(JSONB)
-
-    __table_args__ = (
-        UniqueConstraint("attraction_id", "day_number", name="uq_itinerary_day"),
-    )
-
-
 # --------------------------------------------------------------------------
 # Golf & MICE
 # --------------------------------------------------------------------------
@@ -558,7 +548,13 @@ class GolfCourse(Base, Sourced):
 
 
 class GolfFeature(Base, Sourced):
-    """Gộp 4 mảng cùng hình dạng {title, description}."""
+    """Gộp 5 nguồn cùng hình dạng {tiêu đề, mô tả} của một sân golf.
+
+    Bốn mảng trong ``golf_courses[]`` — ``amenities``, ``experiences``,
+    ``distinctive_features``, ``awards_and_recognitions`` — cộng
+    ``golf_course_maps[]``. Cả năm đều là 1–N của cùng một sân và cùng bộ cột,
+    nên tách năm bảng chỉ thêm JOIN chứ không thêm thông tin.
+    """
 
     __tablename__ = "golf_feature"
 
@@ -571,25 +567,16 @@ class GolfFeature(Base, Sourced):
     description: Mapped[str | None] = mapped_column(Text)
     image_url: Mapped[str | None] = mapped_column(Text)
     detail_url: Mapped[str | None] = mapped_column(Text)
+    # Chỉ dùng cho kind='map': sân Hải Phòng có Marsh Course và Lake Course riêng.
+    variant: Mapped[str | None] = mapped_column(Text)
     sort_order: Mapped[int | None] = mapped_column(Integer)
 
     __table_args__ = (
         CheckConstraint(
-            "kind IN ('feature','award','amenity','experience')", name="kind_valid"
+            "kind IN ('feature','award','amenity','experience','map')",
+            name="kind_valid",
         ),
     )
-
-
-class GolfCourseMap(Base, Sourced):
-    __tablename__ = "golf_course_map"
-
-    id: Mapped[str] = mapped_column(Text, primary_key=True)
-    course_id: Mapped[str] = mapped_column(
-        ForeignKey("golf_course.id", ondelete="CASCADE"), nullable=False
-    )
-    course_type: Mapped[str | None] = mapped_column(Text)
-    map_name: Mapped[str | None] = mapped_column(Text)
-    map_url: Mapped[str | None] = mapped_column(Text)
 
 
 class MiceVenue(Base, Sourced):
@@ -630,7 +617,7 @@ class MiceRoom(Base, Sourced):
     length_m: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     width_m: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     ceiling_height_m: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-    specifications_raw: Mapped[list[str] | None] = mapped_column(JSONB)
+    specifications_raw: Mapped[list[str] | None] = mapped_column(JSONB_NULL)
     image_url: Mapped[str | None] = mapped_column(Text)
     sort_order: Mapped[int | None] = mapped_column(Integer)
 
@@ -694,7 +681,7 @@ class Promotion(Base, Sourced):
     redemption_from: Mapped[date | None] = mapped_column(Date)
     redemption_to: Mapped[date | None] = mapped_column(Date)
     redemption_raw: Mapped[str | None] = mapped_column(Text)
-    excluded_dates: Mapped[list[str] | None] = mapped_column(JSONB)
+    excluded_dates: Mapped[list[str] | None] = mapped_column(JSONB_NULL)
     recurring_schedule: Mapped[str | None] = mapped_column(Text)
     date_confidence: Mapped[str | None] = mapped_column(Text)
 
@@ -719,12 +706,22 @@ class Promotion(Base, Sourced):
     first_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # Thay bảng promotion_tag (561 dòng cho 38 ưu đãi).
+    #
+    # Hình dạng: {"member_tier": ["gold","platinum"], "service": [...], ...} — đúng
+    # 5 khoá của TAG_FIELDS. Truy vấn: WHERE tags @> '{"member_tier":["gold"]}'.
+    #
+    # Đánh đổi đã biết: JSONB không có CHECK theo khoá nên tên chiều viết sai
+    # không bị chặn. Chốt chặn nằm ở adapter (chỉ sinh từ TAG_FIELDS) và ở test.
+    tags: Mapped[dict[str, list[str]] | None] = mapped_column(JSONB_NULL)
+
     __table_args__ = (
         CheckConstraint(
             "date_confidence IS NULL OR date_confidence IN "
             "('parsed','partial','unknown')",
             name="date_confidence_valid",
         ),
+        Index("ix_promotion_tags", "tags", postgresql_using="gin"),
         CheckConstraint(
             "status_at_crawl IS NULL OR status_at_crawl IN "
             "('active','upcoming','expired','unknown')",
@@ -780,27 +777,6 @@ class PromotionDestination(Base):
     )
 
 
-class PromotionTag(Base):
-    """Gộp 5 chiều phân loại cùng hình dạng mảng chuỗi."""
-
-    __tablename__ = "promotion_tag"
-
-    promotion_id: Mapped[str] = mapped_column(
-        ForeignKey("promotion.id", ondelete="CASCADE"), primary_key=True
-    )
-    tag_type: Mapped[str] = mapped_column(Text, primary_key=True)
-    tag_value: Mapped[str] = mapped_column(Text, primary_key=True)
-
-    __table_args__ = (
-        CheckConstraint(
-            "tag_type IN ('promotion_type','service','channel','customer_group',"
-            "'member_tier')",
-            name="tag_type_valid",
-        ),
-        Index("ix_promotion_tag_type_value", "tag_type", "tag_value"),
-    )
-
-
 class PromotionCode(Base, Timestamped):
     __tablename__ = "promotion_code"
 
@@ -812,13 +788,19 @@ class PromotionCode(Base, Timestamped):
     description: Mapped[str | None] = mapped_column(Text)
     validity: Mapped[str | None] = mapped_column(Text)
     source_text: Mapped[str | None] = mapped_column(Text)
-    conditions: Mapped[list[str] | None] = mapped_column(JSONB)
+    conditions: Mapped[list[str] | None] = mapped_column(JSONB_NULL)
     is_suspect: Mapped[bool] = mapped_column(
         Boolean, server_default=text("false"), nullable=False
     )
 
 
 class PromotionSection(Base, Timestamped):
+    """164 mục nội dung của trang ưu đãi.
+
+    Giống ``policy_section`` trừ cột ``level``. Để riêng chứ không gộp — lý do
+    ghi ở docstring của ``PolicySection``.
+    """
+
     __tablename__ = "promotion_section"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -836,6 +818,12 @@ class PromotionSection(Base, Timestamped):
 
 
 class PromotionBlock(Base, Timestamped):
+    """507 khối: bảng biểu, danh sách, tiêu đề.
+
+    ``block_type`` dùng 'list' chứ không phải 'bullet_list' như bản đầu — cùng
+    một từ vựng với ``policy_block`` để hai bên đọc như nhau.
+    """
+
     __tablename__ = "promotion_block"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -845,33 +833,24 @@ class PromotionBlock(Base, Timestamped):
     ord: Mapped[int] = mapped_column(Integer, nullable=False)
     block_type: Mapped[str] = mapped_column(Text, nullable=False)
     caption: Mapped[str | None] = mapped_column(Text)
-    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB_NULL)
 
     __table_args__ = (
+        UniqueConstraint("promotion_id", "ord", name="uq_promotion_block_ord"),
         CheckConstraint(
-            "block_type IN ('table','bullet_list','heading')", name="block_type_valid"
+            "block_type IN ('table','list','heading')", name="block_type_valid"
         ),
     )
 
 
-class PromotionStep(Base, Timestamped):
-    """74 bước đổi thưởng. Cột ord bắt buộc: SQL không giữ thứ tự mảng."""
-
-    __tablename__ = "promotion_step"
-
-    id: Mapped[str] = mapped_column(Text, primary_key=True)
-    promotion_id: Mapped[str] = mapped_column(
-        ForeignKey("promotion.id", ondelete="CASCADE"), nullable=False
-    )
-    ord: Mapped[int] = mapped_column(Integer, nullable=False)
-    text_content: Mapped[str] = mapped_column("text", Text, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint("promotion_id", "ord", name="uq_promotion_step_ord"),
-    )
-
-
 class PromotionTerm(Base, Timestamped):
+    """Gộp 4 mảng văn bản có thứ tự của một ưu đãi.
+
+    ``terms_and_conditions``, ``combination_rules``, ``contact_information`` và
+    ``redemption_steps`` — cùng hình dạng ``(ord, text)``, cùng cha, cùng lực
+    lượng 1–N. Cột ``ord`` bắt buộc vì SQL không giữ thứ tự mảng.
+    """
+
     __tablename__ = "promotion_term"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -884,8 +863,11 @@ class PromotionTerm(Base, Timestamped):
 
     __table_args__ = (
         CheckConstraint(
-            "kind IN ('term','combination','contact')", name="kind_valid"
+            "kind IN ('term','combination','contact','step')", name="kind_valid"
         ),
+        # ord đếm riêng trong từng kind: "bước 3 của quy trình đổi thưởng" độc
+        # lập với "điều khoản thứ 3".
+        UniqueConstraint("promotion_id", "kind", "ord", name="uq_promotion_term_ord"),
     )
 
 
@@ -968,6 +950,16 @@ class PolicyDocument(Base, Sourced):
 
 
 class PolicySection(Base, Timestamped):
+    """36 mục có tiêu đề trong 7 văn bản.
+
+    Cùng hình dạng với ``promotion_section`` nhưng CỐ Ý để riêng. Đã thử gộp hai
+    cặp *_section/*_block thành bảng đa hình khoá theo (entity_type, entity_id):
+    tiết kiệm 2 bảng, nhưng mất 2 khoá ngoại thật, mất ON DELETE CASCADE, và
+    DataGrip không vẽ được đường nối nên bảng treo lơ lửng không rõ thuộc về ai.
+    Đa hình chỉ đáng khi có nhiều loại chủ sở hữu — ``media`` có 8 nên hợp lý,
+    chỗ này chỉ có 2 nên không.
+    """
+
     __tablename__ = "policy_section"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -984,6 +976,8 @@ class PolicySection(Base, Timestamped):
 
 
 class PolicyBlock(Base, Timestamped):
+    """15 bảng biểu và danh sách trong văn bản quy định."""
+
     __tablename__ = "policy_block"
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -993,11 +987,17 @@ class PolicyBlock(Base, Timestamped):
     ord: Mapped[int] = mapped_column(Integer, nullable=False)
     block_type: Mapped[str] = mapped_column(Text, nullable=False)
     caption: Mapped[str | None] = mapped_column(Text)
-    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB_NULL)
 
     __table_args__ = (
+        UniqueConstraint("document_id", "ord", name="uq_policy_block_ord"),
         CheckConstraint("block_type IN ('table','list')", name="block_type_valid"),
     )
+
+
+# --------------------------------------------------------------------------
+# Doanh nghiệp
+# --------------------------------------------------------------------------
 
 
 class OrgInfo(Base, Sourced):
