@@ -10,6 +10,8 @@ from sqlalchemy import create_engine, text
 from src.backend.config import get_settings
 
 
+# Keep intents semantic and non-overlapping where practical. Generic "event/su kien"
+# is treated as leisure/event content, while conference/meeting terminology remains MICE.
 INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "hotel": (
         "hotel", "hotels", "resort", "resorts", "property", "properties",
@@ -19,8 +21,12 @@ INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     ),
     "service": (
         "service", "services", "amenity", "amenities", "facility", "facilities",
-        "dich vu", "dịch vụ", "tien ich", "tiện ích", "spa", "restaurant",
-        "restaurants", "nha hang", "nhà hàng", "bar", "pool", "ho boi", "hồ bơi",
+        "dich vu", "dịch vụ", "tien ich", "tiện ích", "spa", "pool",
+        "ho boi", "hồ bơi",
+    ),
+    "dining": (
+        "dining", "restaurant", "restaurants", "nha hang", "nhà hàng",
+        "bar", "food", "foods", "am thuc", "ẩm thực", "an uong", "ăn uống",
     ),
     "promotion": (
         "promotion", "promotions", "offer", "offers", "deal", "deals",
@@ -29,12 +35,18 @@ INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
     "attraction": (
         "attraction", "attractions", "vinwonders", "theme park", "water park",
         "khu vui choi", "khu vui chơi", "diem tham quan", "điểm tham quan",
-        "hoat dong", "hoạt động", "entertainment", "grand world", "aquafield",
+        "hoat dong", "hoạt động", "entertainment", "giai tri", "giải trí",
+        "grand world", "aquafield",
+    ),
+    "event": (
+        "event", "events", "su kien", "sự kiện", "show", "shows",
+        "festival", "festivals", "le hoi", "lễ hội", "parade",
     ),
     "golf": ("golf", "golf course", "san golf", "sân golf"),
     "mice": (
-        "mice", "meeting", "meetings", "event", "events", "conference",
-        "hoi nghi", "hội nghị", "su kien", "sự kiện", "phong hop", "phòng họp",
+        "mice", "meeting", "meetings", "conference", "conferences",
+        "hoi nghi", "hội nghị", "phong hop", "phòng họp", "wedding", "weddings",
+        "tiec cuoi", "tiệc cưới",
     ),
     "policy": (
         "policy", "policies", "regulation", "regulations", "terms", "term",
@@ -57,18 +69,33 @@ INTENT_ENTITY_TYPES: dict[str, set[str]] = {
         "destination_highlight", "golf_feature", "mice_venue", "mice_room",
         "attraction", "complex",
     },
+    "dining": {"dining_service", "property", "amenity"},
     "promotion": {
-        "promotion", "promotion_benefit", "content_block", "promotion_code",
+        "promotion", "promotion_benefit", "promotion_block", "promotion_code",
         "promotion_destination", "promotion_property_raw", "promotion_relation",
-        "content_section", "promotion_term",
+        "promotion_section", "promotion_term",
     },
     "attraction": {
         "attraction", "destination_highlight", "complex",
     },
+    "event": {"attraction", "destination_highlight", "complex"},
     "golf": {"golf_course", "golf_feature"},
     "mice": {"mice_venue", "mice_room", "mice_room_capacity"},
-    "policy": {"policy_document", "content_section", "content_block", "faq"},
-    "payment": {"policy_document", "content_section", "content_block", "faq"},
+    "policy": {"policy_document", "policy_section", "policy_block", "faq"},
+    "payment": {"policy_document", "policy_section", "policy_block", "faq"},
+}
+
+INTENT_QUERY_LABELS: dict[str, str] = {
+    "hotel": "hotels resorts rooms accommodation",
+    "service": "services amenities facilities",
+    "dining": "restaurants dining food and beverage",
+    "promotion": "promotions offers deals",
+    "attraction": "attractions entertainment things to do",
+    "event": "events shows festivals entertainment",
+    "golf": "golf courses and golf services",
+    "mice": "meetings conferences weddings MICE venues",
+    "policy": "policies regulations terms",
+    "payment": "payment guidance policies",
 }
 
 
@@ -195,37 +222,96 @@ def detect_destination(*texts: str | None) -> dict[str, Any] | None:
     return destinations[0] if destinations else None
 
 
-def detect_intent(*texts: str | None) -> str | None:
-    normalized = normalize_text(" ".join(str(t or "") for t in texts))
+def _intent_matches(text_value: str | None) -> list[tuple[int, int, str]]:
+    """Return intent matches ordered by where the user mentioned them.
 
-    best_intent: str | None = None
-    best_score = 0
+    Tuple = (first_position, -specificity_score, intent). This keeps multi-clause
+    questions in roughly the same order as the user's wording.
+    """
+    normalized = normalize_text(text_value)
+    if not normalized:
+        return []
+
+    found: list[tuple[int, int, str]] = []
     for intent, keywords in INTENT_KEYWORDS.items():
-        score = 0
+        positions: list[int] = []
+        specificity = 0
         for keyword in keywords:
-            normalized_keyword = normalize_text(keyword)
-            if normalized_keyword and _contains_phrase(normalized, normalized_keyword):
-                score += max(1, len(normalized_keyword.split()))
-        if score > best_score:
-            best_intent = intent
-            best_score = score
+            nk = normalize_text(keyword)
+            if not nk:
+                continue
+            pattern = re.compile(rf"(?:^|\s)({re.escape(nk)})(?:$|\s)")
+            match = pattern.search(normalized)
+            if match:
+                positions.append(match.start(1))
+                specificity += max(1, len(nk.split()))
+        if positions:
+            found.append((min(positions), -specificity, intent))
+    found.sort(key=lambda item: (item[0], item[1], item[2]))
+    return found
 
-    return best_intent
+
+def detect_intents(*texts: str | None, max_intents: int = 8) -> list[str]:
+    """Detect every distinct intent instead of collapsing a multi-clause query to one.
+
+    Current user wording should be passed first. Callers can fall back to a rewritten
+    RAG query only when the current message has no explicit intent.
+    """
+    output: list[str] = []
+    seen: set[str] = set()
+    for text_value in texts:
+        for _, _, intent in _intent_matches(text_value):
+            if intent in seen:
+                continue
+            seen.add(intent)
+            output.append(intent)
+            if len(output) >= max_intents:
+                return output
+    return output
+
+
+def detect_intent(*texts: str | None) -> str | None:
+    intents = detect_intents(*texts, max_intents=1)
+    return intents[0] if intents else None
+
+
+def build_intent_query(
+    intent: str,
+    destinations: list[dict[str, Any]],
+    fallback_query: str,
+) -> str:
+    """Create a focused semantic query for one intent in a multi-intent turn."""
+    destination_names = [
+        str(item.get("name_en") or item.get("name_vi") or item.get("id") or "").strip()
+        for item in destinations
+    ]
+    destination_part = " ".join(name for name in destination_names if name)
+    intent_part = INTENT_QUERY_LABELS.get(intent, intent)
+    if destination_part:
+        return f"Vinpearl VinWonders {destination_part} {intent_part}".strip()
+    return f"{fallback_query} {intent_part}".strip()
 
 
 def parse_retrieval_query(user_message: str, rag_query: str) -> dict[str, Any]:
-    # The LLM-created RAG query is the canonical target. This matters for complaint
-    # turns such as "why are your links all Phu Quoc?" while the active topic is Hanoi.
-    # In that case Phu Quoc appears in the raw message as the WRONG destination and
-    # must not override the standalone retrieval query.
+    # The LLM-created RAG query remains the canonical destination target because it
+    # resolves references/complaints from memory. Current-message intents, however,
+    # must take priority so an earlier topic cannot leak into a new turn.
     destinations = detect_destinations(rag_query)
     if not destinations:
         destinations = detect_destinations(user_message)
 
-    intent = detect_intent(rag_query, user_message)
+    intents = detect_intents(user_message)
+    if not intents:
+        intents = detect_intents(rag_query)
+
+    primary_intent = intents[0] if intents else None
     return {
         "destination": destinations[0] if destinations else None,
         "destinations": destinations,
-        "intent": intent,
-        "preferred_entity_types": sorted(INTENT_ENTITY_TYPES.get(intent or "", set())),
+        "intent": primary_intent,  # backward-compatible field
+        "intents": intents,
+        "preferred_entity_types": sorted(INTENT_ENTITY_TYPES.get(primary_intent or "", set())),
+        "preferred_entity_types_by_intent": {
+            intent: sorted(INTENT_ENTITY_TYPES.get(intent, set())) for intent in intents
+        },
     }

@@ -1,39 +1,61 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  fetchCurrentUser,
+  loginAccount,
+  logoutAccount,
+  registerAccount,
+} from '../services/api';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    id: 'u-1',
-    name: 'Victoria Tran',
-    email: 'victoria@vintravel.com',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email, name) => {
-    setUser({
-      id: `u-${Date.now()}`,
-      name: name || email.split('@')[0],
-      email,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
-    });
+  useEffect(() => {
+    let active = true;
+    fetchCurrentUser()
+      .then((current) => {
+        if (active) setUser(current);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const login = async (identifier, password) => {
+    const authenticated = await loginAccount(identifier, password);
+    setUser(authenticated);
+    return authenticated;
   };
 
-  const logout = () => {
+  const register = async (data) => {
+    const authenticated = await registerAccount(data);
+    setUser(authenticated);
+    return authenticated;
+  };
+
+  const logout = async () => {
+    await logoutAccount();
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = useMemo(() => ({
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    isStaff: user?.role === 'staff' || user?.role === 'admin',
+    isAdmin: user?.role === 'admin',
+  }), [user, loading]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };

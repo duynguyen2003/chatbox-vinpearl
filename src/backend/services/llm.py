@@ -22,6 +22,7 @@ class LLMService:
 
         self.model = settings.llm_model
         self.api_key = settings.llm_api_key
+        self.api_key_backup = settings.llm_api_key_backup
         self.base_url = settings.llm_base_url
 
         self.temperature = settings.llm_temperature
@@ -36,80 +37,101 @@ class LLMService:
     ) -> str:
         last_error: Exception | None = None
 
-        for attempt in range(
-            1,
-            self.max_retries + 1,
+        api_keys = [
+            key
+            for key in [
+                self.api_key,
+                self.api_key_backup,
+            ]
+            if key
+        ]
+
+        if not api_keys:
+            raise RuntimeError(
+                "No LLM API key configured."
+            )
+
+        for key_index, api_key in enumerate(
+            api_keys,
+            start=1,
         ):
-            try:
-                kwargs: dict[str, Any] = {
-                    "model": self.model,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": system_prompt,
-                        },
-                        {
-                            "role": "user",
-                            "content": user_prompt,
-                        },
-                    ],
-                    "temperature": self.temperature,
-                    "max_tokens": self.max_tokens,
-                    "timeout": self.timeout,
-                }
+            for attempt in range(
+                1,
+                self.max_retries + 1,
+            ):
+                try:
+                    kwargs: dict[str, Any] = {
+                        "model": self.model,
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": system_prompt,
+                            },
+                            {
+                                "role": "user",
+                                "content": user_prompt,
+                            },
+                        ],
+                        "temperature": self.temperature,
+                        "max_tokens": self.max_tokens,
+                        "timeout": self.timeout,
+                        "api_key": api_key,
+                    }
 
-                if self.api_key:
-                    kwargs["api_key"] = self.api_key
+                    if self.base_url:
+                        kwargs["api_base"] = self.base_url
 
-                if self.base_url:
-                    kwargs["api_base"] = self.base_url
+                    response = completion(**kwargs)
 
-                response = completion(**kwargs)
-
-                content = (
-                    response.choices[0]
-                    .message
-                    .content
-                )
-
-                if not content:
-                    raise ValueError(
-                        "LLM returned an empty response."
+                    content = (
+                        response.choices[0]
+                        .message
+                        .content
                     )
 
-                return content.strip()
+                    if not content:
+                        raise ValueError(
+                            "LLM returned an empty response."
+                        )
 
-            except (
-                RateLimitError,
-                ServiceUnavailableError,
-                APIConnectionError,
-                Timeout,
-                APIError,
-            ) as exc:
-                last_error = exc
+                    return content.strip()
 
-                if attempt == self.max_retries:
-                    break
+                except (
+                    RateLimitError,
+                    ServiceUnavailableError,
+                    APIConnectionError,
+                    Timeout,
+                    APIError,
+                ) as exc:
+                    last_error = exc
 
-                wait_seconds = min(
-                    30.0,
-                    (2 ** attempt)
-                    + random.uniform(0, 1),
-                )
+                    print(
+                        f"Gemini key {key_index} "
+                        f"failed: "
+                        f"{type(exc).__name__} "
+                        f"({attempt}/"
+                        f"{self.max_retries})"
+                    )
 
+                    if attempt == self.max_retries:
+                        break
+
+                    wait_seconds = min(
+                        5.0,
+                        (2 ** attempt)
+                        + random.uniform(0, 1),
+                    )
+
+                    time.sleep(wait_seconds)
+
+            if key_index < len(api_keys):
                 print(
-                    f"LLM request failed: "
-                    f"{type(exc).__name__}. "
-                    f"Retry after "
-                    f"{wait_seconds:.1f}s "
-                    f"({attempt}/"
-                    f"{self.max_retries})"
+                    "Switching to backup "
+                    "Gemini API key..."
                 )
-
-                time.sleep(wait_seconds)
 
         raise RuntimeError(
-            "LLM request failed after retries."
+            "All Gemini API keys failed."
         ) from last_error
 
     def json(

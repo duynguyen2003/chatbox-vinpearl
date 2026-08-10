@@ -12,6 +12,9 @@ import Register from '../pages/Register'
 import SearchResults from '../pages/SearchResults'
 import Ticket from '../pages/Ticket'
 import Regulations from '../pages/Regulations'
+import StaffTickets from '../pages/StaffTickets'
+import AdminStaff from '../pages/AdminStaff'
+import { useAuth } from '../context/AuthContext'
 import '../styles/routes/AppRoutes.css'
 
 function AppLayout({ children }) {
@@ -23,6 +26,15 @@ function AppLayout({ children }) {
       <ChatWidget />
     </div>
   )
+}
+
+
+function RequireRole({ roles, children }) {
+  const { user, loading } = useAuth()
+  if (loading) return <div style={{ padding: 40 }}>Đang kiểm tra đăng nhập...</div>
+  if (!user) return <Navigate to="/login" replace state={{ from: window.location.pathname }} />
+  if (!roles.includes(user.role)) return <Navigate to="/" replace />
+  return children
 }
 
 function AppRoutes() {
@@ -39,6 +51,8 @@ function AppRoutes() {
       <Route path="/support" element={<AppLayout><Ticket /></AppLayout>} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/staff/tickets" element={<AppLayout><RequireRole roles={['staff', 'admin']}><StaffTickets /></RequireRole></AppLayout>} />
+      <Route path="/admin/staff" element={<AppLayout><RequireRole roles={['admin']}><AdminStaff /></RequireRole></AppLayout>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

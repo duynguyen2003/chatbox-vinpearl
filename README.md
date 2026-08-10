@@ -51,3 +51,21 @@ npm run dev
 ```
 
 
+# User đầu (admin)
+```powershell
+$body = @{
+  name = "P013 Admin"
+  email = "admin@example.com"
+  phone = $null
+  password = "ChangeThisPassword123!"
+  locale = "vi"
+  bootstrap_key = "lay trong env ra"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8000/api/v1/auth/bootstrap-admin" `
+  -ContentType "application/json" `
+  -Body $body
+```
+# web admin /admin/staff

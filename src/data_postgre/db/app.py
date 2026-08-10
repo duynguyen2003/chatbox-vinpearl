@@ -56,8 +56,11 @@ class AppUser(Base, Timestamped):
     )
     anon_id: Mapped[str | None] = mapped_column(Text, unique=True)
     email: Mapped[str | None] = mapped_column(Text, unique=True)
+    phone: Mapped[str | None] = mapped_column(Text, unique=True)
     password_hash: Mapped[str | None] = mapped_column(Text)
     display_name: Mapped[str | None] = mapped_column(Text)
+    role: Mapped[str] = mapped_column(Text, server_default=text("'customer'"), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"), nullable=False)
     locale: Mapped[str] = mapped_column(
         Text, server_default=text("'vi'"), nullable=False
     )
@@ -65,6 +68,34 @@ class AppUser(Base, Timestamped):
         Boolean, server_default=text("false"), nullable=False
     )
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("role IN ('customer','staff','admin')", name="app_user_role_valid"),
+        CheckConstraint("email IS NOT NULL OR phone IS NOT NULL OR anon_id IS NOT NULL", name="app_user_contact_or_anon"),
+        Index("ix_app_user_role", "role"),
+    )
+
+
+class AuthSession(Base, Timestamped):
+    """Opaque bearer sessions. Only a SHA-256 hash of the token is stored."""
+
+    __tablename__ = "auth_session"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        Index("ix_auth_session_user", "user_id"),
+        Index("ix_auth_session_expires", "expires_at"),
+    )
 
 
 class ChatSession(Base, Timestamped):
@@ -209,7 +240,15 @@ class Ticket(Base, Timestamped):
     priority: Mapped[str | None] = mapped_column(Text)
     message: Mapped[str | None] = mapped_column(Text)
     language: Mapped[str | None] = mapped_column(Text)
+    contact_name: Mapped[str | None] = mapped_column(Text)
+    contact_email: Mapped[str | None] = mapped_column(Text)
+    contact_phone: Mapped[str | None] = mapped_column(Text)
+    subject: Mapped[str | None] = mapped_column(Text)
+    conversation_turns: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)
     assignee: Mapped[str | None] = mapped_column(Text)
+    assigned_to: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("app_user.id", ondelete="SET NULL")
+    )
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
@@ -221,6 +260,7 @@ class Ticket(Base, Timestamped):
             name="priority_valid",
         ),
         Index("ix_ticket_status", "status"),
+        Index("ix_ticket_assigned_to", "assigned_to"),
     )
 
 

@@ -3,7 +3,6 @@ from src.backend.services.llm import LLMService
 
 
 def _allowed_entities(state: AgentState) -> str:
-    """Build a small entity allow-list from retrieved metadata only."""
     names: list[str] = []
     seen: set[str] = set()
 
@@ -18,31 +17,39 @@ def _allowed_entities(state: AgentState) -> str:
     return "\n".join(f"- {name}" for name in names[:80]) or "(none)"
 
 
+def _intent_status_text(state: AgentState) -> str:
+    results = state.get("intent_results", {}) or {}
+    if not results:
+        return "(single-intent/legacy retrieval; no per-intent status)"
+    lines: list[str] = []
+    for intent, result in results.items():
+        lines.append(
+            f"- {intent}: {result.get('status', 'unknown')} "
+            f"(documents={result.get('document_count', 0)}, best_score={result.get('best_score', 0)})"
+        )
+    return "\n".join(lines)
+
+
 def generate_answer(state: AgentState) -> AgentState:
-    """Generate a factual answer using retrieved RAG context as the sole evidence source."""
+    """Generate a grounded answer; multi-intent branches may be partially available."""
     llm = LLMService()
 
     answer = llm.text(
         system_prompt=(
             "You are a strictly grounded Vinpearl/VinWonders RAG assistant. "
-            "RETRIEVED_CONTEXT is the ONLY factual source of truth for the answer. "
+            "RETRIEVED_CONTEXT is the ONLY source for positive factual claims. "
             "Do not use pretrained knowledge, general knowledge, web knowledge, assumptions, "
-            "or facts remembered from previous assistant answers. "
-            "The user's question and standalone retrieval query may be used only to understand "
-            "what is being asked; they are not factual evidence. "
-            "Every factual claim and every named attraction, hotel, venue, service, event, "
-            "promotion, price, schedule, address, phone number, policy, and URL in the final answer "
-            "must be explicitly supported by RETRIEVED_CONTEXT. "
-            "If a named entity is not present in RETRIEVED_CONTEXT, do not mention it. "
-            "Never fill gaps with your own knowledge. Never fabricate or infer a URL. "
-            "A retrieved block remains valid evidence even when its URL is empty or None; "
-            "missing URL metadata must never cause supported factual content to be omitted. "
-            "If the context is partial, answer only with the supported partial information. "
-            "If the context cannot support a useful answer, say that the current knowledge base "
-            "does not contain enough information. "
-            "For broad destination questions, cover the distinct relevant entities present in the "
-            "context before expanding on child events or details. "
-            "Reply in the user's current original language. Be clear and concise."
+            "or facts remembered from previous assistant answers. Every named entity and factual "
+            "claim must be explicitly supported by RETRIEVED_CONTEXT. Never fabricate URLs. "
+            "INTENT_RETRIEVAL_STATUS is system-generated retrieval metadata, not world knowledge. "
+            "For an intent marked found, answer that part only from RETRIEVED_CONTEXT. "
+            "For an intent marked not_found, do NOT say the service/entity does not exist in reality; "
+            "say only that the current knowledge base does not record or does not contain enough "
+            "information to confirm that requested category for the destination. "
+            "For multi-intent questions, answer EACH requested intent separately. One missing intent "
+            "must never cause you to suppress other intents that have grounded evidence. "
+            "Preserve the order of the user's requested topics when practical. Missing URL metadata "
+            "must never cause supported content to be omitted. Reply in the user's original language."
         ),
         user_prompt=f"""
 Current user question:
@@ -54,14 +61,28 @@ Standalone retrieval query:
 Detected destinations:
 {', '.join(state.get("detected_destination_names", [])) or 'none'}
 
-Entities explicitly identified in retrieved metadata (supporting hint only):
+Detected intents (in current-message order):
+{', '.join(state.get('detected_intents', [])) or state.get('detected_intent') or 'none'}
+
+REQUEST_MODE: {state.get('request_mode', 'information')}
+RESOLUTION_MODE: {state.get('resolution_mode', 'information_only')}
+
+INTENT_RETRIEVAL_STATUS:
+{_intent_status_text(state)}
+
+Entities explicitly identified in retrieved metadata:
 {_allowed_entities(state)}
 
-RETRIEVED_CONTEXT — the sole factual source of truth:
+RETRIEVED_CONTEXT — sole evidence for positive factual claims:
 {state.get("context", "")}
 
-Important: do not use previous assistant answers as evidence. If something is not supported by
-RETRIEVED_CONTEXT, omit it.
+Rules for this answer:
+- Cover every requested intent.
+- found => answer from context.
+- not_found => state only that the CURRENT KNOWLEDGE BASE lacks enough evidence for that intent.
+- Never turn not_found into a real-world non-existence claim.
+- Never use previous assistant answers as evidence.
+- For self_serve support, give only grounded steps; do not pretend to perform account-specific actions.
 """,
     )
 

@@ -93,6 +93,12 @@ function Header() {
             >
               {t.navMeetings}
             </Link>
+            {user && (user.role === 'staff' || user.role === 'admin') && (
+              <Link className={`header__link ${location.pathname.startsWith('/staff') ? 'header__link--active' : ''}`} to="/staff/tickets">Tickets</Link>
+            )}
+            {user?.role === 'admin' && (
+              <Link className={`header__link ${location.pathname.startsWith('/admin') ? 'header__link--active' : ''}`} to="/admin/staff">Nhân viên</Link>
+            )}
             <Link
               className={`header__link ${location.pathname === '/regulations' && location.search.includes('doc=') ? 'header__link--active' : ''}`}
               to="/regulations?doc=ab8c79e6ba880330"
@@ -232,6 +238,12 @@ function Header() {
           >
             {t.navRegulations}
           </Link>
+          {user && (user.role === 'staff' || user.role === 'admin') && (
+            <Link className="header__drawer-link" to="/staff/tickets" onClick={() => setMobileMenuOpen(false)}>Tickets</Link>
+          )}
+          {user?.role === 'admin' && (
+            <Link className="header__drawer-link" to="/admin/staff" onClick={() => setMobileMenuOpen(false)}>Nhân viên</Link>
+          )}
           {user ? (
             <div className="header__drawer-user">
               <div className="header__drawer-profile">
