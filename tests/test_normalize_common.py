@@ -10,7 +10,7 @@ from decimal import Decimal
 
 import pytest
 
-from src.normalize.common import (
+from src.data_postgre.normalize.common import (
     domain_of,
     html_filename,
     language_from_url,

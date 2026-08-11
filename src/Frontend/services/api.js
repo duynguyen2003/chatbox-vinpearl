@@ -1,7 +1,7 @@
 import { HOTELS } from '../data/mockData';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const CHAT_SESSION_KEY = 'vinpearl_chat_session_v2';
+const CHAT_SESSION_KEY = 'vinpearl_chat_session_v3';
 
 function createSessionId() {
   if (globalThis.crypto?.randomUUID) {
@@ -11,60 +11,40 @@ function createSessionId() {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function currentPageBootId() {
-  // performance.timeOrigin changes after a real page reload, but remains stable
-  // across normal SPA navigation and Vite HMR. That gives one conversation
-  // session per loaded chat page without persisting forever in localStorage.
-  return String(Math.round(globalThis.performance?.timeOrigin || Date.now()));
-}
-
-function readStoredSession() {
+function readStoredSessionId() {
   try {
-    const raw = sessionStorage.getItem(CHAT_SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return sessionStorage.getItem(CHAT_SESSION_KEY) || null;
   } catch {
     return null;
   }
 }
 
-function writeStoredSession(sessionId) {
-  sessionStorage.setItem(
-    CHAT_SESSION_KEY,
-    JSON.stringify({
-      sessionId,
-      pageBootId: currentPageBootId(),
-    }),
-  );
+export function setChatSessionId(sessionId) {
+  if (!sessionId) return null;
+  sessionStorage.setItem(CHAT_SESSION_KEY, sessionId);
   return sessionId;
 }
 
-export function getChatSessionId() {
-  const stored = readStoredSession();
-  const pageBootId = currentPageBootId();
-
-  if (stored?.sessionId && stored?.pageBootId === pageBootId) {
-    return stored.sessionId;
+export function clearChatSessionId() {
+  try {
+    sessionStorage.removeItem(CHAT_SESSION_KEY);
+  } catch {
+    // sessionStorage may be unavailable in restricted browser contexts.
   }
-
-  return writeStoredSession(createSessionId());
 }
 
+export function getChatSessionId() {
+  return readStoredSessionId() || setChatSessionId(createSessionId());
+}
+
+export function startNewChatSession() {
+  return setChatSessionId(createSessionId());
+}
+
+// Backward-compatible name used by older UI code. A new conversation no longer
+// deletes the previous server-side history; it only rotates the active session ID.
 export async function resetChatSession() {
-  const stored = readStoredSession();
-  const oldSessionId = stored?.sessionId;
-
-  // Clear backend memory for an explicit "new conversation" action.
-  if (oldSessionId) {
-    try {
-      await fetch(`${API_BASE_URL}/api/v1/chat/${encodeURIComponent(oldSessionId)}/history`, {
-        method: 'DELETE',
-      });
-    } catch (error) {
-      console.warn('Could not clear previous backend chat memory:', error);
-    }
-  }
-
-  return writeStoredSession(createSessionId());
+  return startNewChatSession();
 }
 
 export async function fetchHotels(filters) {
@@ -170,6 +150,7 @@ export async function sendChatMessage(prompt, language = 'EN') {
     }
 
     const result = await res.json();
+    if (result.session_id) setChatSessionId(result.session_id);
     return {
       id: `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       sender: 'assistant',
@@ -193,6 +174,26 @@ export async function sendChatMessage(prompt, language = 'EN') {
 
     throw e;
   }
+}
+
+export async function fetchChatSessions(limit = 50) {
+  if (!getAuthToken()) return [];
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+  return apiJson(`/api/v1/chat/sessions?limit=${safeLimit}`);
+}
+
+export async function fetchChatSessionMessages(sessionId) {
+  if (!getAuthToken()) {
+    throw new Error('Authentication is required to load chat history.');
+  }
+  return apiJson(`/api/v1/chat/sessions/${encodeURIComponent(sessionId)}/messages`);
+}
+
+export async function deleteChatSession(sessionId) {
+  if (!getAuthToken()) return null;
+  return apiJson(`/api/v1/chat/${encodeURIComponent(sessionId)}/history`, {
+    method: 'DELETE',
+  });
 }
 
 export async function submitSupportTicket(ticketData) {
@@ -360,6 +361,7 @@ export async function registerAccount({ name, email, phone, password, locale = '
     }),
   });
   setAuthToken(payload.access_token);
+  startNewChatSession();
   return payload.user;
 }
 
@@ -369,6 +371,7 @@ export async function loginAccount(identifier, password) {
     body: JSON.stringify({ identifier, password }),
   });
   setAuthToken(payload.access_token);
+  startNewChatSession();
   return payload.user;
 }
 
@@ -378,6 +381,7 @@ export async function fetchCurrentUser() {
     return await apiJson('/api/v1/auth/me');
   } catch (error) {
     setAuthToken(null);
+    clearChatSessionId();
     return null;
   }
 }
@@ -387,6 +391,7 @@ export async function logoutAccount() {
     if (getAuthToken()) await apiJson('/api/v1/auth/logout', { method: 'POST' });
   } finally {
     setAuthToken(null);
+    clearChatSessionId();
   }
 }
 

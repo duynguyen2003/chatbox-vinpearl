@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.normalize.text import clean_text, normalize_alias, slugify, strip_accents
+from src.data_postgre.normalize.text import clean_text, normalize_alias, slugify, strip_accents
 
 
 @pytest.mark.parametrize(

@@ -1,12 +1,19 @@
 import re
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..agents.graph import agent_graph
-from ..models.chat import ChatRequest, ChatResponse, SourceItem
+from ..models.chat import (
+    ChatHistoryMessage,
+    ChatRequest,
+    ChatResponse,
+    ChatSessionHistory,
+    ChatSessionSummary,
+    SourceItem,
+)
 from ..services.memory import MemoryService
-from ..services.auth import get_optional_user
+from ..services.auth import get_current_user, get_optional_user
 from src.data_postgre.db.app import AppUser
 from ..services.query_parser import load_destination_catalog, normalize_text
 from ..services.source_reranker import get_source_reranker
@@ -213,15 +220,25 @@ def _build_sources(state: dict) -> list[SourceItem]:
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_optional_user)) -> ChatResponse:
     session_id = request.session_id or f"SES-{uuid4().hex}"
+    user_id = str(current_user.id) if current_user else None
+
+    # Authorize/claim the session before entering LangGraph. This prevents a
+    # caller from supplying another user's session UUID and inheriting its memory.
+    try:
+        MemoryService().ensure_session(session_id, user_id, channel="web")
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập phiên chat này.") from exc
 
     try:
         state = agent_graph.invoke(
             {
                 "user_message": request.message,
                 "session_id": session_id,
-                "user_id": str(current_user.id) if current_user else None,
+                "user_id": user_id,
             }
         )
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập phiên chat này.") from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -255,7 +272,40 @@ def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_option
     )
 
 
+@router.get("/chat/sessions", response_model=list[ChatSessionSummary])
+def list_chat_sessions(
+    limit: int = Query(default=50, ge=1, le=100),
+    current_user: AppUser = Depends(get_current_user),
+) -> list[ChatSessionSummary]:
+    rows = MemoryService().list_user_sessions(str(current_user.id), limit=limit)
+    return [ChatSessionSummary(**row) for row in rows]
+
+
+@router.get(
+    "/chat/sessions/{session_id}/messages",
+    response_model=ChatSessionHistory,
+)
+def get_chat_session_messages(
+    session_id: str,
+    current_user: AppUser = Depends(get_current_user),
+) -> ChatSessionHistory:
+    rows = MemoryService().get_user_session_messages(session_id, str(current_user.id))
+    if rows is None:
+        # Return 404 for both missing and foreign sessions so account ownership is
+        # not leaked to callers probing random session IDs.
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiên chat.")
+    return ChatSessionHistory(
+        session_id=session_id,
+        messages=[ChatHistoryMessage(**row) for row in rows],
+    )
+
+
 @router.delete("/chat/{session_id}/history")
-def clear_chat_history(session_id: str) -> dict[str, int | str]:
-    deleted = MemoryService().clear(session_id)
+def clear_chat_history(
+    session_id: str,
+    current_user: AppUser = Depends(get_current_user),
+) -> dict[str, int | str]:
+    deleted = MemoryService().clear_for_user(session_id, str(current_user.id))
+    if deleted is None:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiên chat.")
     return {"session_id": session_id, "deleted_turns": deleted}

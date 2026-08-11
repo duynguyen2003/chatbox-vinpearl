@@ -24,6 +24,14 @@ def route_after_classification(state: AgentState) -> str:
     return state["route"]
 
 
+def route_after_support_triage(state: AgentState) -> str:
+    # Once triage establishes that a personal record/action is required, evidence
+    # sufficiency cannot change the routing decision. Skip the assessment node.
+    if state.get("resolution_mode") == "human_required":
+        return "ticket"
+    return "assess"
+
+
 def route_after_assessment(state: AgentState) -> str:
     # A case-specific operational request needs a human even when RAG contains
     # general policy/guidance. The chatbot cannot inspect or mutate personal records.
@@ -67,7 +75,14 @@ builder.add_conditional_edges(
 )
 
 builder.add_edge("retrieve", "support_triage")
-builder.add_edge("support_triage", "assess")
+builder.add_conditional_edges(
+    "support_triage",
+    route_after_support_triage,
+    {
+        "assess": "assess",
+        "ticket": "ticket",
+    },
+)
 builder.add_conditional_edges(
     "assess",
     route_after_assessment,

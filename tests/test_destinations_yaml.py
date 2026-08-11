@@ -12,7 +12,7 @@ from scripts.seed_destinations import (
     collect_source_strings,
     load_yaml,
 )
-from src.normalize.text import normalize_alias
+from src.data_postgre.normalize.text import normalize_alias
 
 SPEC = load_yaml()
 
