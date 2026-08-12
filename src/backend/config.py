@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +29,26 @@ class Settings(BaseSettings):
     )
     db_echo: bool = False
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value: object) -> object:
+        """Make Railway/Postgres URLs explicit for SQLAlchemy + pg8000.
+
+        Railway exposes DATABASE_URL as postgres://... or postgresql://....
+        This project intentionally uses the pure-Python pg8000 driver, so normalize
+        those generic URLs to postgresql+pg8000://... while leaving already-explicit
+        SQLAlchemy URLs untouched.
+        """
+        if not isinstance(value, str):
+            return value
+
+        url = value.strip()
+        if url.startswith("postgres://"):
+            return "postgresql+pg8000://" + url[len("postgres://") :]
+        if url.startswith("postgresql://"):
+            return "postgresql+pg8000://" + url[len("postgresql://") :]
+        return url
+
     # Data
     data_dir: Path = Path("./data")
     chroma_dir: Path = Path("./storage/chroma_local")
@@ -53,6 +74,7 @@ class Settings(BaseSettings):
     # API
     app_host: str = "0.0.0.0"
     app_port: int = 8000
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     model_config = SettingsConfigDict(
         env_file=".env",

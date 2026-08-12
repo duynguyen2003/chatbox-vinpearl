@@ -12,6 +12,7 @@ from src.backend.api.staff_routes import router as staff_router
 from src.backend.api.ticket_routes import router as ticket_router
 from src.backend.api.promotions_routes import router as promotions_router
 from src.backend.agents.graph import agent_graph
+from src.backend.config import get_settings
 
 
 app = FastAPI(
@@ -19,9 +20,17 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+def _cors_origins() -> list[str]:
+    raw = get_settings().cors_origins
+    origins = [item.strip().rstrip("/") for item in raw.split(",") if item.strip()]
+    # Keep a safe local fallback rather than opening production with "*".
+    return origins or ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
