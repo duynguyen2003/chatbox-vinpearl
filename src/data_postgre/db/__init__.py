@@ -7,6 +7,7 @@ thấy đủ 41 bảng khi autogenerate.
 
 from src.data_postgre.db.app import (
     AppUser,
+    AuthSession,
     ChatSession,
     EventLog,
     Message,
@@ -110,6 +111,7 @@ __all__ = [
     "OrgInfo",
     "OrgHighlight",
     # ứng dụng
+    "AuthSession",
     "AppUser",
     "ChatSession",
     "Message",

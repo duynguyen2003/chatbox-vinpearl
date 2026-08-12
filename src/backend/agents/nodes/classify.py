@@ -1,6 +1,6 @@
 from src.backend.agents.state import AgentState
 from src.backend.services.llm import LLMService
-from src.backend.services.query_parser import normalize_text
+from src.backend.services.query_parser import detect_destinations, normalize_text
 
 
 _CONTEXT_IDENTITY_PATTERNS = (
@@ -22,6 +22,78 @@ _CONTEXT_IDENTITY_PATTERNS = (
     "where is here",
     "what destination do i mean",
 )
+
+
+_GENERIC_DESTINATION_TRAVEL_MARKERS = (
+    "du lich",
+    "di choi",
+    "nghi duong",
+    "travel",
+    "travel advice",
+    "travel guide",
+    "trip",
+    "visit",
+    "visiting",
+    "things to do",
+    "what to do",
+)
+
+# These are clearly outside the Vinpearl/VinWonders knowledge scope even when
+# the same message names a supported destination. Their presence prevents the
+# deterministic destination guard from forcing the request into RAG.
+_EXTERNAL_ONLY_MARKERS = (
+    "ve may bay",
+    "may bay",
+    "flight",
+    "airline",
+    "thoi tiet",
+    "weather",
+    "visa",
+    "thi thuc",
+    "ho chieu",
+    "passport",
+    "taxi",
+    "grab",
+    "xe buyt",
+    "bus route",
+    "tau hoa",
+    "train ticket",
+)
+
+
+def _is_supported_destination_travel_request(message: str, rag_query: str) -> bool:
+    """Keep generic travel-consulting requests for known destinations in scope.
+
+    The LLM scope classifier was inconsistent for messages such as
+    "tư vấn du lịch Hà Nội": the same semantic request could be marked
+    out_of_scope for Hanoi but rag for Nha Trang. Destination membership is
+    deterministic data, so use it as a guard before asking the LLM.
+
+    This does NOT turn every mention of a destination into RAG. Explicitly
+    external-only topics (weather, flights, visa, taxi, ...) still fall through
+    to the normal classifier.
+    """
+    destinations = detect_destinations(message, rag_query)
+    if not destinations:
+        return False
+
+    normalized_message = normalize_text(message)
+    normalized_rag = normalize_text(rag_query)
+
+    if any(marker in normalized_message for marker in _EXTERNAL_ONLY_MARKERS):
+        return False
+
+    asks_generic_travel_advice = any(
+        marker in normalized_message for marker in _GENERIC_DESTINATION_TRAVEL_MARKERS
+    )
+    rewritten_for_vinpearl = (
+        "vinpearl" in normalized_rag
+        or "vinwonders" in normalized_rag
+        or "vinpearl" in normalized_message
+        or "vinwonders" in normalized_message
+    )
+
+    return asks_generic_travel_advice or rewritten_for_vinpearl
 
 
 def _is_conversation_context_question(message: str) -> bool:
@@ -66,8 +138,26 @@ def _is_conversation_context_question(message: str) -> bool:
 
 def classify_input(state: AgentState) -> AgentState:
     # Current-message meta intent must win over any intent carried in history/rag_query.
-    if _is_conversation_context_question(state.get("user_message", "")):
+    user_message = state.get("user_message", "")
+    rag_query = state.get("rag_query", "")
+
+    if _is_conversation_context_question(user_message):
         return {"route": "conversation_context"}
+
+    # Deterministic guard for supported-destination travel consultation.
+    # Example: "tư vấn du lịch Hà Nội" should be answered using the
+    # Vinpearl/VinWonders knowledge base, not refused merely because the user did
+    # not spell out the brand name.
+    if _is_supported_destination_travel_request(user_message, rag_query):
+        return {"route": "rag"}
+
+    # The language/control node already classified the same current message while
+    # producing the standalone retrieval query. Reuse that result instead of paying
+    # for a second near-duplicate LLM call. Keep the legacy classifier below only as
+    # a defensive fallback if the control call ever omits/returns an invalid route.
+    preclassified_route = str(state.get("route") or "").strip()
+    if preclassified_route in {"greeting", "rag", "out_of_scope"}:
+        return {"route": preclassified_route}
 
     llm = LLMService()
     result = llm.json(
@@ -75,11 +165,13 @@ def classify_input(state: AgentState) -> AgentState:
             "Classify the CURRENT user request for a Vinpearl/VinWonders travel support "
             "agent. The allowed routes are: greeting, rag, out_of_scope. Use greeting "
             "only for pure greeting/small talk without a substantive request. Use rag "
-            "for Vinpearl, VinWonders, destinations, hotels, rooms, dining, entertainment, "
+            "for Vinpearl, VinWonders, supported destinations, hotels, rooms, dining, entertainment, "
             "golf, meetings/events, promotions, policies, FAQs, payment guidance, and Vinpearl/VinWonders "
             "support issues such as booking/payment/refund/voucher errors, failed confirmations, lost property, "
             "or complaints that may need human support. "
-            "A short follow-up is rag when its standalone retrieval query is about those "
+            "A generic request for travel advice in a supported destination is also rag: answer "
+            "only with Vinpearl/VinWonders knowledge for that destination rather than giving "
+            "city-wide general travel advice. A short follow-up is rag when its standalone retrieval query is about those "
             "topics. The agent only guides payment; it does not process payment. Everything "
             "else is out_of_scope. IMPORTANT: classify the CURRENT message first. Previous "
             "conversation may resolve references but must not carry the previous intent into "

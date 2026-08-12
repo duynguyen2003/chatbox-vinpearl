@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -24,3 +25,28 @@ class ChatResponse(BaseModel):
     ticket_id: str | None = None
     sources: list[SourceItem] = Field(default_factory=list)
     debug: dict[str, Any] | None = None
+
+
+class ChatSessionSummary(BaseModel):
+    id: str
+    title: str
+    language: str | None = None
+    started_at: datetime | None = None
+    last_activity_at: datetime | None = None
+    message_count: int = 0
+
+
+class ChatHistoryMessage(BaseModel):
+    id: str
+    seq: int
+    role: str
+    content: str
+    language: str | None = None
+    route: str | None = None
+    ticket_id: str | None = None
+    created_at: datetime | None = None
+
+
+class ChatSessionHistory(BaseModel):
+    session_id: str
+    messages: list[ChatHistoryMessage] = Field(default_factory=list)

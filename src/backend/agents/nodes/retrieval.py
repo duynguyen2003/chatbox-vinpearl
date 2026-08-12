@@ -179,6 +179,44 @@ def assess_information(state: AgentState) -> AgentState:
             best_score,
         )
 
+    # Clear-pass fast path: for a normal informational request, destination-aware
+    # keyword+embedding retrieval has already enforced the destination constraint
+    # and intent branch. If every requested branch is found, the context is non-empty,
+    # and relevance already passed the configured threshold, another LLM sufficiency
+    # judge adds latency but little safety value. Ambiguous semantic-fallback queries
+    # and self-service support still keep the LLM judge.
+    retrieval_mode = str(state.get("retrieval_mode") or "")
+    statuses = [str(result.get("status") or "") for result in intent_results.values()]
+    all_requested_branches_found = bool(statuses) and all(status == "found" for status in statuses)
+    is_destination_scoped = bool(detected_ids) and retrieval_mode.startswith("keyword")
+    is_information = state.get("request_mode", "information") == "information"
+
+    if (
+        is_information
+        and is_destination_scoped
+        and all_requested_branches_found
+        and not missing
+    ):
+        reason = (
+            "Deterministic clear-pass: destination-scoped retrieval found every requested "
+            "branch with non-empty context above the configured relevance threshold."
+        )
+        print("\n===== RAG ASSESSMENT =====")
+        print(f"Question: {state.get('user_message', '')}")
+        print(f"Retrieval mode: {retrieval_mode}")
+        print(f"Detected intents: {detected_intents or [state.get('detected_intent')]}")
+        print(f"Intent results: {intent_results}")
+        print(f"Best score: {best_score:.4f}")
+        print("Enough: True (deterministic clear-pass)")
+        print(f"Reason: {reason}")
+        print("==========================\n")
+        return {
+            "enough_information": True,
+            "assessment_reason": reason,
+            "best_relevance_score": best_score,
+            "insufficiency_action": "no_data",
+        }
+
     llm = LLMService()
     result = llm.json(
         system_prompt=(

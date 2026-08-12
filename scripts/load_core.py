@@ -19,19 +19,24 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.backend.config import get_settings
-from src.data_postgre.db import CORE_TABLES, DataQualityIssue, IngestRun
+from src.data_postgre.db import Base, CORE_TABLES, DataQualityIssue, IngestRun
 from src.data_postgre.db.errors import describe, sqlstate
 from src.data_postgre.normalize.adapters import entertainment, hotels, promotions, simple
 from src.data_postgre.normalize.context import BRANDS, Context, Issue
 from src.data_postgre.normalize.text import normalize_alias
-
-YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "data_postgre" / "normalize" / "destinations.yaml"
+YAML_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "src"
+    / "data_postgre"
+    / "normalize"
+    / "destinations.yaml"
+)
 
 
 def build_context() -> Context:
@@ -133,12 +138,16 @@ def sweep_stale(session: Session, table_names: list[str], run_id: int) -> dict[s
     for name in table_names:
         table = CORE_TABLES[name]
         columns = {c.name for c in table.columns}
-        if not {"ingest_run_id", "is_active"} <= columns:
+        if not {"ingest_run_id", "is_active", "updated_at"} <= columns:
             continue
+
+        stale_predicate = table.c.is_active.is_(True) & (
+            table.c.ingest_run_id.is_(None) | (table.c.ingest_run_id != run_id)
+        )
         result = session.execute(
-            text(f"UPDATE {table.fullname} SET is_active = false, updated_at = now() "  # noqa: S608
-                 "WHERE is_active AND (ingest_run_id IS NULL OR ingest_run_id <> :run)"),
-            {"run": run_id},
+            table.update()
+            .where(stale_predicate)
+            .values(is_active=False, updated_at=datetime.now(UTC))
         )
         if result.rowcount:
             swept[name] = result.rowcount
@@ -249,11 +258,13 @@ def main() -> int:
                              field=i.field, raw_value=i.raw_value, message=i.message)
             for i in issues
         ])
-        log_session.execute(
-            text("UPDATE ingest_run SET status=:s, finished_at=now(), stats=:st, "
-                 "notes=:n WHERE id=:i"),
-            {"s": status, "st": json.dumps(written), "n": note, "i": run_id},
-        )
+        run = log_session.get(IngestRun, run_id)
+        if run is None:
+            raise RuntimeError(f"Không tìm thấy core.ingest_run id={run_id}")
+        run.status = status
+        run.finished_at = datetime.now(UTC)
+        run.stats = written
+        run.notes = note
         log_session.commit()
 
     if swept:

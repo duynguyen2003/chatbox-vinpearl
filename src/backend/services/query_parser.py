@@ -118,7 +118,7 @@ def load_destination_catalog() -> dict[str, dict[str, Any]]:
     try:
         with engine.connect() as conn:
             rows = conn.execute(
-                text("SELECT id, name_en, name_vi, province FROM destination")
+                text("SELECT id, name_en, name_vi, province FROM core.destination")
             ).mappings()
             for row in rows:
                 destination_id = str(row["id"])
@@ -136,7 +136,7 @@ def load_destination_catalog() -> dict[str, dict[str, Any]]:
                 }
 
             alias_rows = conn.execute(
-                text("SELECT destination_id, alias, alias_normalized FROM destination_alias")
+                text("SELECT destination_id, alias, alias_normalized FROM core.destination_alias")
             ).mappings()
             for row in alias_rows:
                 destination_id = str(row["destination_id"])

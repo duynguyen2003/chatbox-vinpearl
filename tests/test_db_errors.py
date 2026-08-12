@@ -1,7 +1,6 @@
 """Kiểm chứng src/data_postgre/db/errors.py trên database thật.
 
-Bỏ qua nếu Postgres chưa chạy (``make db-up``), để pytest vẫn xanh trên máy
-chưa dựng database.
+Bỏ qua nếu Postgres chưa chạy, để pytest vẫn xanh trên máy chưa dựng database.
 """
 
 from __future__ import annotations
@@ -36,17 +35,14 @@ def engine():
 
 
 def _purge(session: Session) -> None:
-    """Xoá ĐÚNG các dòng của test (tiền tố 't-'), theo thứ tự ngược khoá ngoại.
-
-    Tuyệt đối không TRUNCATE: database dev dùng chung với master data thật đã
-    nạp bằng scripts.seed_destinations, và bản đầu của fixture này đã xoá sạch
-    nó một lần rồi.
-    """
-    session.execute(text("DELETE FROM room WHERE id LIKE 't-%'"))
-    session.execute(text("DELETE FROM property WHERE id LIKE 't-%'"))
-    session.execute(text("DELETE FROM complex WHERE id LIKE 't-%'"))
-    session.execute(text("DELETE FROM destination_alias WHERE destination_id LIKE 't-%'"))
-    session.execute(text("DELETE FROM destination WHERE id LIKE 't-%'"))
+    """Xoá đúng dữ liệu test theo thứ tự ngược khoá ngoại trong schema core."""
+    session.execute(text("DELETE FROM core.room WHERE id LIKE 't-%'"))
+    session.execute(text("DELETE FROM core.property WHERE id LIKE 't-%'"))
+    session.execute(text("DELETE FROM core.complex WHERE id LIKE 't-%'"))
+    session.execute(
+        text("DELETE FROM core.destination_alias WHERE destination_id LIKE 't-%'")
+    )
+    session.execute(text("DELETE FROM core.destination WHERE id LIKE 't-%'"))
 
 
 @pytest.fixture
@@ -71,7 +67,7 @@ def seeded(engine):
             Room(id="t-p1--room-1", property_id="t-p1", room_index=1, name="Deluxe"),
         ):
             s.add(obj)
-            s.flush()  # models không khai relationship() nên phải chèn đúng thứ tự
+            s.flush()
         s.commit()
     yield engine
     with Session(engine) as s:
@@ -88,7 +84,6 @@ def _capture(engine, obj) -> DBAPIError:
 
 
 def test_check_violation_readable(seeded) -> None:
-    """CHECK bị pg8000 ném thành ProgrammingError — sqlstate vẫn phải đọc được."""
     exc = _capture(
         seeded, Room(id="t-bad", property_id="t-p1", room_index=9, name="X", guest_count=0)
     )

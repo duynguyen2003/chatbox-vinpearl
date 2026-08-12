@@ -117,21 +117,36 @@ class RAGService:
         documents: list[str] = []
         metadatas: list[dict[str, Any]] = []
         normalized: list[str] = []
+        embeddings: list[list[float] | None] = []
 
         batch_size = 500
         for offset in range(0, count, batch_size):
             batch = self.collection.get(
                 limit=min(batch_size, count - offset),
                 offset=offset,
-                include=["documents", "metadatas"],
+                include=["documents", "metadatas", "embeddings"],
             )
             batch_ids = batch.get("ids", []) or []
             batch_docs = batch.get("documents", []) or []
             batch_meta = batch.get("metadatas", []) or []
+            # Chroma may return embeddings as a NumPy array. Avoid ``or []`` here
+            # because NumPy arrays do not have a scalar truth value.
+            batch_embeddings = batch.get("embeddings")
 
-            for doc_id, text, metadata in zip(batch_ids, batch_docs, batch_meta):
+            for index, (doc_id, text, metadata) in enumerate(
+                zip(batch_ids, batch_docs, batch_meta)
+            ):
                 text = text or ""
                 metadata = metadata or {}
+                stored_embedding: list[float] | None = None
+                if batch_embeddings is not None and index < len(batch_embeddings):
+                    raw_embedding = batch_embeddings[index]
+                    if raw_embedding is not None:
+                        stored_embedding = (
+                            raw_embedding.tolist()
+                            if hasattr(raw_embedding, "tolist")
+                            else list(raw_embedding)
+                        )
                 searchable = " ".join(
                     [
                         text,
@@ -145,12 +160,14 @@ class RAGService:
                 documents.append(text)
                 metadatas.append(metadata)
                 normalized.append(normalize_text(searchable))
+                embeddings.append(stored_embedding)
 
         cache = {
             "ids": ids,
             "documents": documents,
             "metadatas": metadatas,
             "normalized": normalized,
+            "embeddings": embeddings,
         }
         RAGService._corpus_cache = cache
         RAGService._corpus_cache_collection = collection_name
@@ -213,6 +230,9 @@ class RAGService:
                     "id": cache["ids"][index],
                     "text": cache["documents"][index],
                     "metadata": metadata,
+                    # Reuse the vector already persisted during Chroma ingestion.
+                    # Runtime retrieval should only embed the user's query.
+                    "embedding": cache["embeddings"][index],
                     "keyword_score": round(keyword_score, 4),
                     "matched_aliases": matched_aliases[:5],
                     "matched_destination_id": destination_id,
@@ -355,9 +375,18 @@ class RAGService:
         if not candidates:
             return []
 
+        # Documents were already embedded when they were ingested into Chroma.
+        # Re-embedding up to hundreds of candidates on every chat request is both
+        # expensive and unnecessary. Only the query needs a fresh embedding.
+        candidates = [item for item in candidates if item.get("embedding") is not None]
+        if not candidates:
+            return []
+
         query_vector = np.asarray(self.embed_query(query), dtype=np.float32)
-        candidate_texts = [item["text"] for item in candidates]
-        candidate_vectors = np.asarray(self.embed_documents(candidate_texts), dtype=np.float32)
+        candidate_vectors = np.asarray(
+            [item["embedding"] for item in candidates],
+            dtype=np.float32,
+        )
         semantic_scores = candidate_vectors @ query_vector
         broad = self._is_broad_discovery_query(query, intent)
 

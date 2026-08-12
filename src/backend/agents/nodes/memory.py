@@ -4,7 +4,17 @@ from src.backend.services.memory import MemoryService
 
 def load_conversation_memory(state: AgentState) -> AgentState:
     memory = MemoryService()
-    turns = memory.load_recent(state.get("session_id"))
+    # Create app.session before the graph continues so ticket creation on the
+    # first turn can keep a valid session_id foreign key.
+    memory.ensure_session(
+        state.get("session_id"),
+        state.get("user_id"),
+        channel="web",
+    )
+    turns = memory.load_recent(
+        state.get("session_id"),
+        user_id=state.get("user_id"),
+    )
     recent_destinations = memory.extract_recent_destinations(turns)
     return {
         "conversation_turns": turns,

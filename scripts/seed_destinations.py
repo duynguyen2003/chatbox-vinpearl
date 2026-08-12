@@ -27,8 +27,13 @@ from src.backend.config import get_settings
 from src.data_postgre.db import Complex, Destination, DestinationAlias
 from src.data_postgre.normalize.text import normalize_alias
 
-YAML_PATH = Path(__file__).resolve().parents[1] / "src" / "data_postgre" / "normalize" / "destinations.yaml"
-
+YAML_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "src"
+    / "data_postgre"
+    / "normalize"
+    / "destinations.yaml"
+)
 
 def load_yaml() -> dict[str, Any]:
     with YAML_PATH.open(encoding="utf-8") as fh:
