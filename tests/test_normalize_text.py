@@ -1,4 +1,4 @@
-"""Kiểm thử src/normalize/text.py.
+"""Kiểm thử src/data_postgre/normalize/text.py.
 
 Các ca ở đây lấy từ chuỗi có thật trong data/, không phải ví dụ bịa.
 """

@@ -1,4 +1,4 @@
-"""Kiểm thử src/normalize/common.py.
+"""Kiểm thử src/data_postgre/normalize/common.py.
 
 Mọi ca đầu vào ở đây đều là chuỗi có thật lấy từ data/, không phải ví dụ bịa.
 """
