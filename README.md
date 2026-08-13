@@ -1,201 +1,627 @@
-# 🤖 AI20K Agent Template
+# P-013 — Vinpearl Multilingual Travel Agent
+## LINK SCHEMAS
 
-Template chính thức cho học viên **VinUni AI20K Build Phase** — cung cấp sẵn cấu trúc dự án, code mẫu, và hướng dẫn kỹ thuật chi tiết để xây dựng AI Agent đạt điểm cao (35+/50).
+https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
 
-> 📖 **Technical Guidebook:** [phoenix.note.transformerlabs.ai/technical-book](https://phoenix.note.transformerlabs.ai/technical-book)
 
-## 🎯 Template này dùng để làm gì?
+## 1. Setup môi trường local
 
-Khi tham gia AI20K Build Phase, mỗi đội cần xây dựng một AI Agent hoàn chỉnh — từ kiến trúc, code, test, đến deploy. Thay vì bắt đầu từ con số không, template này cung cấp:
+### Tạo virtual environment
 
-- **Cấu trúc thư mục chuẩn** — đã được thiết kế theo best practices (separation of concerns)
-- **Code mẫu** cho các phần cốt lõi: LangGraph agent, FastAPI API, config, schemas
-- **Docker + CI/CD sẵn** — Dockerfile multi-stage, GitHub Actions workflow
-- **Hướng dẫn kỹ thuật 10 chương** — từ clone template đến nộp bài Demo Day
-- **Checklist 10 deliverables** — đảm bảo không bỏ sót yêu cầu BTC
-- **AI Usage Logging tự động** — Pre-configured hooks cho Claude Code, Cursor, Codex, Gemini CLI, Antigravity, và GitHub Copilot
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+```
 
-## ⚡ Quick Start
+### Cài dependencies
 
-### Bước 1: Fork hoặc Clone
+```powershell
+python -m pip install -r requirements.txt 
+```
 
-```bash
-# Clone template
-git clone https://github.com/AI20K-Build-Cohort-2/starter-code-template.git team-YOUR_TEAM_NAME
-cd team-YOUR_TEAM_NAME
+---
 
-# Xóa git history cũ và khởi tạo lại
-rm -rf .git
-git init
+## 2. PostgreSQL
+
+### Kiểm tra ORM metadata
+
+```powershell
+python -c "from src.db import Base; print(len(Base.metadata.tables)); print(list(Base.metadata.tables.keys()))"
+```
+
+### Tạo PostgreSQL user
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" `
+  -U postgres `
+  -c "CREATE USER vinpearl WITH PASSWORD '<POSTGRES_PASSWORD>';"
+```
+
+> Nếu user `vinpearl` đã tồn tại thì bỏ qua bước này. Mật khẩu thật nên lấy từ `.env`, không ghi trực tiếp vào README khi commit Git.
+
+### Kiểm tra migration hiện tại
+
+```powershell
+alembic current
+```
+
+### Chạy migrations
+
+```powershell
+alembic upgrade head
+```
+
+### Seed destination data
+
+```powershell
+python -m scripts.seed_destinations
+```
+
+### Load dữ liệu Core vào PostgreSQL
+
+```powershell
+python -m scripts.load_core
+```
+
+---
+
+## 3. Tạo Chroma Vector Store từ PostgreSQL
+
+Sau khi PostgreSQL đã có dữ liệu:
+
+```powershell
+python -m src.backend.services.ingest_postgres --reset
+```
+
+Lệnh này sẽ đọc dữ liệu business từ PostgreSQL, chunk dữ liệu, tạo embedding, ghi vectors vào Chroma và lưu tại `storage/chroma_local`.
+
+---
+
+## 4. Chạy Backend FastAPI local
+
+```powershell
+python -m uvicorn src.backend.main:app --reload --port 8000
+```
+
+Backend local:
+
+```text
+http://localhost:8000
+```
+
+Swagger:
+
+```text
+http://localhost:8000/docs
+```
+
+Health check:
+
+```text
+GET /health
+```
+
+Readiness check:
+
+```text
+GET /ready
+```
+
+---
+
+## 5. Chạy Frontend local
+
+Nếu frontend nằm tại `src/frontend`:
+
+```powershell
+cd D:\vinuni\T013\main\P-013\src\frontend
+npm install
+npm run dev
+```
+
+Frontend thường chạy tại:
+
+```text
+http://localhost:5173
+```
+
+Frontend gọi backend thông qua:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+---
+
+## 6. Tạo Admin đầu tiên
+
+Lấy giá trị `ADMIN_BOOTSTRAP_KEY` từ `.env`.
+
+```powershell
+$body = @{
+  name = "P013 Admin"
+  email = "admin@example.com"
+  phone = $null
+  password = "ChangeThisPassword123!"
+  locale = "vi"
+  bootstrap_key = "LAY_ADMIN_BOOTSTRAP_KEY_TRONG_ENV"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:8000/api/v1/auth/bootstrap-admin" `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Sau khi tạo admin thành công:
+
+```text
+/admin/staff
+```
+
+---
+
+## 7. Docker
+
+Project đã đóng gói Backend + Redis bằng Docker.
+
+### Build image
+
+```powershell
+docker compose build
+```
+
+Image backend:
+
+```text
+p-013-agent:latest
+```
+
+### Chạy Docker Compose
+
+```powershell
+docker compose up
+```
+
+Kiến trúc local hiện tại:
+
+```text
+Frontend Vite
+     |
+     v
+FastAPI Backend (Docker)
+     |
+     +--> PostgreSQL trên Windows host
+     |
+     +--> Redis container
+     |
+     +--> Chroma Docker Volume
+```
+
+PostgreSQL Windows được container truy cập bằng:
+
+```text
+host.docker.internal:5432
+```
+
+Redis được backend truy cập bằng:
+
+```text
+redis://redis:6379/0
+```
+
+Chroma trong Docker dùng:
+
+```text
+/app/storage/chroma_local
+```
+
+---
+
+## 8. Kiểm tra Docker
+
+### Health
+
+```powershell
+python -c "import httpx; r=httpx.get('http://localhost:8000/health'); print(r.status_code); print(r.text)"
+```
+
+Kỳ vọng:
+
+```text
+200
+{"status":"ok"}
+```
+
+### Ready
+
+```powershell
+python -c "import httpx; r=httpx.get('http://localhost:8000/ready'); print(r.status_code); print(r.text)"
+```
+
+Kỳ vọng:
+
+```text
+200
+{"status":"ready"}
+```
+
+### Test Agent API
+
+Có API key:
+
+```powershell
+python -c "import httpx; r=httpx.post('http://localhost:8000/ask', headers={'X-API-Key':'dev-local-secret-key'}, json={'question':'Xin chào'}); print(r.status_code); print(r.text)"
+```
+
+Kỳ vọng HTTP `200` và response có `answer` cùng `session_id`.
+
+---
+
+## 9. Biến môi trường
+
+### `.env`
+
+Dùng cho môi trường local.
+
+Ví dụ:
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini/gemini-3.5-flash-lite
+
+LOCAL_EMBEDDING_MODEL=intfloat/multilingual-e5-small
+EMBEDDING_DEVICE=cpu
+EMBEDDING_BATCH_SIZE=128
+
+DATABASE_URL=postgresql+pg8000://vinpearl:<POSTGRES_PASSWORD>@localhost:5432/vinpearl
+
+CHROMA_DIR=./storage/chroma_local
+CHROMA_COLLECTION=vinpearl_multilingual_e5_small
+
+VITE_API_BASE_URL=http://localhost:8000
+
+ADMIN_BOOTSTRAP_KEY=<ADMIN_BOOTSTRAP_KEY>
+AGENT_API_KEY=dev-local-secret-key
+```
+
+> Không commit `.env` có secret thật lên GitHub.
+
+### `.env.railway.example`
+
+Chỉ là file mẫu tham khảo cho Railway.
+
+- Không dùng trực tiếp cho local
+- Không chứa secret thật
+- Khi deploy Railway sẽ khai báo Variables trên Railway Dashboard
+
+---
+
+## 10. Các lệnh thường dùng
+
+### Setup đầy đủ từ đầu
+
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
+
+alembic current
+alembic upgrade head
+
+python -m scripts.seed_destinations
+python -m scripts.load_core
+
+python -m src.backend.services.ingest_postgres --reset
+```
+
+### Chạy backend không Docker
+
+```powershell
+python -m uvicorn src.backend.main:app --reload --port 8000
+```
+
+### Chạy Docker
+
+```powershell
+docker compose build
+docker compose up
+```
+
+### Dừng Docker
+
+```powershell
+docker compose down
+```
+
+---
+
+
+## 11. Deploy Railway
+
+Project hiện đã được triển khai trên Railway với các service:
+
+- Backend FastAPI
+- Frontend React/Vite
+- PostgreSQL
+- Redis
+- Railway Volume cho Chroma Vector Store
+
+### Backend Railway
+
+Public Backend URL:
+
+```text
+https://backend-production-9576.up.railway.app
+```
+
+Swagger:
+
+```text
+https://backend-production-9576.up.railway.app/docs
+```
+
+Readiness check:
+
+```text
+https://backend-production-9576.up.railway.app/ready
+```
+
+Kỳ vọng:
+
+```json
+{"status":"ready"}
+```
+
+Backend sử dụng `Dockerfile` ở root project.
+
+`railway.toml` cho Backend:
+
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/ready"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+```
+
+Backend Railway cần cấu hình các Variables tương ứng với môi trường production. Các secret như API key, database password và bootstrap key không ghi trực tiếp vào README.
+
+Một số biến production đang sử dụng:
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini/gemini-3.5-flash-lite
+
+LOCAL_EMBEDDING_MODEL=intfloat/multilingual-e5-small
+EMBEDDING_BACKEND=onnx_int8
+EMBEDDING_ONNX_FILE=onnx/model_qint8_avx512_vnni.onnx
+EMBEDDING_ONNX_PROVIDER=CPUExecutionProvider
+EMBEDDING_ONNX_THREADS=1
+EMBEDDING_BATCH_SIZE=4
+EMBEDDING_MAX_LENGTH=512
+
+CHROMA_DIR=/app/storage/chroma_local
+CHROMA_COLLECTION=vinpearl_multilingual_e5_small_prod
+
+TOP_K=5
+MIN_RELEVANCE_SCORE=0.35
+
+RAILWAY_RUN_UID=0
+```
+
+Database và Redis được cấu hình bằng Railway Variables / service references, không hard-code credential production trong source.
+
+### Railway PostgreSQL
+
+Dữ liệu PostgreSQL local đã được migrate lên Railway PostgreSQL.
+
+Backend production sử dụng PostgreSQL Railway thông qua `DATABASE_URL`.
+
+Alembic migration được chạy khi Backend khởi động để đồng bộ schema:
+
+```powershell
+alembic upgrade head
+```
+
+Có thể kiểm tra migration hiện tại:
+
+```powershell
+alembic current
+```
+
+### Railway Redis
+
+Redis được triển khai thành service riêng trên Railway.
+
+Backend production kết nối Redis thông qua Railway internal networking / Variables.
+
+### Railway Volume cho Chroma
+
+Chroma Vector Store production được lưu tại:
+
+```text
+/app/storage/chroma_local
+```
+
+Collection production:
+
+```text
+vinpearl_multilingual_e5_small_prod
+```
+
+Collection production đã được ingest từ PostgreSQL và hiện chứa dữ liệu RAG dùng bởi Backend.
+
+Khi cần ingest lại Chroma trên Railway:
+
+```powershell
+python -m src.backend.services.ingest_postgres --reset
+```
+
+Không nên chạy `--reset` trên production nếu chưa xác định đúng `CHROMA_COLLECTION`.
+
+### Frontend Railway
+
+Public Frontend URL:
+
+```text
+https://frontend-production-4ca5.up.railway.app
+```
+
+Frontend production sử dụng:
+
+```env
+VITE_API_BASE_URL=https://backend-production-9576.up.railway.app
+```
+
+`VITE_API_BASE_URL` là biến build-time của Vite. Nếu thay đổi giá trị trên Railway thì cần rebuild/redeploy Frontend.
+
+Frontend sử dụng `Dockerfile.frontend`.
+
+Ví dụ `railway.frontend.toml`:
+
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.frontend"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+```
+
+Frontend service cần trỏ Config-as-code tới:
+
+```text
+/railway.frontend.toml
+```
+
+### CORS giữa Frontend và Backend
+
+Do Frontend và Backend chạy trên hai domain Railway khác nhau, Backend phải cho phép Frontend origin.
+
+Biến Backend:
+
+```env
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://frontend-production-4ca5.up.railway.app
+```
+
+Không thêm dấu `/` ở cuối origin.
+
+CORS được đọc từ:
+
+```text
+src/backend/config.py
+src/backend/main.py
+```
+
+và áp dụng bằng `CORSMiddleware`.
+
+### Kiểm tra API production
+
+Swagger:
+
+```text
+https://backend-production-9576.up.railway.app/docs
+```
+
+Ví dụ API đăng ký user:
+
+```text
+POST /api/v1/auth/register
+```
+
+Response đăng ký thành công:
+
+```text
+201 Created
+```
+
+Ví dụ test RAG production:
+
+```json
+{
+  "message": "VinWonders Phú Quốc có gì?",
+  "session_id": "test-session",
+  "user_id": "admin"
+}
+```
+
+Response thành công có thể gồm:
+
+```text
+route = rag
+language = vi
+sources != []
+```
+
+### Quy trình deploy sau khi sửa source
+
+Sau khi test local:
+
+```powershell
+git status
 git add .
-git commit -m "feat: khởi tạo dự án từ template"
+git commit -m "update deployment"
+git push
 ```
 
-### Bước 2: Setup môi trường
+Railway sẽ build/deploy lại service tương ứng nếu service đang theo dõi branch Git hiện tại.
 
-```bash
-# Tạo virtual environment
-python3.11 -m venv .venv
-source .venv/bin/activate
+Nếu thay đổi Backend:
 
-# Cài dependencies
-pip install -e ".[dev]"
+1. Railway build Backend image.
+2. Backend chạy migration nếu entrypoint đã cấu hình `alembic upgrade head`.
+3. Healthcheck `/ready` phải trả `200`.
+4. Kiểm tra Swagger và API cần thiết.
 
-# Cấu hình API keys
-cp .env.example .env
-# Mở .env và thêm OPENAI_API_KEY của bạn
-# Đồng thời cập nhật AI_LOG_API_KEY bằng key riêng từ link mời của BTC
-# (giá trị trong .env.example chỉ là placeholder)
-```
+Nếu thay đổi Frontend:
 
-### Bước 3: Cài AI Logging Hooks
+1. Railway build bằng `Dockerfile.frontend`.
+2. Vite sử dụng `VITE_API_BASE_URL` tại build-time.
+3. Healthcheck `/` phải thành công.
+4. Kiểm tra Frontend gọi được Backend và không bị lỗi CORS.
 
-```bash
-# Linux / macOS / Git Bash
-bash scripts/setup_hooks.sh
+---
 
-# Windows PowerShell
-# powershell -ExecutionPolicy Bypass -File scripts\setup_hooks.ps1
-```
+## 12. Trạng thái hiện tại
 
-Hooks tự động log mọi AI prompt khi dùng Claude Code, Cursor, Codex, Gemini CLI, Antigravity, hoặc GitHub Copilot. Không cần thao tác thủ công.
+### Đã hoàn thành
 
-### Bước 4: Chạy server
+- PostgreSQL schema
+- Alembic migrations
+- Seed destination
+- Load Core data
+- PostgreSQL → Chroma ingestion
+- FastAPI Backend
+- React/Vite Frontend
+- Admin bootstrap
+- Redis
+- Docker image
+- Docker Compose
+- `/health`
+- `/ready`
+- `/ask`
+- Docker local test
 
-```bash
-# Chạy FastAPI backend
-uvicorn src.main:app --reload --port 8000
+### Đã triển khai trên Railway
 
-# Mở Swagger UI
-# http://localhost:8000/docs
-```
+- Railway deployment
+- Railway PostgreSQL
+- Railway Redis
+- Railway Volume cho Chroma
+- Public Backend URL
+- Public Frontend URL
+- Backend `/ready` hoạt động
+- Swagger production hoạt động
+- Frontend gọi Backend qua public URL
+- CORS đã cấu hình cho Frontend Railway
+- Chroma production collection đã ingest và được Backend sử dụng cho RAG
 
-### Bước 5: Đọc hướng dẫn
-
-📖 Mở **[Technical Guidebook](https://phoenix.note.transformerlabs.ai/technical-book)** và làm theo từng chương.
-
-## 📁 Cấu trúc dự án
-
-```
-├── src/
-│   ├── agents/           # 🧠 LangGraph Agent
-│   │   ├── graph.py      #    State graph (nodes + edges)
-│   │   ├── state.py      #    State schema (TypedDict)
-│   │   ├── nodes/        #    Node functions
-│   │   └── tools/        #    Agent tools (@tool)
-│   ├── api/              # 🌐 FastAPI Backend
-│   │   └── routes.py     #    API endpoints
-│   ├── models/           # 📋 Pydantic schemas
-│   ├── services/         # 🔧 Business logic (LLM, etc.)
-│   ├── config.py         # ⚙️ Pydantic Settings
-│   └── main.py           # 🚀 App entry point
-├── tests/                # 🧪 pytest suite
-│   ├── test_agents/      #    Agent/graph tests
-│   └── test_api/         #    API endpoint tests
-├── scripts/              # 🔌 AI Logging Hooks
-│   ├── log_hook.py       #    Auto-log cho Claude/Cursor/Codex/Gemini/Copilot
-│   ├── log_antigravity.py#    Antigravity IDE prompt scanner
-│   ├── log_manual.py     #    Manual log cho ChatGPT / web tools
-│   ├── submit_log.py     #    Submit logs on git push
-│   └── setup_hooks.sh    #    One-time hook installer
-├── .claude/ .codex/ .cursor/ .gemini/  # Per-tool hook configs
-├── .agents/              # Antigravity rules + workflows
-├── .ai-log/              # 📊 AI usage logs (auto-generated)
-├── docs/
-│   ├── guide/            # 📖 Technical Guidebook (10 chapters)
-│   └── architecture_diagram.md
-├── eval/                 # 📊 Evaluation results
-├── presentation/         # 🎤 Demo Day slides
-├── .github/workflows/    # ⚡ CI/CD (GitHub Actions)
-├── .github/hooks/        # 🪝 Copilot hook config
-├── Dockerfile            # 🐳 Multi-stage build
-├── docker-compose.yml    # 🐙 Full stack orchestration
-└── README_boilerplate.md # 📝 README template cho đội của bạn
-```
-
-## 📚 Technical Guidebook — 10 Chương
-
-| Chương | Nội dung | Thời gian |
-|---------|----------|-----------|
-| 1 | Lời mở đầu — Mục tiêu, cách sử dụng | 15 phút |
-| 2 | Khởi tạo dự án — Clone, setup, git workflow | 4 giờ |
-| 3 | Thiết kế kiến trúc — 3-tier, diagrams, ADR | 6 giờ |
-| 4 | **LangGraph Agent** — State, nodes, edges, tools, RAG | 8 giờ |
-| 5 | FastAPI — Routes, validation, error handling, streaming | 6 giờ |
-| 6 | Giao diện — Next.js + Streamlit quickstart | 6 giờ |
-| 7 | DevOps — Docker, CI/CD, deploy, logging | 6 giờ |
-| 8 | Kiểm thử — Unit test, integration test, RAGAS | 4 giờ |
-| 9 | Demo Day — 10 deliverables, checklist, tips | 2 giờ |
-| 10 | Tài nguyên — Khóa học, docs, BMAD method | tham khảo |
-
-📖 **Đọc online:** [phoenix.note.transformerlabs.ai/technical-book](https://phoenix.note.transformerlabs.ai/technical-book)
-
-## 📋 10 Deliverables cho Demo Day
-
-| # | Deliverable | File vị trí | Template có sẵn |
-|---|-------------|-------------|:---:|
-| 1 | Source Code | `src/` | ✅ |
-| 2 | README.md | `README_boilerplate.md` → copy thành `README.md` | ✅ |
-| 3 | Architecture Diagram | `docs/architecture_diagram.md` | ✅ |
-| 4 | AI Logs | LangSmith (3 env vars) + Auto AI Usage Logging | ✅ |
-| 5 | Live URL | Deploy lên Render/Vercel | ⚡ CI/CD sẵn |
-| 6 | Video Demo | `presentation/` | 📝 |
-| 7 | Pitch Deck | `presentation/` | 📝 |
-| 8 | Development Journal | `JOURNAL.md` | ✅ |
-| 9 | Worklog | `WORKLOG.md` | ✅ |
-| 10 | Evaluation Evidence | `eval/` | 📝 |
-
-## 🛠 Tech Stack
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| AI Agent | LangGraph + LangChain | Latest |
-| Backend | FastAPI + Uvicorn | 0.100+ |
-| LLM | OpenAI GPT-4o-mini | API |
-| Frontend | Next.js / Streamlit | 14+ / 1.30+ |
-| Database | SQLite (dev) / PostgreSQL (prod) | — |
-| DevOps | Docker + GitHub Actions | — |
-| Testing | pytest + pytest-asyncio | 8+ |
-
-## 📊 AI Usage Logging
-
-Template đã tích hợp sẵn auto-logging hooks cho 6 AI tools:
-
-| Tool | Cơ chế | Config |
-|------|--------|--------|
-| Claude Code | `.claude/settings.json` hooks | Tự động |
-| Cursor | `.cursor/hooks.json` | Tự động |
-| OpenAI Codex CLI | `.codex/hooks.json` | Tự động |
-| Gemini CLI | `.gemini/settings.json` | Tự động |
-| GitHub Copilot | `.github/hooks/hooks.json` | Tự động |
-| Antigravity IDE | Pre-push scan transcript | Tự động trên `git push` |
-
-Tất cả prompts và tool calls được log vào `.ai-log/session.jsonl` và tự động submit lên grading server mỗi khi `git push`.
-
-**ChatGPT / web tools khác** — log thủ công:
-```bash
-bash scripts/_pyrun.sh scripts/log_manual.py --tool chatgpt --prompt "What you asked"
-```
-
-> ⚠️ Chạy `bash scripts/setup_hooks.sh` một lần sau khi clone để cài pre-push hook.
-
-## 📖 Đọc Technical Guidebook
-
-**Online (khuyến nghị):** [phoenix.note.transformerlabs.ai/technical-book](https://phoenix.note.transformerlabs.ai/technical-book)
-
-Đăng nhập bằng GitHub (cùng account đã được BTC mời vào org `AI20K-Build-Cohort-2`)
-→ chọn tab **Technical Book** ở sidebar trái → đọc 10 chương + topic sections,
-có table of contents bên phải, hỗ trợ light/dark/cyberpunk theme.
-
-**Offline:** mọi chương đều ở thư mục `docs/guide/` trong template này — mở bằng
-bất kỳ markdown viewer/editor nào (VS Code, Obsidian, GitHub UI, …).
-
-## 🔗 Liên kết
-
-- 📖 **Technical Guidebook:** [phoenix.note.transformerlabs.ai/technical-book](https://phoenix.note.transformerlabs.ai/technical-book)
-- 🏫 **AI20K Program:** VinUni AI20K Build Phase
-- 👨‍🏫 **Mentor:** Đặng Hải Lộc
-
-## 📄 License
-
-MIT — Sử dụng tự do cho mục đích giáo dục.

@@ -44,7 +44,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Fix Windows console encoding so VN diacritics in prompts print cleanly.
@@ -119,15 +119,10 @@ def _unquote_arg(val):
     return val
 
 
-def _conv_matches_repo(transcript: Path, repo_root_n: str) -> bool:
-    """True if the transcript has ANY indication of belonging to repo_root_n."""
-    if not repo_root_n:
-        return False
+def _conv_cwds(transcript: Path) -> set[str]:
+    """All Cwd values that appear in tool calls inside this transcript."""
+    cwds: set[str] = set()
     try:
-        content = transcript.read_text(encoding="utf-8").lower()
-        if repo_root_n in content or repo_root_n.replace("\\", "/") in content:
-            return True
-
         with open(transcript, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -139,14 +134,28 @@ def _conv_matches_repo(transcript: Path, repo_root_n: str) -> bool:
                     continue
                 for tc in (entry.get("tool_calls") or []):
                     args = tc.get("args") or {}
-                    for v in args.values():
-                        v_un = _unquote_arg(v)
-                        if isinstance(v_un, str):
-                            n = _normalize(v_un)
-                            if n and (n == repo_root_n or n.startswith(repo_root_n + "\\") or repo_root_n.startswith(n + "\\")):
-                                return True
+                    cwd = args.get("Cwd") or args.get("cwd")
+                    cwd = _unquote_arg(cwd)
+                    if isinstance(cwd, str):
+                        n = _normalize(cwd)
+                        if n:
+                            cwds.add(n)
     except OSError:
         pass
+    return cwds
+
+
+def _conv_matches_repo(cwds: set[str], repo_root_n: str) -> bool:
+    """True if any cwd is equal to, ancestor of, or descendant of the repo."""
+    if not repo_root_n or not cwds:
+        return False
+    for cwd in cwds:
+        if cwd == repo_root_n:
+            return True
+        if cwd.startswith(repo_root_n + "\\"):
+            return True
+        if repo_root_n.startswith(cwd + "\\"):
+            return True
     return False
 
 
@@ -193,14 +202,6 @@ def get_logged_entry_ids(log_file: Path) -> set[str]:
 # Iterating user inputs
 # ---------------------------------------------------------------------------
 
-def _find_transcript(conv_dir: Path) -> Path | None:
-    for name in ("transcript.jsonl", "overview.txt"):
-        p = conv_dir / ".system_generated" / "logs" / name
-        if p.exists() and p.stat().st_size > 0:
-            return p
-    return None
-
-
 def iter_user_inputs(brain_dirs: list[Path], cutoff: datetime | None,
                      only_conv: str | None, repo_root_n: str):
     """Yield user-input dicts from every matching conversation transcript."""
@@ -210,12 +211,15 @@ def iter_user_inputs(brain_dirs: list[Path], cutoff: datetime | None,
                 continue
             if only_conv and conv_dir.name != only_conv:
                 continue
-            transcript = _find_transcript(conv_dir)
-            if transcript is None:
+            transcript = (
+                conv_dir / ".system_generated" / "logs" / "transcript.jsonl"
+            )
+            if not transcript.exists() or transcript.stat().st_size == 0:
                 continue
 
+            cwds = _conv_cwds(transcript)
             # If we have a repo root, skip convs that never touched it.
-            if repo_root_n and not _conv_matches_repo(transcript, repo_root_n):
+            if repo_root_n and not _conv_matches_repo(cwds, repo_root_n):
                 continue
 
             with open(transcript, encoding="utf-8") as f:

@@ -7,6 +7,7 @@ dist/
 build/
 .eggs/
 
+
 # Virtual environments
 venv/
 .venv/
@@ -28,11 +29,19 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data (never commit large data)
-data/
+# Data
+# Ignore everything inside data
+data/**
+
+# Allow Git to enter all subfolders
+!data/**/
+
+# Allow all JSON files recursively
+!data/**/*.json
+
 *.db
 *.sqlite3
-
+!storage/chroma_local/chroma.sqlite3
 # Logs
 logs/
 *.log

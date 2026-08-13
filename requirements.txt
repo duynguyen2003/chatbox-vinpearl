@@ -21,5 +21,31 @@ langgraph>=0.2.0
 # Dev tools
 ruff>=0.8.0
 pytest>=8.0.0
+
 pytest-asyncio>=0.24.0
 httpx>=0.28.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+python-dotenv>=1.0.0
+openai>=1.60.0
+langgraph>=0.2.0
+chromadb>=0.5.0
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+httpx>=0.28.0
+sentence-transformers>=3.0.0
+torch>=2.2.0
+litellm>=1.75.0
+
+# Database
+sqlalchemy>=2.0.36
+alembic>=1.14.0
+pyyaml>=6.0.2
+# Driver PostgreSQL thuần Python. Chọn pg8000 vì psycopg[binary] và psycopg2-binary
+# đều bị Windows Application Control policy chặn không nạp được DLL trên máy dev.
+# Ở quy mô ~4.400 dòng thì chênh lệch tốc độ so với psycopg không đáng kể.
+pg8000>=1.31.0
+redis>=5.0,<6.0
+psycopg2-binary>=2.9,<3.0
