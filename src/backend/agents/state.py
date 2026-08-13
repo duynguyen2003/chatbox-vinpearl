@@ -18,6 +18,7 @@ class AgentState(TypedDict, total=False):
     recent_destination_summary: str
 
     original_language: str
+    original_language_name: str
     rag_query: str
     route: RouteName
 

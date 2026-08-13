@@ -3,6 +3,7 @@ from langgraph.graph import END, START, StateGraph
 from src.backend.agents.nodes.answer import generate_answer
 from src.backend.agents.nodes.classify import classify_input
 from src.backend.agents.nodes.language import detect_language_and_translate
+from src.backend.agents.nodes.language_guard import enforce_response_language
 from src.backend.agents.nodes.grounding import validate_grounding
 from src.backend.agents.nodes.memory import (
     load_conversation_memory,
@@ -55,6 +56,7 @@ builder.add_node("support_triage", analyze_support_request)
 builder.add_node("assess", assess_information)
 builder.add_node("answer", generate_answer)
 builder.add_node("grounding", validate_grounding)
+builder.add_node("language_guard", enforce_response_language)
 builder.add_node("no_data", no_data_response)
 builder.add_node("ticket", create_ticket)
 builder.add_node("save_memory", save_conversation_memory)
@@ -93,13 +95,14 @@ builder.add_conditional_edges(
     },
 )
 
-builder.add_edge("conversation_context", "save_memory")
-builder.add_edge("greeting", "save_memory")
-builder.add_edge("out_of_scope", "save_memory")
+builder.add_edge("conversation_context", "language_guard")
+builder.add_edge("greeting", "language_guard")
+builder.add_edge("out_of_scope", "language_guard")
 builder.add_edge("answer", "grounding")
-builder.add_edge("grounding", "save_memory")
-builder.add_edge("no_data", "save_memory")
-builder.add_edge("ticket", "save_memory")
+builder.add_edge("grounding", "language_guard")
+builder.add_edge("no_data", "language_guard")
+builder.add_edge("ticket", "language_guard")
+builder.add_edge("language_guard", "save_memory")
 builder.add_edge("save_memory", END)
 
 agent_graph = builder.compile()
