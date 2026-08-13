@@ -12,7 +12,7 @@ py -3.11 -m venv .venv
 ### Cài dependencies
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install -r requirements.txt 
 ```
 
 ---
