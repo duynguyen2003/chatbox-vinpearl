@@ -119,6 +119,11 @@ export async function fetchAboutInfo() {
   return res.json();
 }
 
+/**
+ * Fetch FAQs from PostgreSQL-backed API.
+ * @param {{q?: string, category?: string, destination?: string, page?: number, pageSize?: number}} [filters]
+ * @returns {Promise<import('../types').FaqListResponse>}
+ */
 export async function fetchFaqs(filters = {}) {
   const params = new URLSearchParams();
   if (filters.q) params.set('q', filters.q);
@@ -126,6 +131,7 @@ export async function fetchFaqs(filters = {}) {
   if (filters.destination) params.set('destination', filters.destination);
   params.set('page', String(filters.page || 1));
   params.set('page_size', String(filters.pageSize || 20));
+
   const query = params.toString();
   const res = await apiFetch(`/api/v1/faqs${query ? `?${query}` : ''}`);
   if (!res.ok) throw new Error(`FAQ API returned status ${res.status}`);

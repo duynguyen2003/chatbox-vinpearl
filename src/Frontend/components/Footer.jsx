@@ -70,7 +70,7 @@ function Footer() {
                 <li><Link className="footer__link" to="/about">{t.vpAboutUs}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpContact}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpCareers}</Link></li>
-                <li><Link className="footer__link" to="/">{t.vpFAQ}</Link></li>
+                <li><Link className="footer__link" to="/faq">{t.vpFAQ}</Link></li>
                 <li><Link className="footer__link" to="/">{t.vpSitemap}</Link></li>
               </ul>
             </div>
