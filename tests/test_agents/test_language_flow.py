@@ -13,6 +13,10 @@ class _FakeJsonLLM:
             "language_name": "Thai",
             "rag_query": "Vinpearl greeting",
             "route": "greeting",
+            "safety_action": "allow",
+            "safety_category": "safe",
+            "safety_reason": "Benign greeting.",
+            "safety_confidence": 0.99,
         }
 
 
@@ -46,6 +50,8 @@ def test_language_node_uses_current_message_and_returns_language_name(monkeypatc
     assert result["original_language"] == "th-TH"
     assert result["original_language_name"] == "Thai"
     assert result["route"] == "greeting"
+    assert result["safety_action"] == "allow"
+    assert result["safety_category"] == "safe"
 
 
 def test_final_language_guard_forces_target_language(monkeypatch) -> None:

@@ -5,6 +5,7 @@ RouteName = Literal["greeting", "out_of_scope", "conversation_context", "rag"]
 InsufficiencyAction = Literal["no_data", "ticket"]
 RequestMode = Literal["information", "support_action"]
 ResolutionMode = Literal["information_only", "self_serve", "human_required"]
+SafetyAction = Literal["allow", "block"]
 
 
 class AgentState(TypedDict, total=False):
@@ -21,6 +22,14 @@ class AgentState(TypedDict, total=False):
     original_language_name: str
     rag_query: str
     route: RouteName
+
+    # Semantic safety guard. This is intentionally model-classified rather than
+    # keyword-matched so paraphrases, euphemisms and multilingual requests are
+    # handled consistently.
+    safety_action: SafetyAction
+    safety_category: str
+    safety_reason: str
+    safety_confidence: float
 
     retrieved_documents: list[dict[str, Any]]
     context: str

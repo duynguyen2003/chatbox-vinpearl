@@ -16,6 +16,7 @@ from src.backend.agents.nodes.static_responses import (
     greeting_response,
     no_data_response,
     out_of_scope_response,
+    sensitive_content_response,
 )
 from src.backend.agents.nodes.ticket import create_ticket
 from src.backend.agents.state import AgentState
@@ -23,6 +24,11 @@ from src.backend.agents.state import AgentState
 
 def route_after_classification(state: AgentState) -> str:
     return state["route"]
+
+
+def route_after_safety(state: AgentState) -> str:
+    """Stop sensitive requests before classification, retrieval, or ticket creation."""
+    return "sensitive" if state.get("safety_action") == "block" else "classify"
 
 
 def route_after_support_triage(state: AgentState) -> str:
@@ -48,6 +54,7 @@ builder = StateGraph(AgentState)
 builder.add_node("load_memory", load_conversation_memory)
 builder.add_node("language", detect_language_and_translate)
 builder.add_node("classify", classify_input)
+builder.add_node("sensitive", sensitive_content_response)
 builder.add_node("conversation_context", conversation_context_response)
 builder.add_node("greeting", greeting_response)
 builder.add_node("out_of_scope", out_of_scope_response)
@@ -63,7 +70,14 @@ builder.add_node("save_memory", save_conversation_memory)
 
 builder.add_edge(START, "load_memory")
 builder.add_edge("load_memory", "language")
-builder.add_edge("language", "classify")
+builder.add_conditional_edges(
+    "language",
+    route_after_safety,
+    {
+        "sensitive": "sensitive",
+        "classify": "classify",
+    },
+)
 
 builder.add_conditional_edges(
     "classify",
@@ -98,6 +112,7 @@ builder.add_conditional_edges(
 builder.add_edge("conversation_context", "language_guard")
 builder.add_edge("greeting", "language_guard")
 builder.add_edge("out_of_scope", "language_guard")
+builder.add_edge("sensitive", "language_guard")
 builder.add_edge("answer", "grounding")
 builder.add_edge("grounding", "language_guard")
 builder.add_edge("no_data", "language_guard")
