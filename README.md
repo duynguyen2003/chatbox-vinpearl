@@ -1,4 +1,8 @@
 # P-013 — Vinpearl Multilingual Travel Agent
+## LINK SCHEMAS
+
+https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
+
 
 ## 1. Setup môi trường local
 
@@ -621,6 +625,3 @@ Nếu thay đổi Frontend:
 - CORS đã cấu hình cho Frontend Railway
 - Chroma production collection đã ingest và được Backend sử dụng cho RAG
 
-### Ghi chú
-
-Các phần trong README chưa được xác nhận hoặc không liên quan trực tiếp đến Railway deployment được giữ nguyên, không tự ý xóa hoặc thay đổi.
