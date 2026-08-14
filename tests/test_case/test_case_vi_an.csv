@@ -1,0 +1,826 @@
+﻿test_id,type,user_message,reference_hint,assistant_answer,response_time_ms,status
+faq-004,FAQ - General,"Nếu có yêu cầu đặc biệt, tôi cần liên hệ với ai để được hỗ trợ?","Các yêu cầu đặc biệt như phòng tầng cao, phòng thông nhau, trang trí phòng... sẽ được đáp ứng tùy thuộc vào tình trạng phòng trống của khách sạn tại thời điểm nhận phòng. Vui lòng liên hệ Tổng đài Chăm sóc Khách hàng theo số 1900232389, nhánh 3 để được hỗ trợ.","Đối với các yêu cầu đặc biệt, bạn có thể liên hệ hỗ trợ như sau:
+
+*   **Đối với các yêu cầu đặc biệt tại khách sạn:** Các yêu cầu như phòng tầng cao, phòng thông nhau, trang trí phòng... sẽ được cung cấp tùy thuộc vào tình trạng sẵn có của khách sạn tại thời điểm nhận phòng. Bạn vui lòng liên hệ Tổng đài Chăm sóc khách hàng theo số **1900232389 (nhánh 3)** để được hỗ trợ.
+*   **Đối với các yêu cầu liên quan đến đặt dịch vụ (với voucher):** Nếu voucher của bạn yêu cầu đặt chỗ trước, bạn vui lòng liên hệ Tổng đài Chăm sóc khách hàng theo số **1900232389** hoặc liên hệ bộ phận đặt phòng của khách sạn để xác nhận. Đối với các dịch vụ bổ sung (như đặt thêm dịch vụ cho các thành viên khác), bạn có thể liên hệ nhân viên khách sạn hoặc nhân viên Spa để được hỗ trợ. Ngoài ra, bạn cũng có thể phản hồi email xác nhận đặt phòng thành công để cung cấp thông tin voucher và yêu cầu dịch vụ đến bộ phận đặt phòng.",21256,pass
+faq-008,FAQ - General,Quy trình hoàn tiền mất bao lâu?,Thời gian trung bình của quy trình hoàn tiền là khoảng 30-45 ngày sau khi Vinpearl nhận được yêu cầu của Khách hàng.,"Thời gian hoàn tiền tại Vinpearl được quy định như sau:
+
+*   **Thời gian trung bình:** Thông thường, quy trình hoàn tiền mất khoảng 30-45 ngày sau khi nhận được yêu cầu từ khách hàng.
+*   **Trường hợp lỗi kỹ thuật hoặc lỗi dữ liệu:** Trong trường hợp Vinpearl từ chối thực hiện giao dịch do lỗi kỹ thuật (như lỗi máy móc, phần mềm, hệ thống kết nối internet, website bị nhiễm virus) hoặc lỗi dữ liệu (như lỗi giá cả, điều kiện), khoản thanh toán liên quan đến giao dịch bị từ chối sẽ được hoàn lại cho khách hàng trong vòng tối đa 45 ngày làm việc.",25999,pass
+faq-012,FAQ - Hotels,"Nếu có yêu cầu đặc biệt, tôi cần liên hệ với ai để được hỗ trợ?","Các yêu cầu đặc biệt như phòng tầng cao, phòng thông nhau, trang trí phòng... sẽ được đáp ứng tùy thuộc vào tình trạng phòng trống của khách sạn tại thời điểm nhận phòng. Vui lòng liên hệ Tổng đài Chăm sóc Khách hàng theo số 1900232389 để được hỗ trợ.","Đối với các yêu cầu đặc biệt, bạn có thể liên hệ hỗ trợ như sau:
+
+*   **Đối với các yêu cầu đặc biệt chung (ví dụ: phòng tầng cao, phòng thông nhau, trang trí phòng...):** Các yêu cầu này sẽ được cung cấp tùy thuộc vào tình trạng sẵn có của khách sạn tại thời điểm nhận phòng. Bạn vui lòng liên hệ Tổng đài Chăm sóc Khách hàng theo số **1900232389 (nhánh 3)** để được hỗ trợ.
+*   **Đối với các yêu cầu liên quan đến đặt dịch vụ (với voucher yêu cầu đặt trước):** Bạn vui lòng liên hệ Tổng đài Chăm sóc Khách hàng theo số **1900232389** hoặc liên hệ bộ phận đặt phòng của khách sạn để xác nhận đặt chỗ.
+*   **Đối với các yêu cầu đặt thêm dịch vụ cho các thành viên khác (ví dụ: dịch vụ Spa):** Bạn vui lòng liên hệ trực tiếp với nhân viên khách sạn hoặc nhân viên Spa để được hỗ trợ.
+*   **Đối với các yêu cầu liên quan đến dịch vụ ""Welcome set"":** Bạn vui lòng cung cấp thông tin voucher và thông tin phòng muốn thiết lập dịch vụ cho bộ phận đặt phòng bằng cách phản hồi email xác nhận đặt phòng thành công ngay sau khi nhận được mã voucher.",24932,pass
+faq-016,FAQ - Hotels,Thông tin chi tiết về dịch vụ đưa đón sân bay như thế nào?,"Thông tin chi tiết về loại xe, phí sử dụng, phí hủy dịch vụ... được cung cấp trước trong xác nhận đặt phòng của từng khách sạn. Nếu cần tự đặt xe, quý khách có thể liên hệ số điện thoại của khách sạn hoặc Hotline 1900232389 để được hỗ trợ.","Dưới đây là thông tin chi tiết về dịch vụ đưa đón sân bay tại Vinpearl dựa trên các quy định hiện hành:
+
+**1. Quy định chung về dịch vụ đưa đón:**
+*   **Đối với dịch vụ miễn phí:** Không áp dụng phí hủy dịch vụ.
+*   **Đối với dịch vụ có tính phí:** Thông tin chi tiết về loại xe, phí sử dụng và phí hủy dịch vụ sẽ được cung cấp trước trong xác nhận đặt phòng của từng khách sạn.
+
+**2. Quy định đặt xe riêng:**
+*   Khách hàng cần cung cấp số hiệu chuyến bay và thời gian bay cho khách sạn ít nhất **05 ngày** trước ngày nhận phòng để khách sạn sắp xếp việc đưa đón.
+*   Nếu có thay đổi hoặc hủy yêu cầu đưa đón, khách hàng cần thông báo cho khách sạn ít nhất **03 ngày (72 giờ)** trước ngày nhận phòng. Mọi thông báo sau thời hạn này sẽ phải chịu phí hủy dịch vụ.
+
+**3. Quy trình đón và tiễn khách:**
+*   **Đón khách:** Nhân viên lễ tân sân bay sẽ đón khách tại quầy lễ tân của Vinpearl đặt tại khu vực sảnh đến. Quý khách vui lòng tìm biển đón hoặc liên hệ với quầy lễ tân sân bay qua số điện thoại được cung cấp trong xác nhận Yêu cầu dịch vụ.
+*   **Tiễn khách:** Đối với dịch vụ đưa tiễn miễn phí, khách hàng cần có mặt tại khu vực sảnh khách sạn **15 phút** trước giờ khởi hành. Trong trường hợp khách đến muộn, xe buýt của khách sạn vẫn sẽ di chuyển ra sân bay để đảm bảo không ảnh hưởng đến các khách hàng khác. Khách hàng đến muộn sẽ tự chịu chi phí vận chuyển của mình ra sân bay.
+
+**4. Lưu ý khác:**
+*   Một số cơ sở (ví dụ: VinHolidays Fiesta Phu Quoc) có thể cung cấp dịch vụ đưa đón sân bay - khách sạn bằng VinBus miễn phí. Quý khách có thể kiểm tra lịch trình di chuyển trên ứng dụng điện thoại VinBus hoặc truy cập website của VinBus.
+*   Thông tin liên hệ đặt dịch vụ cho từng khách sạn được quy định cụ thể trong thông tin khách sạn đăng tải trên website và tại trang: https://vinpearl.com/vi/contact.",29747,pass
+faq-020,FAQ - Hotels,Số lượng người tối đa cho một phòng là bao nhiêu?,"Số lượng người tối đa cho một phòng khách sạn là 04 người/phòng, cụ thể: 03 người lớn và 01 trẻ em hoặc 02 người lớn và 02 trẻ em. Đối với Villa, số người tối đa trên mỗi phòng ngủ là 02 người lớn và 02 trẻ em dưới 12 tuổi. Riêng Vinpearl Luxury Nha Trang áp dụng theo tiêu chuẩn của khách sạn.","Số lượng người tối đa cho một phòng tại các khách sạn Vinpearl được quy định như sau:
+
+*   **Đối với phòng khách sạn:** Tối đa 04 người/phòng, cụ thể là 03 người lớn & 01 trẻ em hoặc 02 người lớn & 02 trẻ em (bao gồm cả trẻ em dưới 04 tuổi). Mỗi phòng chỉ được đặt tối đa 01 giường phụ tùy theo chính sách của từng khách sạn.
+*   **Đối với biệt thự (Villa):** Tối đa 02 người lớn và 02 trẻ em dưới 12 tuổi cho mỗi phòng ngủ. Lưu ý rằng không được phép kê thêm giường phụ trong các biệt thự, ngoại trừ trường hợp tại Vinpearl Luxury Nha Trang.
+
+Các quy định trên áp dụng trừ các trường hợp đặc biệt được nêu rõ khác. Ngoài ra, các khoản phụ thu sẽ được áp dụng cho trẻ em từ 04 đến dưới 12 tuổi và người lớn từ 12 tuổi trở lên.",24359,pass
+faq-024,FAQ - Bundle Hotels Flights,Gói khách sạn + chuyến bay đặt trên website đã bao gồm dịch vụ đưa đón sân bay chưa?,Dịch vụ đưa đón sân bay có được bao gồm trong combo Khách sạn + Vé máy bay hay không phụ thuộc vào các dịch vụ được liệt kê trong gói mà Khách hàng lựa chọn.,"Đối với câu hỏi của bạn về việc gói khách sạn và chuyến bay đặt trên website có bao gồm dịch vụ đưa đón sân bay hay không, thông tin từ hệ thống như sau:
+
+*   **Về dịch vụ đưa đón sân bay trong gói:** Các dịch vụ đi kèm sẽ phụ thuộc vào gói cụ thể mà khách hàng lựa chọn.
+*   **Thông tin chi tiết về dịch vụ:**
+    *   Đối với các khách sạn cung cấp dịch vụ đưa đón sân bay miễn phí, sẽ không áp dụng phí hủy dịch vụ.
+    *   Đối với các khách sạn cung cấp dịch vụ đưa đón sân bay có tính phí, thông tin chi tiết về loại xe, phí sử dụng và phí hủy dịch vụ sẽ được cung cấp trước trong xác nhận đặt phòng của từng khách sạn.
+    *   Nếu bạn có yêu cầu đưa đón, bạn cần cung cấp thông tin chuyến bay và thời gian dự kiến đến khách sạn cho bộ phận đặt phòng ít nhất 05 ngày trước ngày nhận phòng. Trong trường hợp đặt xe riêng, nếu có thay đổi hoặc hủy yêu cầu, bạn cần thông báo cho khách sạn ít nhất 03 ngày (72 giờ) trước ngày nhận phòng.",23754,pass
+faq-028,FAQ - Tours Experiences,Tôi có nhận được ưu đãi gì khi mua voucher số lượng lớn không?,Khách hàng mua voucher với số lượng lớn sẽ nhận được các ưu đãi tùy theo chính sách của từng chương trình khuyến mãi.,Hiện cơ sở dữ liệu Vinpearl/VinWonders chưa có đủ thông tin để xác nhận nội dung này.,15775,pass
+faq-032,FAQ - Tours Experiences,Voucher có thể quy đổi thành tiền mặt không?,Voucher không được quy đổi thành tiền mặt và không được hoàn tiền.,Các voucher của Vinpearl và VinWonders không thể quy đổi thành tiền mặt và không được hoàn tiền.,66286,pass
+faq-036,FAQ - Tours Experiences,Giá vé đã bao gồm các trò chơi chưa?,Việc giá trò chơi có được bao gồm trong Voucher hay không phụ thuộc vào điều khoản và điều kiện của từng Voucher. Vui lòng liên hệ Tổng đài Chăm sóc Khách hàng theo số 1900232389 để được hỗ trợ.,"Việc giá vé đã bao gồm các trò chơi hay chưa phụ thuộc vào từng cơ sở VinWonders cụ thể:
+
+*   **Tại VinWonders Nam Hội An:** Giá vé đã bao gồm quyền tham quan và vui chơi tại tất cả các khu vực: Công viên nước, River Safari, Đảo Văn hóa dân gian, các khu trò chơi trong nhà và ngoài trời, cùng các chương trình biểu diễn trong ngày. Giá vé không bao gồm các dịch vụ mua sắm, ăn uống hoặc các dịch vụ phát sinh khác như thuê xe điện, thuê tủ đồ, thuê khăn tắm, v.v.
+*   **Tại VinWonders Nha Trang:** Giá vé trọn gói đã bao gồm vé cáp treo, các trò chơi trong nhà và ngoài trời, Công viên nước, Thủy cung, Vườn Quý Vương, Đồi Vạn Hoa, cùng các chương trình biểu diễn. Tuy nhiên, vé này không bao gồm các trò chơi thể thao dưới nước và các dịch vụ cá nhân như ăn uống, mua sắm, thuê tủ đồ, thuê khăn tắm và các dịch vụ tiện ích khác.
+*   **Đối với các loại voucher khác:** Việc giá vé đã bao gồm các trò chơi hay chưa phụ thuộc vào điều khoản và điều kiện cụ thể của từng loại voucher. Bạn vui lòng liên hệ Tổng đài Chăm sóc khách hàng qua số 1900232389 để được hỗ trợ chi tiết.",22210,pass
+faq-040,FAQ - Tours Experiences,Khách lưu trú tại Vinpearl có được miễn phí vé vào cửa Grand World Phú Quốc không?,"Grand World Phú Quốc miễn phí vé vào cửa cho tất cả Khách hàng. Khách cần tự thanh toán các dịch vụ khác như mua sắm, ăn uống, vé Bảo tàng Gấu Teddy, show Tinh hoa Việt Nam và show Sắc màu Venice.","Dựa trên cơ sở dữ liệu hiện có, thông tin về việc khách lưu trú tại Vinpearl có được miễn phí vé vào cửa Grand World Phú Quốc hay không không được ghi nhận hoặc không có đủ thông tin để xác nhận.
+
+Cơ sở dữ liệu hiện tại chỉ cung cấp thông tin về các gói dịch vụ như ""Full-Flavored Phu Quoc"" hoặc ""Ultimate Phu Quoc"" cho phép du khách tham quan Bảo tàng Gấu Teddy và khám phá Grand World, cũng như các chương trình khuyến mãi như mua combo vé VinWonders và Vinpearl Safari để nhận ưu đãi vé trẻ em tại Bảo tàng Gấu Teddy.",15951,pass
+faq-044,FAQ - Tours Experiences,Làm thế nào để nhận ưu đãi dành cho cư dân địa phương?,"Grand World Phú Quốc có ưu đãi đặc biệt cho cư dân tỉnh Kiên Giang hoặc một số tỉnh được quy định. Khách cần xuất trình giấy tờ tùy thân hợp lệ tại quầy vé như CMND/CCCD, giấy phép lái xe, thẻ học sinh đối với khách cao trên 140cm và giấy khai sinh đối với trẻ dưới 140cm.","Để nhận ưu đãi dành cho cư dân địa phương tại VinWonders, bạn có thể thực hiện theo hướng dẫn sau:
+
+Hiện tại, VinWonders Phú Quốc có cung cấp các ưu đãi đặc biệt dành cho cư dân tại tỉnh Kiên Giang hoặc một số tỉnh thành được liệt kê. Để nhận ưu đãi này, bạn vui lòng xuất trình giấy tờ tùy thân hợp lệ tại quầy vé, bao gồm:
+*   **Đối với khách trên 140cm:** Căn cước công dân, bằng lái xe hoặc thẻ học sinh.
+*   **Đối với trẻ em dưới 140cm:** Giấy khai sinh.
+
+Thông tin này được ghi nhận tại cơ sở dữ liệu của chúng tôi dành riêng cho điểm đến Phú Quốc.",25180,pass
+faq-048,FAQ - Tours Experiences,Tôi có được mang thú cưng vào Grand World Phú Quốc không?,Thú cưng hoặc các loại động vật sống khác không được phép mang vào Grand World Phú Quốc.,"Hiện tại, cơ sở dữ liệu của chúng tôi không có đủ thông tin để xác nhận quy định về việc mang thú cưng vào Grand World Phú Quốc.",14127,pass
+faq-052,FAQ - Flights,Tôi có thể thay đổi ngày giờ bay không?,"Quy định đổi ngày/giờ vé khác nhau theo hãng: Vietjet Air - hạng SkyBoss được đổi miễn phí và thanh toán chênh lệch giá vé nếu có; hạng Eco, Promo phải trả phí đổi và chênh lệch giá nếu có. Vietnam Airlines - vé Flexible được đổi miễn phí; vé Standard được đổi có tính phí; vé Economy theo nội dung FAQ không được đổi. Bamboo Airways - hạng Business được đổi miễn phí và thanh toán chênh lệch nếu có; hạng Eco, Plus phải trả phí đổi và chênh lệch giá nếu có. Liên hệ Hotline 0987 328 681 hoặc email onlineticket@vinpearl.com để được hỗ trợ.","Mình chỉ có thể hỗ trợ các nội dung liên quan đến Vinpearl/VinWonders và hướng dẫn thanh toán. Bạn có thể hỏi mình về điểm đến, khách sạn, vui chơi, ưu đãi hoặc chính sách nhé.",3057,pass
+faq-056,FAQ - Flights,Phụ nữ mang thai cần lưu ý những gì khi đi máy bay?,"Phụ nữ mang thai có tình trạng sức khỏe tốt có thể đi máy bay nhưng phải tuân thủ quy định của hãng hàng không. Từ tuần 32 đến 36 cần xác nhận tình trạng sức khỏe trước chuyến bay. Từ tuần 36 trở lên, hoặc dự kiến sinh trong vòng 07 ngày trước ngày khởi hành, hoặc phụ nữ trong vòng 07 ngày sau sinh thì không được vận chuyển theo nội dung FAQ. Cần có xác nhận y tế trước chuyến bay nếu: không xác định rõ tuổi thai hoặc ngày dự sinh; từng mang thai đôi hoặc ba; có biến chứng có thể xảy ra khi sinh; hoặc mang thai bằng phương pháp thụ tinh nhân tạo. Liên hệ Hotline 0987 328 681 hoặc email onlineticket@vinpearl.com để được hỗ trợ.","Mình chỉ có thể hỗ trợ các nội dung liên quan đến Vinpearl/VinWonders và hướng dẫn thanh toán. Bạn có thể hỏi mình về điểm đến, khách sạn, vui chơi, ưu đãi hoặc chính sách nhé.",2587,pass
+faq-060,FAQ - VinClub,Khách hàng được hưởng những quyền lợi gì? Tôi có thể đăng ký thẻ thành viên VinClub ở đâu?,Quyền lợi Khách hàng được hưởng phụ thuộc vào từng hạng thẻ. Có thể tham khảo chi tiết quyền lợi từng hạng thẻ và hệ thống áp dụng tại: https://www.vinpearl.com/vi/vinclub,"Chào bạn, dưới đây là thông tin về chương trình thành viên VinClub dựa trên dữ liệu hiện có:
+
+**Quyền lợi của khách hàng khi tham gia VinClub:**
+*   **Các ưu đãi độc quyền:** VinClub là chương trình khách hàng thân thiết mang đến nhiều đặc quyền cho thành viên. Tùy thuộc vào hạng thẻ, khách hàng sẽ được hưởng các ưu đãi khác nhau khi trải nghiệm dịch vụ trong hệ sinh thái Vinpearl - VinWonders.
+*   **Ưu đãi nâng hạng và quà tặng sinh nhật:** Khi nâng hạng thẻ hoặc trong tháng sinh nhật, khách hàng sẽ nhận được các voucher ưu đãi hấp dẫn để tận hưởng trọn vẹn các dịch vụ.
+*   **Lưu ý về quyền lợi:** 
+    *   Quyền lợi thành viên chỉ áp dụng khi có sự hiện diện của chủ thẻ.
+    *   Các ưu đãi không áp dụng cho sản phẩm có cồn, Almaz Phu Quoc và các giai đoạn cao điểm theo thông tin của khách sạn.
+    *   Bạn nên đăng nhập vào tài khoản VinClub để kiểm tra và sử dụng voucher đúng thời hạn.
+
+**Đăng ký thẻ thành viên VinClub:**
+*   Hiện tại, cơ sở dữ liệu không ghi nhận thông tin chi tiết về địa điểm cụ thể để đăng ký thẻ trực tiếp. Tuy nhiên, bạn có thể tham khảo thông tin chi tiết về các hạng thẻ và hệ thống áp dụng tại website: [https://www.vinpearl.com/vi/vinclub](https://www.vinpearl.com/vi/vinclub).
+*   Thông tin tối thiểu cần cung cấp khi đăng ký thành viên bao gồm: (1) Họ và tên, (2) Email hoặc Số điện thoại.
+*   Sau khi đăng ký tài khoản trực tuyến qua Website/App, bạn có thể sử dụng quyền lợi của hạng thành viên Pearl ngay lập tức. Đối với khách hàng mua thẻ VIP Pearl, tài khoản sẽ được kích hoạt sau 03 ngày làm việc kể từ khi đăng ký kích hoạt thẻ (bạn có thể đăng nhập vào thẻ trực tuyến để sử dụng quyền lợi ngay).",22752,pass
+faq-064,FAQ - VinClub,Tôi có thể kiểm tra lịch sử giao dịch của thẻ không?,Khách hàng có thể kiểm tra lịch sử giao dịch của thẻ trực tiếp trên ứng dụng MyVinpearl tại mục Hội viên VinClub.,"Yêu cầu này cần chuyển cho nhân viên hỗ trợ. Để tạo ticket, hệ thống cần họ tên và ít nhất một thông tin liên hệ (email hoặc số điện thoại). Bạn vui lòng đăng nhập/đăng ký tài khoản hoặc gửi yêu cầu tại trang Hỗ trợ.",23008,pass
+faq-068,FAQ - VinClub,Tôi có được áp dụng quyền lợi thành viên cho các khoản phụ phí phát sinh sau khi đặt phòng qua đại lý du lịch của Vinpearl không? Làm thế nào để nhận ưu đãi?,"Các khoản phụ thu liên quan đến phòng không được áp dụng quyền lợi hội viên nếu chỗ ở được đặt thông qua đại lý du lịch của Vinpearl. Tuy nhiên, quyền lợi hội viên vẫn áp dụng cho các dịch vụ khác tại cơ sở.","Đối với các câu hỏi của bạn về việc áp dụng quyền lợi thành viên VinClub khi đặt phòng qua đại lý du lịch, thông tin từ hệ thống như sau:
+
+**Về việc áp dụng quyền lợi cho các khoản phụ phí phát sinh:**
+Theo quy định, các khoản phụ phí liên quan đến phòng (room-related surcharges) không được áp dụng quyền lợi thành viên trong trường hợp bạn đặt phòng qua đại lý du lịch. Tuy nhiên, quyền lợi thành viên vẫn được áp dụng cho tất cả các dịch vụ khác tại các cơ sở của Vinpearl.
+
+**Về cách nhận ưu đãi:**
+Để nhận các ưu đãi, bạn có thể thực hiện theo các cách sau:
+*   Đối với các dịch vụ được áp dụng, bạn vui lòng cung cấp số đặt phòng và ID thành viên cho nhân viên tổng đài, hoặc xuất trình thẻ thành viên cho nhân viên lễ tân để được hưởng quyền lợi.
+*   Bạn có thể tham khảo chi tiết về quyền lợi theo hạng thẻ và các hệ thống áp dụng tại trang web: https://www.vinpearl.com/vi/vinclub.
+
+Lưu ý rằng quyền lợi thành viên chỉ áp dụng cho việc ăn uống tại các nhà hàng và không áp dụng cho Minibar hay dịch vụ tại phòng (Room service). Ngoài ra, các ưu đãi cũng không áp dụng cho các sản phẩm đồ uống có cồn, Almaz Phú Quốc và các giai đoạn cao điểm theo thông tin của khách sạn.",20531,pass
+faq-072,FAQ - VinClub,Làm thế nào để đổi đêm nghỉ miễn phí?,"Để đổi Đêm nghỉ miễn phí: đăng nhập website Vinpearl hoặc ứng dụng MyVinpearl → vào mục ""Quyền lợi của tôi"" trong phần Tài khoản → chọn ""Đêm nghỉ miễn phí"" và chọn đổi quyền lợi → chọn cơ sở, số lượng khách, ngày nhận phòng và trả phòng → Đêm nghỉ miễn phí sẽ hiển thị giá ""0 VND"" trên App và ""1 VND"" trên website → chọn loại phòng, gói dịch vụ và hoàn tất đặt phòng.","Để đổi đêm nghỉ miễn phí (complimentary night), bạn vui lòng thực hiện theo các bước sau trên website hoặc ứng dụng của Vinpearl:
+
+1. Đăng nhập vào tài khoản của bạn trên Website Vinpearl hoặc ứng dụng MyVinpearl.
+2. Truy cập mục ""Tài khoản"" (Account) và chọn ""Quyền lợi của tôi"" (My benefits).
+3. Chọn ""Đêm nghỉ miễn phí"" (Complimentary night) và nhấn vào nút đổi (redeem).
+4. Chọn cơ sở lưu trú, số lượng khách, và ngày nhận/trả phòng.
+5. Đêm nghỉ miễn phí sẽ hiển thị với mức giá ""0 VND"" trên ứng dụng hoặc ""1 VND"" trên website.
+6. Chọn loại phòng, gói dịch vụ và tiến hành đặt phòng.",22019,pass
+faq-076,FAQ - VinClub,Tôi có thể đặt tối đa bao nhiêu phòng khi sử dụng quyền lợi hội viên?,"Vinpearl không giới hạn số lượng phòng mà hội viên có thể đặt bằng quyền lợi thành viên. Tuy nhiên, hội viên phải có mặt tại thời điểm sử dụng dịch vụ.","Vinpearl không giới hạn số lượng phòng mà hội viên có thể đặt khi sử dụng quyền lợi hội viên. Tuy nhiên, hội viên cần xuất trình thẻ tại thời điểm sử dụng dịch vụ.",18506,pass
+faq-080,FAQ - VinClub,Làm thế nào để tích lũy giá trị giao dịch khi tôi đặt dịch vụ bằng thẻ hội viên?,Khách hàng được tích lũy 100% giá trị giao dịch sau khi đã trừ ưu đãi đối với các dịch vụ do Vinpearl cung cấp. Các dịch vụ do đối tác/nhà cung cấp khác cung cấp không được tính vào giá trị tích lũy.,"Để tích lũy giá trị giao dịch khi đặt dịch vụ bằng thẻ hội viên VinClub, bạn có thể tham khảo các thông tin sau:
+
+*   **Cách thức tích lũy:** Khách hàng có thể tích lũy 100% giá trị giao dịch sau khi đã trừ chiết khấu cho các dịch vụ do Vinpearl cung cấp. Đối với các dịch vụ từ đối tác của Vinpearl, giá trị này sẽ không được tính vào giá trị tích lũy.
+*   **Điều kiện tích lũy:**
+    *   Việc tích lũy giao dịch chỉ được xử lý khi chủ thẻ xuất trình thẻ trực tiếp. Bạn nên cài đặt ứng dụng MyVinpearl để sử dụng thẻ trực tuyến thay vì thẻ vật lý.
+    *   Giá trị tích lũy chỉ áp dụng cho các giao dịch đặt dịch vụ trực tiếp với Vinpearl. Các dịch vụ đặt qua đại lý du lịch sẽ không được tích lũy.
+    *   Tất cả các giao dịch trực tuyến hoặc tại cơ sở đặt trực tiếp với Vinpearl đều đủ điều kiện tích lũy để xét hạng hội viên cho năm tiếp theo, kể cả đối với các dịch vụ không áp dụng chiết khấu hội viên (không áp dụng cho các sản phẩm/dịch vụ từ nhà cung cấp khác như vé máy bay, tour, v.v.).
+*   **Tích lũy VPoints (đối với VinWonders):** Hội viên từ hạng Gold trở lên có thể tích lũy VPoints sau mỗi đơn hàng. VPoints được tính trên mỗi giao dịch (đã bao gồm VAT) sau khi đã trừ chiết khấu theo chính sách của VinWonders, với công thức quy đổi: 1.000 VND = 1 VPoint. Tỷ lệ tích lũy cụ thể theo hạng thẻ như sau:
+    *   Hạng GOLD: 1%
+    *   Hạng PLATINUM: 1,5%
+    *   Hạng DIAMOND: 2%
+    *   Mỗi giao dịch trực tuyến tại VinWonders chỉ được tích lũy VPoints vào 01 tài khoản VinClub.
+*   **Kiểm tra lịch sử giao dịch:** Bạn có thể kiểm tra lịch sử giao dịch của thẻ trực tiếp trên ứng dụng MyVinpearl, tại mục ""VinClub Members"".
+*   **Lưu ý về đặt dịch vụ trước khi kích hoạt thẻ:** Nếu bạn đã đặt dịch vụ trước khi kích hoạt thẻ, bạn có thể kiểm tra lại chính sách hủy dịch vụ trong email xác nhận đặt phòng để xem xét việc hủy và đặt lại nhằm tích lũy điểm.",26718,pass
+faq-084,FAQ - VinClub,Người thân hoặc bạn bè có thể dùng chung thẻ hội viên không?,Quyền lợi hội viên chỉ được áp dụng khi chủ thẻ có mặt. Thành viên gia đình hoặc bạn bè không thể tự sử dụng quyền lợi hội viên khi chủ thẻ vắng mặt.,"Theo quy định của chương trình hội viên VinClub, các quyền lợi hội viên chỉ được áp dụng khi có sự hiện diện của chủ thẻ. Do đó, người thân hoặc bạn bè không thể sử dụng chung thẻ hoặc sử dụng các đặc quyền của thẻ khi không có chủ thẻ đi cùng.
+
+Cụ thể:
+*   Các quyền lợi hội viên chỉ áp dụng khi chủ thẻ có mặt.
+*   Đối với các dịch vụ như bơi lội, spa, gym..., chủ thẻ bắt buộc phải có mặt khi sử dụng dịch vụ.
+*   Ngay cả khi bạn đặt phòng cho một nhóm người, các thành viên trong nhóm cũng không thể sử dụng thẻ vật lý và giấy tờ tùy thân của bạn để thay thế cho sự hiện diện của bạn khi sử dụng dịch vụ.",19808,pass
+faq-088,FAQ - VinClub,"Khi làm thủ tục nhận phòng hoặc sử dụng các dịch vụ F&B, Spa, Golf..., chủ thẻ có cần xuất trình thẻ vật lý không?","Khi nhận phòng hoặc sử dụng các quyền lợi F&B, Spa, Golf..., chủ thẻ có thể xuất trình thẻ vật lý hoặc thẻ trực tuyến trên ứng dụng MyVinpearl tại lễ tân/điểm dịch vụ, kèm giấy tờ tùy thân chứng minh quyền sở hữu thẻ với tên trùng tên chủ thẻ. Nếu chủ thẻ đã cập nhật ảnh đại diện trên ứng dụng để xác thực thì không cần xuất trình giấy tờ tùy thân.","Khi làm thủ tục nhận phòng hoặc sử dụng các dịch vụ như F&B, Spa, Golf, chủ thẻ cần thực hiện như sau:
+
+*   **Đối với việc xuất trình thẻ:** Chủ thẻ có thể xuất trình thẻ vật lý hoặc thẻ trực tuyến (trên ứng dụng MyVinpearl) tại quầy lễ tân hoặc các điểm dịch vụ.
+*   **Giấy tờ đi kèm:** Chủ thẻ cần xuất trình thêm giấy tờ tùy thân chứng minh quyền sở hữu thẻ (có tên trùng với tên chủ thẻ) để được hưởng các đặc quyền.
+*   **Trường hợp ngoại lệ:** Nếu chủ thẻ đã cập nhật ảnh đại diện trên ứng dụng để xác thực, chủ thẻ không cần phải xuất trình thêm giấy tờ tùy thân.",20198,pass
+faq-092,FAQ - VinClub,Tôi đã đặt phòng trước khi kích hoạt thẻ hội viên. Vậy tôi có thể hủy đặt phòng để đặt lại và tích lũy điểm thưởng không?,Mỗi đặt phòng đều có chính sách hủy riêng được cung cấp kèm theo. Khách hàng cần kiểm tra chính sách hủy trong email xác nhận đặt phòng trước khi quyết định hủy và đặt lại để tích lũy điểm.,"Yêu cầu này cần chuyển cho nhân viên hỗ trợ. Để tạo ticket, hệ thống cần họ tên và ít nhất một thông tin liên hệ (email hoặc số điện thoại). Bạn vui lòng đăng nhập/đăng ký tài khoản hoặc gửi yêu cầu tại trang Hỗ trợ.",11719,pass
+faq-096,FAQ - VinClub,"Nếu quên mang thẻ khi sử dụng dịch vụ, tôi có được tích điểm bù vào ngày hôm sau không?",Không. Việc tích lũy giao dịch chỉ được thực hiện khi chủ thẻ xuất trình thẻ tại thời điểm sử dụng dịch vụ. Khách hàng có thể cài ứng dụng MyVinpearl để sử dụng thẻ trực tuyến thay cho thẻ vật lý.,"Theo quy định hiện tại, việc tích điểm giao dịch chỉ được thực hiện khi chủ thẻ xuất trình thẻ tại thời điểm sử dụng dịch vụ. Do đó, bạn không thể thực hiện tích điểm bù vào ngày hôm sau nếu quên mang thẻ.
+
+Để thuận tiện hơn, bạn có thể cài đặt ứng dụng MyVinpearl để sử dụng thẻ trực tuyến mà không cần mang theo thẻ vật lý.",16503,pass
+faq-100,FAQ - VinClub,"Khi đặt phòng qua hotline theo các đặc quyền giảm giá/miễn phí, chủ thẻ có cần gửi ảnh thẻ hay chỉ cần cung cấp số thẻ để nhân viên kiểm tra, xác minh và xác nhận các quyền lợi đi kèm?","Khi đặt dịch vụ qua Hotline bằng quyền lợi giảm giá/Đêm nghỉ miễn phí, Khách hàng chỉ cần cung cấp số thẻ và tên chủ thẻ để tư vấn viên kiểm tra thông tin và hỗ trợ đặt dịch vụ. Khi nhận phòng tại cơ sở, Khách hàng phải xuất trình thẻ vật lý hoặc thẻ trực tuyến cùng giấy tờ tùy thân để lễ tân xác minh. Nếu không thể xuất trình đầy đủ giấy tờ, Khách hàng phải thanh toán phần chênh lệch giữa giá công bố và giá ưu đãi hội viên.","Yêu cầu này cần chuyển cho nhân viên hỗ trợ. Để tạo ticket, hệ thống cần họ tên và ít nhất một thông tin liên hệ (email hoặc số điện thoại). Bạn vui lòng đăng nhập/đăng ký tài khoản hoặc gửi yêu cầu tại trang Hỗ trợ.",23532,pass
+faq-104,FAQ - VinClub,Làm thế nào để đăng ký và đăng nhập vào VinClub?,"Đăng ký tài khoản VinClub: Bước 1: tải ứng dụng VinClub trên App Store hoặc Google Play. Bước 2: đăng ký tài khoản bằng số điện thoại hoặc email. Bước 3: nhập mã OTP được gửi đến số điện thoại hoặc email. Bước 4: thiết lập thông tin cá nhân gồm Họ tên, mã PIN đăng nhập và hoàn tất đăng ký. Đăng nhập tài khoản: Bước 1: nhập số điện thoại hoặc email đã đăng ký. Bước 2: nhập mã PIN. Bước 3: nhập mã OTP gửi đến số điện thoại/email đã đăng ký và chọn xác nhận để truy cập.","Dưới đây là hướng dẫn đăng ký và đăng nhập vào VinClub dựa trên thông tin được cung cấp:
+
+**Cách đăng ký tài khoản trên ứng dụng VinClub:**
+1. Tải ứng dụng VinClub trên App Store hoặc Google Play.
+2. Đăng ký tài khoản bằng số điện thoại hoặc email của bạn.
+3. Nhập mã OTP được gửi đến số điện thoại hoặc email đã đăng ký.
+4. Thiết lập thông tin cá nhân bao gồm: Họ và tên, mã PIN đăng nhập và hoàn tất đăng ký.
+*Lưu ý: Thông tin tối thiểu cần cung cấp khi đăng ký là Họ và tên, cùng với Email hoặc Số điện thoại.*
+
+**Cách đăng nhập vào tài khoản trên ứng dụng VinClub:**
+1. Nhập số điện thoại hoặc email đã đăng ký.
+2. Nhập mã PIN.
+3. Nhập mã OTP được gửi đến số điện thoại hoặc email đã đăng ký và nhấn xác nhận để truy cập.
+
+Đối với các giao dịch trên website VinWonders, bạn có thể đăng nhập vào tài khoản VinClub của mình để thực hiện các thao tác như nhận ưu đãi VIN33.
+
+*Về ý định thanh toán (payment):* Hiện tại, cơ sở dữ liệu không chứa đủ thông tin để phản hồi về các vấn đề liên quan đến thanh toán trong VinClub.",75916,pass
+faq-108,FAQ - VinClub,Tôi có thể tìm thông tin chính thức về VinClub ở đâu?,Thông tin chính thức về VinClub được cung cấp tại: vinclub.vn; Fanpage: VinClub; Hotline: 1900 232389 - nhánh 2.,"Bạn có thể tìm kiếm thông tin chính thức về chương trình hội viên VinClub tại các địa chỉ sau:
+
+*   **Website chính thức:** Bạn có thể truy cập vào trang web https://www.vinpearl.com/vi/vinclub để xem chi tiết về các quyền lợi theo hạng thẻ và các hệ thống áp dụng.
+*   **Trang Câu hỏi thường gặp (FAQs):** Thông tin chi tiết về chương trình cũng được cập nhật tại https://vinpearl.com/en/faqs.
+
+Ngoài ra, nếu bạn cần hỗ trợ thêm, bạn có thể liên hệ qua các kênh sau:
+*   **Hotline:** 1900 23 23 28
+*   **Email:** [email protected]",84978,pass
+faq-112,FAQ - VinClub,Khách hàng có thể mua thẻ hạng Vàng/ Bạch kim/ Kim cương không?,Không. Khách hàng không thể trực tiếp mua thẻ Gold/Platinum/Diamond mà cần chi tiêu và tích lũy giao dịch để được nâng hạng.,"Chào bạn, về câu hỏi của bạn, thông tin từ hệ thống như sau:
+
+Khách hàng **không thể** mua thẻ hạng Vàng (Gold), Bạch kim (Platinum) hoặc Kim cương (Diamond). Để nâng hạng thẻ, khách hàng cần thực hiện chi tiêu và tích lũy giá trị giao dịch trong năm dương lịch (từ ngày 01/01 đến ngày 31/12) để đạt các điều kiện nâng hạng như sau:
+
+*   **Hạng Bạch kim (Platinum):** Đạt 50 triệu VND giá trị tích lũy.
+*   **Hạng Kim cương (Diamond):** Đạt 100 triệu VND giá trị tích lũy.
+
+Khách hàng sẽ được nâng hạng ngay khi tích lũy đủ giá trị giao dịch theo quy định.",19349,pass
+faq-116,FAQ - VinWonders Safari,Tôi có được mang đồ ăn vào VinWonders Phú Quốc không?,"Không được mang đồ ăn từ bên ngoài vào VinWonders Phú Quốc vì lý do an toàn thực phẩm và bảo vệ cảnh quan. Trong công viên có các nhà hàng phục vụ buffet, à la carte, thức ăn nhanh, đồ uống... để phục vụ Khách hàng.","Dựa trên cơ sở dữ liệu hiện tại, thông tin về quy định mang đồ ăn từ bên ngoài vào VinWonders Phú Quốc không được ghi nhận. Do đó, cơ sở dữ liệu hiện tại không có đủ thông tin để xác nhận về chính sách này.",13342,pass
+faq-120,FAQ - VinWonders Safari,Tôi có được phép bay flycam tại Grand World Phú Quốc không?,"Khu vực xung quanh Grand World Phú Quốc được trang bị hệ thống vô hiệu hóa flycam của Bộ Quốc phòng. Muốn bay drone/flycam trong khu vực, Khách hàng cần có giấy phép hợp lệ do Bộ Quốc phòng cấp và được Ban Quản lý Grand World chấp thuận. Nếu không có đầy đủ giấy phép, không được sử dụng drone/flycam.","Dựa trên cơ sở dữ liệu hiện có, chúng tôi không có thông tin xác nhận về quy định liên quan đến việc sử dụng flycam tại Grand World Phú Quốc. Cơ sở dữ liệu hiện tại không ghi nhận hoặc không chứa đủ thông tin để trả lời về vấn đề này.",15136,pass
+faq-124,FAQ - VinWonders Safari,Lịch hoạt động của VinWonders Nha Trang và cáp treo là gì?,VinWonders Nha Trang mở cửa hằng ngày từ 08:00 đến 20:00. Lịch hoạt động và chương trình biểu diễn chi tiết được cung cấp tại: https://vinpearl.com/en/vinwonder-playground/nha_trang,"Dưới đây là thông tin về lịch hoạt động của VinWonders Nha Trang và hệ thống cáp treo dựa trên dữ liệu hiện có:
+
+**Lịch hoạt động của VinWonders Nha Trang**
+*   Giờ mở cửa tham khảo của VinWonders Nha Trang là hàng ngày, từ 09:00 sáng đến 08:00 tối.
+*   Ngoài ra, khu vực King's Garden mở cửa hàng ngày từ 08:30 sáng đến 06:00 chiều.
+
+**Lịch hoạt động của hệ thống cáp treo**
+*   Hệ thống cáp treo Vinpearl Nha Trang hoạt động từ 08:30 sáng đến 11:00 tối.
+*   Từ 11:00 tối đến 02:00 sáng, du khách sẽ di chuyển bằng tàu cao tốc. Chuyến tàu cuối cùng từ đảo về đất liền khởi hành lúc 02:15 sáng.
+*   Lưu ý: Giờ hoạt động của cáp treo có thể thay đổi tùy thuộc vào điều kiện vận hành, thời tiết hoặc các yếu tố khác.",69453,pass
+faq-128,FAQ - VinWonders Safari,VinWonders Nha Trang có nhà hàng hoặc khu ẩm thực không?,"VinWonders Nha Trang có nhiều nhà hàng và thực đơn khác nhau, gồm: Nhà hàng Wind & Sea phục vụ set menu; Nhà hàng Coral phục vụ buffet trưa; Nhà hàng Chingu phục vụ nướng và lẩu Hàn Quốc; ngoài ra còn có chuỗi nhà hàng và các quầy thức ăn nhanh.","Tại VinWonders Nha Trang, bạn có thể trải nghiệm hành trình ẩm thực đa dạng. Dưới đây là thông tin chi tiết dựa trên cơ sở dữ liệu hiện có:
+
+**Về điểm tham quan (VinWonders Nha Trang):**
+VinWonders Nha Trang là một công viên giải trí kỷ lục tọa lạc trên đảo Hòn Tre, nơi cung cấp hàng trăm hoạt động giải trí sôi động và các trải nghiệm đa dạng như World Garden, King's Garden và các chương trình biểu diễn.
+
+**Về dịch vụ ẩm thực:**
+Tại khu vực đảo Hòn Tre (nơi có VinWonders Nha Trang), du khách có thể khám phá ""bản đồ ẩm thực"" với sự kết hợp giữa hương vị Á - Âu và các món ngon địa phương. Ngoài ra, trong hệ thống Vinpearl tại Nha Trang, có nhiều nhà hàng và dịch vụ ăn uống được ghi nhận như:
+*   **Jasmine Restaurant:** Phục vụ thực đơn gọi món (à la carte) các món ăn Việt Nam, Thái Lan và Campuchia.
+*   **Nha Trang Bay Restaurant:** Cung cấp thực đơn tinh tế với các món ăn hiện đại từ châu Âu và châu Á.
+*   **Blue Lagoon:** Nhà hàng phục vụ cả ngày với các đặc sản Việt Nam, châu Á và quốc tế.
+*   **Lagoon Restaurant:** Phục vụ ẩm thực gọi món Việt Nam và Á-Âu.
+*   **Pool Bar:** Nơi cung cấp các loại cocktail, bia và rượu vang.
+
+Bạn có thể tham khảo thêm thông tin chi tiết tại trang web chính thức: https://vinwonders.com/en/nha-trang-destination/",63101,pass
+faq-132,FAQ - VinWonders Safari,Tôi có cần mua vé để chơi tất cả các trò chơi không?,"Vé vào cửa VinWonders Nha Trang là gói vé cho phép Khách hàng tham gia các trò chơi sau khi vào công viên. Vé được kiểm soát khi check-in tại cáp treo ra đảo; sau khi vào khu vui chơi, Khách được tự do tham gia các trò chơi và khi quay về đất liền không cần sử dụng lại vé.","Việc bạn có cần mua vé để chơi tất cả các trò chơi hay không phụ thuộc vào từng cơ sở VinWonders cụ thể:
+
+*   **Tại VinWonders Nha Trang:** Bạn cần mua vé vào cửa (vé trọn gói). Sau khi qua cổng kiểm soát tại cáp treo, bạn được tự do tham gia tất cả các trò chơi trong công viên giải trí.
+*   **Tại VinWonders Nam Hội An:** Giá vé vào cửa đã bao gồm tất cả các hoạt động và chương trình biểu diễn trong công viên giải trí, bao gồm các khu vực: Công viên nước, River Safari, Đảo văn hóa dân gian, các khu trò chơi trong nhà và ngoài trời. Tuy nhiên, giá vé không bao gồm các dịch vụ mua sắm, ăn uống hoặc các dịch vụ phát sinh khác như thuê xe điện, thuê tủ đồ, thuê khăn tắm, v.v.
+*   **Tại Vinpearl Safari Phú Quốc:** Tất cả các điểm tham quan đều đã được bao gồm trong vé vào cửa của bạn.
+
+Đối với các trường hợp sử dụng voucher, việc giá vé đã bao gồm các trò chơi hay chưa sẽ phụ thuộc vào điều khoản và điều kiện cụ thể của từng loại voucher. Bạn có thể liên hệ Tổng đài Chăm sóc khách hàng qua số 1900232389 để được hỗ trợ chi tiết.",18859,pass
+faq-136,FAQ - VinWonders Safari,Tôi có được mang đồ ăn dặm cho bé vào VinWonders Nha Trang không?,"Được mang thức ăn cho trẻ em, sữa công thức hoặc thực phẩm theo chỉ định của bác sĩ vào VinWonders Nha Trang với số lượng hạn chế.","Hiện tại, cơ sở dữ liệu của chúng tôi không có thông tin cụ thể về quy định mang đồ ăn dặm cho bé vào VinWonders Nha Trang.",15281,pass
+faq-140,FAQ - VinWonders Safari,Giá vé dành cho các công ty lữ hành và đại lý là bao nhiêu?,VinWonders Nam Hội An có giá vé dành cho các công ty du lịch và đại lý đã ký hợp đồng với VWNHA. Liên hệ số 0931 122 037 để được hỗ trợ.,"Đối với các công ty lữ hành và đại lý, thông tin về giá vé và chính sách được ghi nhận như sau:
+
+*   **Về giá vé:** Hiện tại, cơ sở dữ liệu của chúng tôi không ghi nhận bảng giá cụ thể dành cho các công ty lữ hành và đại lý. Đối với các đơn vị đã ký hợp đồng với VinWonders Nam Hội An, giá vé được áp dụng theo hợp đồng đã ký kết. Bạn có thể liên hệ số điện thoại 0931 122 037 để được hỗ trợ.
+*   **Về cách thức trở thành đại lý:** Đối với các yêu cầu trở thành đại lý vé của VinWonders (ví dụ tại Nha Trang), vui lòng liên hệ với đội ngũ kinh doanh (Sale Team) qua số điện thoại 02583 888 886 để được hỗ trợ chi tiết.",17691,pass
+faq-144,FAQ - VinWonders Safari,Công viên giải trí có khu vực gửi đồ cho khách hàng không?,Khách có thể gửi đồ tại quầy gửi đồ gần cổng chính hoặc khu Công viên nước với mức phí/tiền cọc được FAQ ghi là 20.000 VNĐ/hộp.,Hiện cơ sở dữ liệu Vinpearl/VinWonders chưa có đủ thông tin để xác nhận nội dung này.,14086,pass
+faq-148,FAQ - VinWonders Safari,VinWonders Nha Trang phục vụ những loại đồ ăn nào?,"Nội dung FAQ tương ứng thuộc VinWonders Nam Hội An: Công viên có nhiều nhà hàng với mô hình food court, set menu, à la carte như Harbor Corner Restaurant, Deland, Chợ Quê, Food Court VinWonders... Giá được ghi khoảng 60.000 - 250.000 VNĐ/khách. Ngoài ra còn có các món ăn nhẹ như bỏng ngô, kem, hot dog và đồ uống tại các quầy thức ăn nhanh.","Tại VinWonders Nha Trang, bạn có thể trải nghiệm hành trình ẩm thực đa dạng với các lựa chọn sau:
+
+*   **Wind & Sea Buffet:** Nơi phục vụ hơn 50 món ăn Á - Âu hấp dẫn cùng các loại hải sản tươi sống địa phương.
+*   **Blue Lagoon Restaurant:** Cung cấp bữa sáng tự chọn (buffet) với sự kết hợp giữa các món ăn tinh hoa của ẩm thực Á và Âu trong không gian nhìn ra biển.
+*   **Trải nghiệm ẩm thực chung:** VinWonders Nha Trang mang đến một ""bản đồ ẩm thực"" trên đảo Hòn Tre, kết hợp giữa hương vị Á - Âu và các món ngon địa phương.",16624,pass
+faq-152,FAQ - VinWonders Safari,Làm thế nào để sử dụng dịch vụ xe điện và thuê xe đẩy/xe lăn/dù?,"Dịch vụ xe điện hoạt động từ 09:30 đến 17:30. Khách có nhu cầu sử dụng có thể liên hệ quầy Chăm sóc Khách hàng gần cổng chính hoặc Hotline 0931122027 để được tư vấn về xe điện và các dịch vụ thuê xe đẩy, xe lăn, dù.","Dưới đây là thông tin về việc sử dụng dịch vụ xe điện và thuê xe đẩy, xe lăn, dù tại các cơ sở của VinWonders dựa trên dữ liệu hiện có:
+
+**Tại VinWonders Nam Hội An:**
+*   **Dịch vụ xe điện:** Hoạt động từ 9:30 sáng đến 5:30 chiều.
+*   **Cách thức sử dụng:** Quý khách có nhu cầu sử dụng xe điện hoặc thuê xe đẩy, xe lăn, dù có thể liên hệ quầy dịch vụ khách hàng gần cổng chính hoặc gọi đến hotline: 0931122027 để được tư vấn và hỗ trợ.
+
+**Tại Vinpearl Safari Phú Quốc:**
+*   **Cách thức thuê:** Quý khách có thể thuê xe đẩy, xe lăn và dù tại Cổng soát vé (Entrance Gate) của Safari với các thông tin cụ thể như sau:
+    *   **Dù:** 30.000 VNĐ/chiếc (tiền đặt cọc 200.000 VNĐ).
+    *   **Xe đẩy em bé:** 100.000 VNĐ/chiếc (tiền đặt cọc 500.000 VNĐ). Lưu ý giới hạn cân nặng cho bé là 12kg.
+    *   **Xe lăn:** Miễn phí (tiền đặt cọc 500.000 VNĐ).
+
+Đối với các địa điểm khác ngoài những cơ sở đã nêu trên, cơ sở dữ liệu hiện tại không ghi nhận hoặc không chứa đủ thông tin để xác nhận về dịch vụ xe điện và cho thuê thiết bị hỗ trợ.",19625,pass
+faq-156,FAQ - VinWonders Safari,"Tôi có thể thuê xe đẩy, xe lăn hoặc dù tại Safari không?","Tại Vinpearl Safari Phú Quốc, dịch vụ thuê xe đẩy/xe lăn/dù có tại cổng vào Safari. Dù: 30.000 VNĐ/cái, cọc 200.000 VNĐ. Xe đẩy trẻ em: 100.000 VNĐ/cái, cọc 500.000 VNĐ; giới hạn cân nặng của trẻ là 12kg. Xe lăn: miễn phí, cọc 500.000 VNĐ.",Hiện cơ sở dữ liệu Vinpearl/VinWonders chưa có đủ thông tin để xác nhận nội dung này.,13722,pass
+faq-160,FAQ - VinWonders Safari,Vinpearl Safari có tủ gửi đồ không?,Vinpearl Safari có dịch vụ cho thuê tủ locker theo ngày tại sảnh chính.,"Có, Vinpearl Safari có cung cấp dịch vụ tủ gửi đồ (locker room) cho khách hàng thuê theo ngày tại khu vực sảnh chính.",16112,pass
+faq-164,FAQ - VinWonders Safari,Tôi có được phép chụp ảnh không?,Được phép chụp ảnh và quay video tại Vinpearl Safari nhưng không được dùng đèn flash. Chụp ảnh/quay video cho mục đích thương mại hoặc sử dụng flycam không được phép nếu chưa có sự đồng ý của Ban Quản lý Safari.,Hiện cơ sở dữ liệu Vinpearl/VinWonders chưa có đủ thông tin để xác nhận nội dung này.,11820,pass
+faq-168,FAQ - VinWonders Safari,Tôi có được mang thú cưng vào công viên không?,Thú cưng hoặc các loại động vật khác không được phép mang vào Vinpearl Safari.,"Dựa trên cơ sở dữ liệu hiện có, thông tin về việc mang thú cưng vào các công viên được quy định như sau:
+
+*   **Về chính sách tại Vinpearl Safari Phú Quốc:** Thú cưng hoặc các loại động vật khác không được phép mang vào bên trong Vinpearl Safari.
+*   **Về chính sách tại Grand World Phú Quốc:** Vì lý do an toàn cho bạn và những người khác, thú cưng và các loại động vật sống khác không được phép mang vào Grand World Phú Quốc.
+
+Đối với các địa điểm khác ngoài những nơi đã nêu trên, cơ sở dữ liệu hiện tại không ghi nhận hoặc không chứa đủ thông tin để xác nhận chính sách về việc mang thú cưng vào công viên.",16605,pass
+faq-172,FAQ - VinWonders Safari,Safari có cung cấp dịch vụ đưa đón miễn phí không?,Vinpearl Safari cung cấp Shuttle Bus miễn phí từ trung tâm Phú Quốc đến VinWonders và ngược lại. Lịch xe có thể thay đổi mà không cần thông báo trước. Liên hệ Hotline 19006677 - nhánh 4 để biết thêm chi tiết.,"Tại Vinpearl Safari Phú Quốc, dịch vụ xe đưa đón được cung cấp như sau:
+
+*   **Xe đưa đón từ trung tâm Phú Quốc:** Vinpearl Safari có cung cấp xe buýt đưa đón miễn phí từ trung tâm Phú Quốc đến VinWonders và ngược lại. Lịch trình xe có thể thay đổi mà không cần báo trước, vì vậy bạn vui lòng liên hệ hotline 1900 6677 (nhánh 4) để biết thêm chi tiết.
+*   **Đối với khách lưu trú tại Vinpearl:** Khách hàng lưu trú tại hệ thống Vinpearl sẽ có xe buýt/xe điện miễn phí đón tại sảnh khách sạn.
+*   **Đối với khách không lưu trú tại Vinpearl:** Có dịch vụ xe buýt đưa đón miễn phí. Để biết chi tiết về điểm đón và thời gian, bạn vui lòng liên hệ hotline 1900 6677 để được tư vấn.
+*   **Thông tin thêm:** Du khách cũng có thể sử dụng xe buýt theo lịch trình miễn phí của Vinpearl từ phường Dương Đông.
+
+Lưu ý: Lịch trình và thông tin dịch vụ có thể thay đổi, bạn nên liên hệ trực tiếp qua hotline 1900 6677 để được cập nhật thông tin chính xác nhất cho chuyến đi của mình.",17169,pass
+promo-002,Promotion,Ưu đãi «Mastercard card privileges: 15% discount when booking Vinpearl rooms and VinWonders tickets» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"Áp dụng 06/06–31/08/2026, có thể kết thúc sớm khi hết ngân sách. Chủ thẻ Mastercard BIN bắt đầu bằng 2 hoặc 5 được giảm 15% phòng Vinpearl, tối đa 1.200.000đ/đơn, và 10% dịch vụ VinWonders, tối đa 200.000đ/đơn; mỗi thẻ dùng 1 lần/tháng cho mỗi dịch vụ, không cộng dồn với chương trình cần nhập mã.","Chương trình ưu đãi «Mastercard card privileges: 15% discount when booking Vinpearl rooms and VinWonders tickets» hiện vẫn đang trong thời gian áp dụng (từ ngày 06/06/2026 đến hết ngày 31/08/2026). Tuy nhiên, chương trình có thể kết thúc sớm hơn nếu ngân sách ưu đãi được sử dụng hết trước thời hạn.
+
+Dưới đây là tóm tắt các nội dung chính và điều kiện áp dụng:
+
+**1. Nội dung ưu đãi:**
+*   **Đặt phòng Vinpearl:** Giảm 15% (tối đa 1.200.000 VNĐ/đơn hàng) khi đặt trên website Vinpearl.com hoặc ứng dụng MyVinpearl.
+*   **Đặt vé VinWonders:** Giảm 10% (tối đa 200.000 VNĐ/đơn hàng) khi đặt trên website VinWonders.com hoặc ứng dụng VinWonders.
+
+**2. Điều kiện áp dụng:**
+*   **Đối tượng:** Khách hàng thanh toán trực tiếp bằng thẻ Mastercard có mã BIN bắt đầu bằng số ""2"" hoặc ""5"".
+*   **Tần suất:** Mỗi thẻ chỉ được áp dụng ưu đãi 01 lần/tháng cho mỗi dịch vụ (Vinpearl và VinWonders) trong suốt thời gian diễn ra chương trình.
+*   **Lưu ý:** Không áp dụng đồng thời với các chương trình nhập mã khuyến mãi khác trên website/ứng dụng của Vinpearl và VinWonders.
+
+**3. Hướng dẫn đặt dịch vụ (trên website Vinpearl):**
+*   **Bước 1:** Chọn ""Khách sạn"", chọn khách sạn và thời gian lưu trú (không nhập mã khuyến mãi).
+*   **Bước 2:** Chọn gói phòng và các dịch vụ bổ sung theo nhu cầu. Tại bước thanh toán, nhập thông tin đặt phòng theo hướng dẫn.
+*   **Bước 3:** Tại mục ""Phương thức thanh toán"", chọn ""Thẻ tín dụng/ghi nợ quốc tế (Visa/Master/JCB)"". Nhấp vào banner ưu đãi 15% dành cho Mastercard và chọn ""Thanh toán"".
+*   **Bước 4:** Tại trang thanh toán, chọn ""Giảm 15% cho chủ thẻ Mastercard"", điền thông tin thẻ Mastercard (có BIN bắt đầu bằng số ""2"" hoặc ""5""), kiểm tra mức giảm giá và hoàn tất đơn hàng.",18448,pass
+promo-006,Promotion,Ưu đãi «VIN33 Birthday: Up to 30% discount for VinClub members» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"VIN33 áp dụng cho hội viên VinClub: đặt phòng/mua vé 01/08–31/10/2026, lưu trú/dùng vé đến 31/12/2026. Phòng chính chủ: Diamond 30% mã DIAMOND33, Platinum 21% mã PLATINUM33, Gold 15% mã GOLD33; vé VinWonders cho Gold/Platinum/Diamond lần lượt 6%/9%/15%. Phải dùng đúng tài khoản/chủ thẻ và xuất trình giấy tờ khớp thông tin khi kiểm soát.","Dựa trên dữ liệu hiện có, dưới đây là thông tin về chương trình ưu đãi «VIN33 Birthday: Up to 30% discount for VinClub members»:
+
+*   **Về hiệu lực:** Chương trình này có thời gian đặt dịch vụ từ ngày 01/08/2020 đến ngày 31/10/2020.
+*   **Tóm tắt nội dung và điều kiện:**
+    *   **Ưu đãi:** Giảm giá lên đến 30% tại Vinpearl, VinWonders và Vinpearl Golf (mức giảm cụ thể phụ thuộc vào hạng thẻ thành viên).
+    *   **Đối tượng:** Dành cho thành viên VinClub.
+    *   **Điều kiện:** Bạn có thể đăng ký thành viên VinClub miễn phí để tích điểm, nâng hạng và hưởng các quyền lợi đặc biệt.
+
+Hiện tại, cơ sở dữ liệu không ghi nhận thông tin về việc chương trình này còn hiệu lực áp dụng ở thời điểm hiện tại hay không.",18130,pass
+promo-010,Promotion,Ưu đãi «Aquafield Nha Trang – The first Korean Top 1 luxury spa & sauna complex in Vietnam» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"Aquafield Nha Trang có các gói ưu đãi trong năm 2026. Trên web/app, đăng nhập VinClub có thể nhận giảm 10% với MEMBER10, 12% với PLATINUM12, 15% với DIAMOND15; ngoài ra có nhiều combo sauna/cáp treo/Tata Show với mức giảm khác nhau, có gói giảm đến 50% hoặc hơn tùy sản phẩm.","Dựa trên dữ liệu hiện có, tôi xin giải đáp các thắc mắc của bạn về Aquafield Nha Trang như sau:
+
+**1. Về ưu đãi Aquafield Nha Trang:**
+Dữ liệu hiện tại xác nhận có chương trình ưu đãi liên quan đến Aquafield Nha Trang dành cho khách lưu trú tại Vinpearl Resort & Spa Nha Trang Bay trong giai đoạn từ ngày 16/08 đến 30/11. Cụ thể:
+*   **Nội dung ưu đãi:** Bạn có thể chọn 1 trong 2 quyền lợi:
+    *   Miễn phí trải nghiệm Aquafield + miễn phí lưu trú cho tối đa 2 trẻ em dưới 12 tuổi (bao gồm bữa sáng, không bao gồm giường phụ).
+    *   Miễn phí trải nghiệm Aquafield + tặng tín dụng khách sạn (hotel credit) trị giá 300.000 VNĐ/phòng/đêm.
+*   **Lưu ý:** Các quyền lợi đặc biệt này áp dụng khi đặt phòng qua website hoặc ứng dụng của Vinpearl. Ngoài ra, khách hàng còn được hưởng các ưu đãi khác như giảm giá thêm tới 10% cho thành viên VinClub, tích điểm Vpoint, giảm giá 20% dịch vụ golf, 30% dịch vụ spa, 20% dịch vụ ẩm thực (không áp dụng cho đồ uống có cồn), miễn phí di chuyển bằng VinBus, miễn phí xông hơi & Jacuzzi, và miễn phí cáp treo vượt biển cùng các hoạt động giải trí tại Vinpearl Harbor.
+
+**2. Về thông tin tổng quan và dịch vụ tại Aquafield Nha Trang:**
+Cơ sở dữ liệu hiện tại không chứa đủ thông tin chi tiết để mô tả toàn diện về các dịch vụ hoặc đặc điểm của Aquafield Nha Trang ngoài các thông tin về ưu đãi nêu trên.
+
+**3. Về các điểm đến và dịch vụ khác tại Nha Trang:**
+Nha Trang là điểm đến với nhiều trải nghiệm đa dạng thuộc hệ thống Vinpearl/VinWonders, bao gồm:
+*   **Điểm đến giải trí:** VinWonders Nha Trang (công viên giải trí với nhiều hoạt động), Vinpearl Harbor.
+*   **Hệ thống lưu trú:** Vinpearl Resort & Spa Nha Trang Bay, Hon Tam Resort, Vinpearl Beachfront Nha Trang, và Vinpearl Empire Nha Trang, Affiliated by Meliá.
+*   **Trải nghiệm:** Các khu nghỉ dưỡng cao cấp bên vịnh Nha Trang, các hành trình ẩm thực kết hợp Á-Âu tại đảo Hòn Tre.",16786,pass
+promo-014,Promotion,"Ưu đãi «Hoi An Passport: One combo, two destinations, thousands of interesting experiences» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.","Hoi An Passport áp dụng 01/06–31/12/2026, bán trên website/app VinWonders. Combo gồm vé VinWonders Nam Hội An 1 ngày, xe điện trong công viên và trải nghiệm rừng dừa Bảy Mẫu/thuyền thúng; giá ưu đãi thay đổi theo nhóm người lớn, trẻ em và người cao tuổi.","Ưu đãi «Hoi An Passport: One combo, two destinations, thousands of interesting experiences» hiện vẫn đang được áp dụng (trạng thái: Is active: true).
+
+Dưới đây là tóm tắt các nội dung và điều kiện chính của chương trình:
+
+*   **Nội dung chính:** Combo bao gồm trải nghiệm tại Rừng dừa Bảy Mẫu và vui chơi tại VinWonders Nam Hội An. Lịch trình gợi ý là trải nghiệm Rừng dừa Bảy Mẫu vào buổi sáng và dành trọn buổi chiều để vui chơi cũng như thưởng thức các show diễn tại VinWonders Nam Hội An.
+*   **Điều kiện sử dụng dịch vụ tại Rừng dừa Bảy Mẫu:**
+    *   Du khách cần đến đúng địa điểm của đại lý Hạnh Coconut.
+    *   Xuất trình vé ""Hoi An Passport"" cho nhân viên để sử dụng dịch vụ.
+    *   **Lưu ý quan trọng:** Nếu du khách đến nhầm các đại lý không nằm trong chương trình hợp tác với VinWonders, du khách có thể phải chịu thêm chi phí phát sinh và không thể sử dụng vé đã mua. VinWonders không chịu trách nhiệm cho các chi phí phát sinh hoặc các trải nghiệm không nằm trong chương trình.
+
+Bạn có thể tham khảo thêm thông tin chi tiết hoặc đặt vé tại website chính thức: https://vinwonders.com/vi/uu-dai/hoi-an-passport hoặc https://booking.vinwonders.com/vi-VND/search?code=NHAVW&tab=all&usingDate=11-07-2026.",15121,pass
+promo-018,Promotion,Ưu đãi «Get a free voucher worth 500K when logging into the VinWonders app for the first time» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"Áp dụng 10/07–31/12/2026 cho khách mới đăng ký hoặc đăng nhập app VinWonders lần đầu. Bộ voucher tổng giá trị đến 500.000đ gồm giảm 5% vé VinWonders cho đơn đầu, giảm 300.000đ vé sauna Aquafield Ocean City và ưu đãi Green SM; số lượng có hạn và voucher không cộng dồn với chương trình khác.","Ưu đãi «Get a free voucher worth 500K when logging into the VinWonders app for the first time» hiện vẫn đang áp dụng (trạng thái hoạt động từ 10/07/2026 đến 31/12/2026).
+
+Dưới đây là tóm tắt các nội dung và điều kiện chính của chương trình:
+
+**1. Nội dung ưu đãi:**
+*   Khách hàng nhận được bộ voucher trị giá lên đến 500.000 VND khi đăng nhập vào ứng dụng VinWonders lần đầu tiên.
+*   Các ưu đãi bao gồm:
+    *   Giảm 5% (tối đa 150.000 VND) cho đơn hàng đầu tiên mua vé VinWonders trên ứng dụng.
+    *   Giảm 300.000 VND khi mua vé xông hơi tiêu chuẩn tại Aquafield Ocean City.
+    *   Giảm 20% (tối đa 50.000 VND) cho các chuyến xe trên ứng dụng Xanh SM.
+
+**2. Điều kiện áp dụng:**
+*   **Đối tượng:** Dành riêng cho khách hàng mới. Tài khoản hợp lệ là tài khoản đăng nhập lần đầu tiên trên ứng dụng VinWonders (bao gồm cả những tài khoản đã đăng ký/đăng nhập trên website nhưng chưa từng sử dụng ứng dụng).
+*   **Cách thức nhận:** Voucher sẽ được gửi trực tiếp vào mục ""Khuyến mãi"" (Promotions) trên ứng dụng VinWonders ngay sau khi hệ thống ghi nhận lượt đăng nhập hợp lệ.
+*   **Thời hạn sử dụng:** Mã có hiệu lực trong vòng 90 ngày kể từ ngày nhận.
+*   **Lưu ý quan trọng:**
+    *   Mỗi mã chỉ được sử dụng một lần cho mỗi tài khoản.
+    *   Ưu đãi không áp dụng đồng thời với các chương trình khuyến mãi khác.
+    *   Đối với voucher Xanh SM, bạn cần sao chép mã khuyến mãi hiển thị trên ứng dụng VinWonders và nhập vào mục Khuyến mãi trên ứng dụng Xanh SM khi đặt dịch vụ.
+    *   Bạn nên bật thông báo của ứng dụng VinWonders để cập nhật các chương trình ưu đãi khác.
+
+Bạn có thể xem chi tiết hơn tại đường dẫn: [https://vinwonders.com/vi/uu-dai/tang-voucher-500k-khi-dang-nhap-app-lan-dau](https://vinwonders.com/vi/uu-dai/tang-voucher-500k-khi-dang-nhap-app-lan-dau)",34773,pass
+promo-022,Promotion,Ưu đãi «[SPECIAL DEAL] Complete set of hottest deals in Nha Trang» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"Bộ deal Nha Trang áp dụng 12/02–31/12/2026, gồm nhiều combo VinWonders Nha Trang/Fastpass/buffet/Aquafield/Tata Show. Có gói nửa ngày giảm khoảng 30% và các combo ưu tiên trò chơi, cáp treo hoặc vé sử dụng nhiều ngày; giá và quyền lợi tùy gói.","Dựa trên dữ liệu hiện có, dưới đây là thông tin về ưu đãi «[SPECIAL DEAL] Complete set of hottest deals in Nha Trang»:
+
+*   **Về tình trạng áp dụng:** Cơ sở dữ liệu hiện tại không ghi nhận thông tin cụ thể về thời hạn hiệu lực (ngày bắt đầu hoặc ngày kết thúc) của ưu đãi này.
+*   **Về nội dung chính:** Đây là chương trình ưu đãi dành cho các điểm đến tại Nha Trang, bao gồm các khu phức hợp giải trí như VinWonders Nha Trang và Vinpearl Harbor. Chương trình được thiết kế nhằm giúp du khách có một kỳ nghỉ trọn vẹn và tiết kiệm hơn khi khám phá các dịch vụ tại đây.
+
+Dữ liệu hiện tại không cung cấp thêm các điều kiện chi tiết khác ngoài các thông tin nêu trên.",14209,pass
+promo-026,Promotion,Ưu đãi «Up to 15% discount on VinWonders tickets for all STARLUX Airlines passengers» còn áp dụng không? Tóm tắt điều kiện / nội dung chính giúp tôi.,"Ưu đãi STARLUX áp dụng đến 31/03/2027, giảm đến 15% tùy cơ sở/dịch vụ. Chỉ dành cho hành khách STARLUX; 1 vé máy bay tương ứng 1 vé ưu đãi tại điểm đến và có hiệu lực trong 7 ngày từ ngày bay. Khi sử dụng phải xuất trình hộ chiếu/giấy khai sinh trẻ em và vé STARLUX khớp thông tin; không hoàn, không đổi, không cộng dồn ưu đãi khác.","Ưu đãi giảm giá lên đến 15% vé VinWonders dành cho hành khách của hãng hàng không STARLUX Airlines hiện vẫn đang được ghi nhận trong hệ thống. Dưới đây là tóm tắt các nội dung và điều kiện chính của chương trình:
+
+**Nội dung chính:**
+*   Hành khách của STARLUX Airlines được hưởng ưu đãi giảm giá lên đến 15% khi mua vé tại VinWonders.
+*   Chương trình áp dụng cho hành khách đi đến các điểm đến bao gồm: VinWonders, Vinpearl Harbor và Aquafield.
+
+**Điều kiện áp dụng:**
+*   **Quy định mua vé:** Việc mua vé phải được thực hiện thông qua đường dẫn (link) của VinWonders.
+*   **Giới hạn sử dụng:** 01 vé máy bay tương ứng với 01 vé giảm giá tại điểm đến tương ứng. Vé có hiệu lực trong vòng 7 ngày kể từ ngày bay.
+*   **Xác minh tại chỗ:** Khi đến cổng soát vé, hành khách bắt buộc phải xuất trình Hộ chiếu (hoặc Giấy khai sinh đối với trẻ em) kèm theo vé máy bay STARLUX trùng khớp thông tin. Thông tin của hành khách và người đi kèm phải khớp với thông tin trên vé máy bay.
+*   **Chính sách chung:** Ưu đãi không được hoàn tiền, không được đổi trả và không áp dụng đồng thời với các chương trình khuyến mãi khác.
+*   **Lưu ý về giá:** Trong trường hợp không xuất trình được các giấy tờ hợp lệ, hành khách sẽ phải thanh toán phần chênh lệch giá theo giá tiêu chuẩn tại quầy. Ngoài ra, giá vé có thể thay đổi tùy theo thời điểm (cuối tuần, mùa cao điểm hè, ngày lễ).
+*   **Thông tin vận hành:** Các trò chơi dưới nước sẽ tạm đóng cửa trong mùa thấp điểm (khoảng từ tháng 10 đến tháng 3), trong khi các trải nghiệm trên cạn vẫn mở cửa quanh năm.
+
+Nếu bạn cần thêm thông tin hoặc hỗ trợ, vui lòng liên hệ với Trung tâm Chăm sóc khách hàng.",17738,pass
+promo-030,Promotion,Ưu đãi «MasterCard card privileges: 10% discount when booking VinWonders tickets» tại Hải Phòng còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.,"Tại Hải Phòng, VinWonders Vũ Yên nằm trong danh sách áp dụng Mastercard. Từ 06/06–31/08/2026, thẻ Mastercard BIN 2 hoặc 5 được giảm 10%, tối đa 200.000đ/đơn; mỗi thẻ 1 lần/tháng cho mỗi dịch vụ, không cộng dồn với ưu đãi cần nhập mã.","Hiện tại, cơ sở dữ liệu của chúng tôi không ghi nhận thông tin về ưu đãi «MasterCard card privileges: 10% discount when booking VinWonders tickets» tại Hải Phòng. Do đó, chúng tôi không thể xác nhận hiệu lực cũng như các điều kiện đi kèm của chương trình này.
+
+Đối với các thông tin khác tại điểm đến Hải Phòng:
+
+*   **Về các ưu đãi hiện có:** Cơ sở dữ liệu hiện ghi nhận một số chương trình khuyến mãi khác tại Hải Phòng như: ưu đãi giảm giá vé cho hành khách hãng hàng không STARLUX (lên đến 15%) và chương trình ưu đãi sinh nhật VIN33 dành cho hội viên VinClub.
+*   **Về các điểm tham quan:** Tại Hải Phòng, bạn có thể trải nghiệm các hoạt động tại Vu Yen Royal Island, bao gồm các trò chơi và tham quan động vật tại VinWonders, tập luyện golf tại Vinpearl Golf Hải Phòng, hoặc trải nghiệm cưỡi ngựa tại Vinpearl Horse Academy.
+*   **Về khách sạn:** Cơ sở dữ liệu hiện không chứa đủ thông tin chi tiết để xác nhận các dịch vụ khách sạn cụ thể tại Hải Phòng.",15959,pass
+promo-034,Promotion,Ưu đãi «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines» tại TP. Hồ Chí Minh còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.,"Với điểm khởi hành TP. Hồ Chí Minh, combo Vinpearl + Vietnam Airlines có các tuyến TP.HCM–Hội An, TP.HCM–Nha Trang và TP.HCM–Phú Quốc. Đặt và lưu trú đến 10/10/2026; giảm đến 15% combo và đến 30% dịch vụ tại khách sạn.","Ưu đãi «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines» hiện vẫn đang được áp dụng (trạng thái: *Is active: true*).
+
+Dưới đây là tóm tắt các điều kiện và thông tin chính liên quan đến ưu đãi này:
+
+*   **Phạm vi áp dụng:** Ưu đãi dành cho các chặng bay kết hợp nghỉ dưỡng tại Phú Quốc, Nha Trang và Hội An. Đối với khách hàng khởi hành từ TP. Hồ Chí Minh, bạn có thể đặt combo đi Hội An, Nha Trang hoặc Phú Quốc.
+*   **Cách thức đặt dịch vụ:**
+    1. Truy cập kênh đặt combo chính thức tại: [booking.vinpearl.com](https://booking.vinpearl.com/)
+    2. Chọn mục ""Hotel + Flight tickets"" (Khách sạn + Vé máy bay).
+    3. Nhập thông tin hành trình (điểm đi - điểm đến, ngày nhận - trả phòng, số lượng khách) và nhấn ""Search"" (Tìm kiếm).
+    4. Lựa chọn khách sạn, hạng phòng và chọn hãng hàng không ""Vietnam Airlines"" cùng chuyến bay phù hợp.
+    5. Kiểm tra lại ưu đãi và hoàn tất thanh toán.
+*   **Lưu ý quan trọng:**
+    *   Các ưu đãi có thể thay đổi tùy thuộc vào điểm đến, thời điểm đặt dịch vụ, hạng phòng và hạng vé.
+    *   Bạn cần kiểm tra kỹ thông tin đơn hàng, điều kiện giá và các chính sách áp dụng trước khi thực hiện thanh toán.",63283,pass
+promo-038,Promotion,Ưu đãi «Enter code HAPPY10 to receive exclusive discount on MyVinpearl app up to 10%» tại Hội An còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.,"Metadata của chương trình HAPPY10 có gắn Hội An, nhưng phần cơ sở áp dụng chi tiết chỉ nêu VinHolidays Fiesta Phú Quốc, Vinpearl Wonderworld Phú Quốc, Vinpearl Resort & Spa Phú Quốc và Vinpearl Empire Nha Trang. Vì vậy dữ liệu hiện có chưa đủ căn cứ để khẳng định HAPPY10 áp dụng cho một cơ sở tại Hội An; cần trả lời thận trọng và nêu sự thiếu nhất quán này.","Dựa trên dữ liệu hiện có, tôi xin giải đáp thắc mắc của bạn về ưu đãi tại Hội An như sau:
+
+**Về việc áp dụng mã ưu đãi HAPPY10:**
+Dữ liệu hiện tại xác nhận có tồn tại chương trình khuyến mãi với mã ""HAPPY10"" dành cho ứng dụng MyVinpearl với mức giảm giá lên đến 10% tại điểm đến Hội An.
+
+**Về điều kiện chính:**
+Dữ liệu hiện tại không ghi nhận chi tiết các điều kiện áp dụng cụ thể (như thời hạn hiệu lực, đối tượng áp dụng hay các dịch vụ đi kèm) cho mã HAPPY10 này. Do đó, cơ sở dữ liệu hiện tại không chứa đủ thông tin để tóm tắt các điều kiện chính cho bạn.",60572,pass
+promo-042,Promotion,"Ưu đãi «Summer fun - Hunt for ""huge"" deals at VinWonders Cua Hoi!» tại Nghệ An còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.","VinWonders Cửa Hội áp dụng chương trình hè 30/04–30/09/2026. Có combo Wonder Ngon vui chơi + buffet giảm đến 30%, BBQ bên biển vào tối thứ Bảy và các combo trò chơi; một số ưu đãi dùng mã MEMBER3 hoặc BBQ theo điều kiện từng gói.","Ưu đãi «Summer fun - Hunt for ""huge"" deals at VinWonders Cua Hoi!» tại Nghệ An hiện vẫn đang trong thời gian áp dụng. Dưới đây là thông tin chi tiết và các điều kiện chính của chương trình:
+
+**1. Thời gian áp dụng:**
+Chương trình có hiệu lực từ ngày 30/04/2026 đến hết ngày 30/09/2026.
+
+**2. Các nội dung ưu đãi chính:**
+*   **Gói ""Wonder Delicious"" (Combo vui chơi + Buffet):** Áp dụng trong tuần với các lựa chọn:
+    *   Combo Cáp treo Cửa Hội + Trò chơi trên đảo + Buffet: 510.000 VNĐ.
+    *   Combo Cáp treo + Công viên nước Cửa Hội + Buffet: 520.000 VNĐ (giá gốc 570.000 VNĐ).
+    *   Combo All-in-one 04 khu + Buffet: 600.000 VNĐ (giá gốc 740.000 VNĐ).
+*   **Tiệc tối BBQ trên bãi biển Cửa Lò:**
+    *   Thời gian: 17:00 - 21:00 vào mỗi tối thứ Bảy hàng tuần.
+    *   Địa điểm: Tầng 2 nhà hàng Vọng Biển.
+    *   Giá vé: Chỉ từ 350.000 VNĐ/người lớn và 175.000 VNĐ/trẻ em.
+    *   Trải nghiệm: Thưởng thức tiệc buffet nướng, ngắm pháo hoa tại Quảng trường Ánh sáng và tham gia đêm nhạc DJ sôi động.
+
+**3. Lưu ý thêm:**
+*   Bạn có thể đăng nhập và nhập mã **MEMBER3** để được giảm thêm 3% giá vé.
+*   Để đặt vé, bạn có thể truy cập trực tiếp tại đường dẫn: [https://booking.vinwonders.com/vi-VND/search?code=CHVW1&tab=FnB&usingDate=14-05-2026](https://booking.vinwonders.com/vi-VND/search?code=CHVW1&tab=FnB&usingDate=14-05-2026).
+
+Về các điểm tham quan tại VinWonders Cửa Hội, nơi đây nổi bật với các trải nghiệm như: hệ thống cáp treo vượt biển đầu tiên và duy nhất tại khu vực Bắc Trung Bộ, khu du lịch sinh thái và đảo tâm linh, cùng các hoạt động giải trí, mua sắm, ẩm thực tiêu chuẩn quốc tế và show diễn Mascot - Lala Wonders tại Quảng trường Ánh sáng.",56732,pass
+promo-046,Promotion,Ưu đãi «Up to 15% discount on VinWonders tickets for all STARLUX Airlines passengers» tại khác còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.,"Trong nhóm địa điểm ""khác"", chương trình STARLUX có dữ liệu cho khu vực Đà Nẵng–Hội An và Nghệ An–Hà Tĩnh: VinWonders Nam Hội An giảm 5% vé vào cửa, Hà Tĩnh Water Park giảm 5% vé công viên nước. Chương trình đến 31/03/2027; 1 vé máy bay = 1 vé ưu đãi, hiệu lực 7 ngày và cần giấy tờ + vé STARLUX khớp thông tin.","Dựa trên dữ liệu hiện có, dưới đây là thông tin về ưu đãi dành cho hành khách hãng hàng không STARLUX:
+
+**Về việc áp dụng ưu đãi:**
+Dữ liệu hiện tại xác nhận chương trình ưu đãi «Up to 15% discount on VinWonders tickets for all STARLUX Airlines passengers» đang được ghi nhận trong hệ thống.
+
+**Tóm tắt các điều kiện chính:**
+*   **Đối tượng áp dụng:** Hành khách của hãng hàng không STARLUX bay đến các điểm đến VinWonders/Vinpearl Harbor/Aquafield.
+*   **Quy định sử dụng:** 
+    *   1 vé máy bay áp dụng cho 1 vé ưu đãi (tại điểm đến tương ứng).
+    *   Vé có hiệu lực trong vòng 7 ngày kể từ ngày bay.
+    *   Việc mua vé phải được thực hiện thông qua đường dẫn (link) của VinWonders.
+*   **Xác minh tại chỗ:** Khi đến cổng soát vé, hành khách bắt buộc phải xuất trình Hộ chiếu (hoặc Giấy khai sinh đối với trẻ em) kèm theo vé máy bay STARLUX trùng khớp thông tin. Thông tin của hành khách và người đi cùng phải khớp nhau.
+*   **Chính sách & Tuân thủ:** 
+    *   Vé không được hoàn, không được đổi và không áp dụng đồng thời với các chương trình khuyến mãi khác.
+    *   Nếu không xuất trình được giấy tờ hợp lệ, bạn sẽ phải thanh toán phần chênh lệch giá theo giá niêm yết tại quầy.
+*   **Lưu ý khác:** 
+    *   Giá vé có thể thay đổi tùy theo thời điểm (cuối tuần, mùa cao điểm hè, ngày lễ).
+    *   Các trò chơi dưới nước sẽ tạm đóng cửa trong mùa thấp điểm (khoảng tháng 10 đến tháng 3), các trải nghiệm trên cạn vẫn mở cửa quanh năm.
+
+Nếu cần hỗ trợ thêm, bạn có thể liên hệ Trung tâm Chăm sóc khách hàng qua:
+*   Hotline: 1900 2323 89 (nhánh 3)
+*   Email: [email protected]",45695,pass
+promo-050,Promotion,Ưu đãi «Enter code HAPPY10 to receive exclusive discount on MyVinpearl app up to 10%» tại Phú Quốc còn áp dụng không? Tóm tắt điều kiện chính giúp tôi.,"Tại Phú Quốc, HAPPY10 áp dụng cho VinHolidays Fiesta Phú Quốc, Vinpearl Wonderworld Phú Quốc và Vinpearl Resort & Spa Phú Quốc. Đặt trực tiếp trên app MyVinpearl vào mỗi thứ Năm, nhập HAPPY10 để giảm 10% giá phòng tốt nhất và đến 30% dịch vụ khách sạn; lưu trú đến 30/10/2026.","Ưu đãi sử dụng mã **HAPPY10** trên ứng dụng MyVinpearl hiện vẫn đang được ghi nhận trong hệ thống thông tin của chúng tôi dành cho các cơ sở tại Phú Quốc.
+
+Dưới đây là tóm tắt các điều kiện và nội dung chính của chương trình:
+
+*   **Cách thức áp dụng:** Bạn cần thực hiện đặt phòng trực tiếp trên ứng dụng MyVinpearl và nhập mã **HAPPY10** khi thanh toán.
+*   **Ưu đãi cụ thể:**
+    *   Giảm trực tiếp 10% trên giá phòng tốt nhất.
+    *   Giảm lên đến 30% cho các dịch vụ khách sạn (bao gồm ẩm thực, spa và các tiện ích khác). Vui lòng kiểm tra chi tiết ưu đãi tại từng khách sạn cụ thể.
+*   **Các cơ sở áp dụng tại Phú Quốc:**
+    *   VinHolidays Fiesta Phu Quoc.
+    *   Vinpearl Wonderworld Phu Quoc.
+    *   Vinpearl Resort & Spa Phu Quoc.
+
+Lưu ý: Bạn nên kiểm tra chi tiết áp dụng tại từng khách sạn trên ứng dụng để biết thông tin chính xác nhất cho thời điểm đặt phòng của mình.",41596,pass
+golf-003,Golf,Sân golf Vinpearl Golf Hai Phong có những tiện ích gì?,"Các tiện ích tại Vinpearl Golf Hai Phong: Nhà hàng, Sân tập, Cơ sở vật chất, Phòng thay đồ.","Vinpearl Golf Hải Phòng, tọa lạc trên đảo Vũ Yên, cung cấp các tiện ích và dịch vụ sau đây:
+
+**Về tiện ích sân golf:**
+*   **Dịch vụ cho thuê dụng cụ:** Cung cấp dịch vụ cho thuê gậy và giày chơi golf cao cấp với nhiều lựa chọn cho khách hàng.
+*   **Đội ngũ Caddie:** Có đội ngũ caddie chuyên nghiệp và giàu kinh nghiệm sẵn sàng hỗ trợ người chơi.
+*   **Dịch vụ ẩm thực (F&B):** Cung cấp hành trình ẩm thực tại thành phố Cảng với đa dạng các món ăn địa phương đặc sắc cùng ẩm thực Á - Âu phong phú, đáp ứng nhu cầu của khách hàng.
+
+**Về các dịch vụ và trải nghiệm tại khu vực lân cận (Vu Yen Royal Island):**
+*   **VinWonders Vũ Yên:** Mang đến hành trình khám phá với vô số trò chơi và hàng ngàn loài động vật.
+*   **Vinpearl Horse Academy:** Cung cấp trải nghiệm cưỡi ngựa thượng lưu.
+
+Hiện tại, cơ sở dữ liệu của chúng tôi không ghi nhận thông tin cụ thể về các tiện ích khách sạn (hotel) trực thuộc nội khu sân golf Vinpearl Golf Hải Phòng.",40897,pass
+golf-007,Golf,Sân golf Vinpearl Golf Nam Hoi An có những tiện ích gì?,"Các tiện ích tại Vinpearl Golf Nam Hoi An bao gồm: Nhà hàng, Sân tập, Cửa hàng dụng cụ (Proshop), Phòng thay đồ.","Tại Vinpearl Golf Nam Hội An, các tiện ích và dịch vụ được cung cấp bao gồm:
+
+**Về tiện ích sân golf:**
+*   **Đội ngũ Caddies:** Có đội ngũ caddies chuyên nghiệp và am hiểu sẵn sàng hỗ trợ người chơi.
+*   **Dịch vụ cho thuê dụng cụ:** Cung cấp dịch vụ cho thuê gậy và giày golf cao cấp với nhiều lựa chọn đa dạng.
+*   **Nhà hàng:** Sân golf có nhà hàng với sức chứa lên đến 120 khách, phục vụ các nhu cầu ẩm thực và tổ chức sự kiện.
+*   **Ẩm thực (F&B):** Cung cấp các lựa chọn ẩm thực Á - Âu, bao gồm các món ăn đặc trưng của vùng đất Quảng Nam.
+
+**Về các dịch vụ tại khu phức hợp Vinpearl Nam Hội An:**
+*   **Lưu trú:** Du khách có thể tận hưởng kỳ nghỉ tại Vinpearl Resort & Golf Nam Hội An, tọa lạc dọc theo bờ biển Bình Minh.
+*   **Trải nghiệm văn hóa và thiên nhiên:** Khu phức hợp bao gồm các điểm đến như River Safari (công viên bảo tồn động vật bán hoang dã) và Đảo Văn hóa Dân gian, nơi tái hiện nét tinh hoa văn hóa của ba miền Việt Nam.",32141,pass
+golf-011,Golf,Sân golf Vinpearl Golf Phu Quoc có những tiện ích gì?,"Các tiện ích tại Vinpearl Golf Phu Quoc bao gồm: Nhà hàng, Sân tập, Cửa hàng dụng cụ (Proshop), Phòng thay đồ.","Tại Vinpearl Golf Phú Quốc, bạn có thể trải nghiệm các tiện ích và dịch vụ sau:
+
+*   **Dịch vụ ẩm thực (F&B):** Cung cấp các món ăn Á - Âu phong phú cùng những món đặc sản địa phương độc đáo của đảo Phú Quốc.
+*   **Dịch vụ cho thuê dụng cụ golf:** Cung cấp dịch vụ cho thuê gậy và giày golf cao cấp với nhiều lựa chọn đa dạng.
+*   **Đội ngũ Caddies:** Đội ngũ caddies chuyên nghiệp và am hiểu luôn sẵn sàng hỗ trợ người chơi trong suốt quá trình trải nghiệm.
+*   **Bản đồ sân golf:** Hỗ trợ thông tin về sơ đồ sân golf để người chơi thuận tiện trong việc di chuyển và thi đấu.
+
+Về các dịch vụ khác tại điểm đến Phú Quốc, hệ thống hiện có thông tin về các khu nghỉ dưỡng và tiện ích giải trí trong quần thể Phú Quốc United Center như:
+*   **Các khu lưu trú:** VinHolidays Fiesta Phú Quốc, Vinpearl Resort & Spa Phú Quốc và Vinpearl Wonderworld Phú Quốc.
+*   **Trải nghiệm nghỉ dưỡng:** Các bãi biển riêng tư và dịch vụ tại các khách sạn, khu nghỉ dưỡng sang trọng.
+*   **Giải trí:** VinWonders Phú Quốc – công viên chủ đề lớn nhất Việt Nam với các hoạt động giải trí đa dạng.",57501,pass
+about-004,Hotel,Giới thiệu ngắn về Vinpearl Resort & Spa Phu Quoc.,"Vinpearl Resort & Spa Phu Quoc: Chào đón du khách với mái ngói đỏ tươi, kiến trúc phong cách Indochine và hồ bơi ngoài trời rộng gần 5.000m2, Vinpearl Resort & Spa Phu Quoc mang đến hành trình đầy thú vị với hương vị thiên nhiên đặc trưng của đảo ngọc. Những trải nghiệm không thể bỏ qua tại đây bao gồm thưởng thức tiệc buffet hải sản với tầm nhìn hoàng hôn tráng lệ...","Vinpearl Resort & Spa Phu Quoc là một khu nghỉ dưỡng (resort) tọa lạc tại khu vực Bãi Dài, xã Gành Dầu, thành phố Phú Quốc, tỉnh Kiên Giang, Việt Nam. Đây là một phần của quần thể Phu Quoc United Center.
+
+Về các dịch vụ tại đây, Vinpearl Resort & Spa Phu Quoc cung cấp các tiện ích lưu trú và dịch vụ ăn uống. Bạn có thể tìm hiểu thêm thông tin chi tiết về các hạng phòng và dịch vụ ẩm thực tại các đường dẫn sau:
+- Thông tin chung: https://vinpearl.com/en/hotels/vinpearl-resort-spa-phu-quoc
+- Thông tin phòng: https://vinpearl.com/en/hotels/vinpearl-resort-spa-phu-quoc/rooms
+- Thông tin ẩm thực: https://vinpearl.com/en/hotels/vinpearl-resort-spa-phu-quoc/foods",54987,pass
+about-008,Hotel,Giới thiệu ngắn về Vinpearl Beachfront Nha Trang.,"Vinpearl Beachfront Nha Trang: Vinpearl Beachfront Nha Trang sở hữu các căn hộ khách sạn hướng biển, không chỉ mang đến sự thoải mái và tiện nghi vốn là thương hiệu của Vinpearl, mà còn giúp du khách tiếp cận trọn vẹn và thuận tiện với bãi biển đầy nắng của vịnh Nha Trang. Đây là điểm đến sang trọng mới, nơi du khách sẽ được tận hưởng trung tâm mua sắm sầm uất, các nhà hàng sang trọng, hồ bơi ngoài trời...","Vinpearl Beachfront Nha Trang là một điểm đến sang trọng tọa lạc tại địa chỉ 78 – 80 đường Trần Phú, Nha Trang, tỉnh Khánh Hòa.
+
+Dưới đây là một số thông tin nổi bật về khu nghỉ dưỡng này:
+*   **Tiện nghi:** Khu nghỉ dưỡng cung cấp các căn hộ khách sạn có tầm nhìn hướng biển, kết hợp sự thoải mái và tiện lợi với khả năng tiếp cận bãi biển Nha Trang.
+*   **Dịch vụ và tiện ích:** Khách lưu trú có thể tận hưởng trung tâm mua sắm sầm uất, các nhà hàng sang trọng, hồ bơi ngoài trời với tầm nhìn toàn cảnh đại dương và các không gian hội họp đẳng cấp.",55393,pass
+about-012,Package,Gói «Golf Stay & Play» của Vinpearl là gì?,Lưu trú và chơi golf giữa thiên nhiên nguyên sơ tại những sân golf tốt nhất khu vực Châu Á - Thái Bình Dương.,"Gói «Stay & Play» của Vinpearl là một chương trình ưu đãi dành cho khách lưu trú, với mức giá khởi điểm từ 2.937.000 VND/đêm. Dưới đây là các thông tin chi tiết về gói này dựa trên dữ liệu hiện có:
+
+**Quyền lợi bao gồm:**
+*   **Lưu trú:** Nghỉ dưỡng tại phòng khách sạn Vinpearl kèm bữa sáng (bao gồm bữa sáng cao cấp tại một số khu nghỉ dưỡng).
+*   **Golf:** 01 vòng golf 18 hố/phòng/đêm, đã bao gồm phí sân (green fee), xe điện (cart) và caddy. Số lượng vòng golf có thể thay đổi tùy theo gói dịch vụ khách hàng lựa chọn.
+*   **Ưu đãi dịch vụ tại khách sạn:** Giảm giá lên đến 20% cho các dịch vụ sử dụng tại khách sạn, cụ thể bao gồm:
+    *   20% ưu đãi dịch vụ golf.
+    *   20% ưu đãi dịch vụ spa.
+    *   15% ưu đãi ẩm thực (không áp dụng cho đồ uống có cồn).
+    *   30% ưu đãi BBQ tại khách sạn (tùy theo chính sách từng khu nghỉ).
+*   **Các quyền lợi khác:** Tại một số khu nghỉ như Vinpearl Resort & Spa Phú Quốc, gói này còn bao gồm dịch vụ đưa đón sân bay, ưu đãi spa (ví dụ: 02 gói spa 60 phút/phòng cho khách đặt gói 3 ngày 2 đêm), nhận phòng sớm hoặc trả phòng muộn (tùy tình trạng phòng thực tế), và ưu đãi nâng hạng phòng hướng biển (tùy tình trạng phòng thực tế).
+
+**Thời gian áp dụng:**
+*   Thời gian đặt dịch vụ: Từ ngày 01/01/2026 đến ngày 30/10/2026.
+*   Thời gian lưu trú: Đến hết ngày 31/12/2026.
+
+**Lưu ý quan trọng:**
+*   Khách hàng cần chọn đúng loại gói «Stay & Play» khi đặt dịch vụ trực tuyến trên hệ thống của Vinpearl để nhận được các ưu đãi này.
+*   Các ưu đãi giảm giá thành viên (lên đến 10%) thường không áp dụng đồng thời với gói «Stay & Play».
+*   Ưu đãi giảm giá lên đến 50% cho các dịch vụ như VinWonders, Safari, Essence of Vietnam,... chỉ áp dụng khi đặt các dịch vụ trực tuyến đi kèm với gói phòng.",73137,pass
+policy-002,Regulation,Quy định «General regulations» của Vinpearl nói về điều gì? Tóm tắt giúp tôi.,"General regulations là Quy định chung về hành vi, an toàn và sử dụng dịch vụ trong khu vực khách sạn Vinpearl/VinOasis. Khách lưu trú phải có giấy tờ tùy thân hợp lệ; không được mang thú cưng vào khách sạn; hút thuốc, kể cả thuốc lá điện tử, chỉ được phép tại khu vực cho phép và/hoặc ngoài ban công phòng, vi phạm tại nơi cấm hút thuốc phải trả phí khôi phục, vệ sinh sâu và khử mùi 3.000.000 VNĐ/lần lưu trú. Khách phải giữ tài sản giá trị trong két phòng hoặc gửi lễ tân, khóa cửa và đảm bảo thiết bị điện an toàn khi rời phòng. Bếp tại Villa chỉ dùng để hâm nóng thức ăn; không được tự nấu/chế biến gây mùi, khói hoặc mất an toàn cháy nổ; tổ chức BBQ phải đăng ký với Trung tâm Chăm sóc Khách hàng và có thể phát sinh phí. Không được mang đồ ăn/thức uống mua từ bên ngoài vào khách sạn; nếu mang vào phải thông báo và trả phí dịch vụ 1.175.000 VNĐ/lần, khách sạn không chịu trách nhiệm về an toàn thực phẩm; không mang thực phẩm có mùi mạnh như sầu riêng, mít, nước mắm vào phòng. Cấm vũ khí, hóa chất, chất nổ, cờ bạc, mại dâm, chất kích thích/sản phẩm bị cấm, đánh nhau và các hành vi vi phạm pháp luật. Khách đến thăm phải đăng ký với lễ tân; vì lý do an ninh, khách thăm không được vào phòng sau 20:00, nếu ở qua đêm phải đăng ký và thanh toán phí lưu trú. Hồ bơi đóng muộn nhất lúc 22:00 và không nên sử dụng sau thời điểm này; không bơi biển sau 19:00 do không còn nhân viên an ninh/cứu hộ trực. Sau 22:00 phải hạn chế tiếng ồn, âm lượng TV không vượt quá mức 10, không mở loa lớn hoặc nói chuyện quá to. Ban Quản lý có quyền yêu cầu khách cố ý vi phạm nội quy rời khách sạn mà không hoàn lại phí.","""General regulations"" (Quy định chung) của Vinpearl là bộ quy tắc được ban hành nhằm đảm bảo an toàn, sự ổn định và bảo vệ quyền lợi của khách hàng khi sử dụng dịch vụ tại các khách sạn thuộc hệ thống Vinpearl và VinOasis.
+
+Dưới đây là tóm tắt các nội dung chính của bộ quy định này:
+
+*   **Mục đích và trách nhiệm:** Quy định được áp dụng cho toàn bộ Ban quản lý và nhân viên để đảm bảo khách hàng được tận hưởng các tiện ích và dịch vụ tốt nhất. Khách hàng có trách nhiệm tìm hiểu và tuân thủ các quy định này. Vinpearl có thể sửa đổi, bổ sung các quy định này theo từng thời điểm.
+*   **Quy định về lưu trú và an toàn:**
+    *   Khách hàng phải mang theo giấy tờ tùy thân hợp lệ theo quy định của pháp luật về lưu trú.
+    *   Không được mang thú cưng vào khu vực khách sạn.
+    *   Tuân thủ các quy định về phòng chống dịch bệnh và an toàn khi sử dụng phương tiện di chuyển trong khu vực khách sạn.
+    *   Khách hàng cần bảo quản tài sản cá nhân (sử dụng két sắt trong phòng hoặc gửi tại quầy lễ tân); khách sạn không chịu trách nhiệm nếu khách không tuân thủ quy định này.
+*   **Quy định về hành vi và ứng xử:**
+    *   Cư xử đúng mực tại nơi công cộng: tôn trọng nguyên tắc ưu tiên (người già, người khuyết tật, phụ nữ mang thai), không gây ồn ào, không có các hành vi thiếu văn minh.
+    *   Trang phục: Phải mặc trang phục phù hợp tại các khu vực chung (sảnh, nhà hàng...); nghiêm cấm tình trạng khỏa thân.
+    *   Hút thuốc: Chỉ được phép hút tại các khu vực có biển báo cho phép hoặc ngoài ban công phòng. Vi phạm sẽ bị phạt 3.000.000 VNĐ để chi trả phí làm sạch và khử mùi.
+*   **Quy định về tiện ích và dịch vụ:**
+    *   **Hồ bơi và bãi biển:** Tuân thủ giờ hoạt động. Không sử dụng hồ bơi sau 22:00 và không tắm biển sau 19:00 (do không có nhân viên cứu hộ). Khách tự chịu trách nhiệm nếu cố tình vi phạm.
+    *   **Tiếng ồn:** Sau 22:00, cần giữ trật tự, âm lượng TV không quá 10 và không sử dụng loa lớn.
+    *   **VinWonders:** Khi sử dụng vé đi kèm, khách phải tuân thủ các điều kiện về độ tuổi, chiều cao, cân nặng và an toàn của từng trò chơi.
+    *   **Phòng ở/Villa:** Tuân thủ quy định về sử dụng thiết bị điện và nấu nướng (bếp tại villa chỉ dùng để hâm nóng thức ăn).
+*   **Chế tài xử lý:** Ban quản lý khách sạn có quyền yêu cầu khách rời khỏi khách sạn mà không hoàn lại phí nếu khách cố tình phớt lờ hoặc vi phạm các quy định đã nêu.",72145,pass
+policy-006,Regulation,Quy định «PRIVACY POLICY (Personal Data Protection Policy)» của Vinpearl nói về điều gì? Tóm tắt giúp tôi.,"Privacy Policy là Chính sách bảo vệ dữ liệu cá nhân của Vinpearl, áp dụng cho việc thu thập, sử dụng, lưu trữ, chia sẻ và xử lý dữ liệu cá nhân trong hoạt động của Công ty. Dữ liệu có thể gồm dữ liệu cơ bản như họ tên, ngày sinh, giới tính, địa chỉ, quốc tịch, hình ảnh, số điện thoại, CCCD/hộ chiếu, nghề nghiệp, tình trạng hôn nhân, quan hệ gia đình, tài khoản số và lịch sử hoạt động; dữ liệu nhạy cảm có thể gồm quan điểm chính trị/tôn giáo, sức khỏe, nguồn gốc chủng tộc/dân tộc, dữ liệu sinh trắc học, thông tin tội phạm, tài khoản ngân hàng và dữ liệu vị trí. Mục đích xử lý gồm xác minh khách hàng, cung cấp và thực hiện hợp đồng/dịch vụ, chăm sóc và giải quyết khiếu nại, liên hệ thông báo, chương trình khuyến mại/marketing, quản lý chương trình khách hàng thân thiết, phân tích và cải thiện sản phẩm/dịch vụ, cá nhân hóa đề xuất, thực hiện nghĩa vụ tài chính-kế toán-thuế, tái cấu trúc/chuyển giao kinh doanh, phòng chống tội phạm và tuân thủ yêu cầu pháp luật. Dữ liệu có thể được thu thập từ website/app, quá trình sử dụng dịch vụ, trao đổi với khách hàng, mạng xã hội, camera/thiết bị ghi âm ghi hình, cookies/pixel và các nguồn hợp pháp khác; có thể được lưu tại Việt Nam hoặc nơi Công ty, công ty liên quan, đối tác/nhà cung cấp dịch vụ có cơ sở. Vinpearl tuyên bố không bán dữ liệu cá nhân; dữ liệu có thể được chia sẻ với công ty mẹ, công ty con/công ty liên kết, đối tác tham gia xử lý dữ liệu, người đại diện được ủy quyền hoặc cơ quan nhà nước có thẩm quyền và việc chuyển dữ liệu ra nước ngoài phải tuân thủ yêu cầu bảo mật và pháp luật Việt Nam. Dữ liệu thẻ thanh toán quan trọng như số thẻ, họ tên và CVV không được Vinpearl ghi lại trên hệ thống; giao dịch thanh toán được thực hiện trên hệ thống ngân hàng liên quan. Dữ liệu của trẻ em chỉ được xử lý khi cha mẹ/người giám hộ đồng ý; với trẻ từ 7 tuổi trở lên còn cần sự đồng ý của chính trẻ theo quy định nêu trong chính sách. Chủ thể dữ liệu có các quyền như được biết, đồng ý/không đồng ý, truy cập/chỉnh sửa, rút lại sự đồng ý, yêu cầu xóa hoặc hạn chế xử lý, yêu cầu cung cấp dữ liệu, phản đối xử lý, khiếu nại/tố cáo/khởi kiện, yêu cầu bồi thường và tự bảo vệ; một số yêu cầu có thể bị từ chối nếu không đúng thủ tục, không xác minh được danh tính, có dấu hiệu gian lận/vi phạm hoặc pháp luật không cho phép. Dữ liệu được xử lý từ khi Công ty nhận hợp pháp đến khi hoàn thành mục đích xử lý và có thể tiếp tục được lưu sau khi hợp đồng kết thúc nếu pháp luật hoặc cơ quan có thẩm quyền yêu cầu. Chính sách có hiệu lực từ 05/11/2024.","Chính sách bảo mật và bảo vệ dữ liệu cá nhân (Privacy Policy) của Vinpearl mô tả cách thức Công ty Cổ phần Vinpearl thu thập, sử dụng và xử lý dữ liệu cá nhân trong quá trình vận hành và kinh doanh. Dưới đây là tóm tắt các nội dung chính:
+
+*   **Mục đích thu thập và xử lý dữ liệu:** Dữ liệu được sử dụng để thực hiện các hoạt động chăm sóc khách hàng, cải thiện chất lượng sản phẩm/dịch vụ, quản lý tài khoản, thực hiện các chương trình khuyến mãi, tiếp thị, quảng cáo, cũng như phục vụ các nghĩa vụ báo cáo, tài chính, thuế, kiểm toán và tuân thủ pháp luật. Dữ liệu cũng có thể được sử dụng để ngăn chặn, điều tra tội phạm và bảo vệ quyền lợi hợp pháp của các bên.
+*   **Đối tượng áp dụng:** Chính sách áp dụng cho các cá nhân là khách hàng sử dụng sản phẩm/dịch vụ của Vinpearl, nhân viên, cổ đông và các cá nhân có mối quan hệ pháp lý với Công ty.
+*   **Phương thức thu thập:** Dữ liệu được thu thập thông qua các biểu mẫu trên website/ứng dụng của Vinpearl hoặc khi khách hàng đăng ký, sử dụng sản phẩm, dịch vụ và ký kết hợp đồng với Công ty.
+*   **Quyền và xác nhận của chủ thể dữ liệu:** Khi chấp nhận chính sách này, chủ thể dữ liệu đồng ý cho phép Vinpearl và các tổ chức/cá nhân tham gia vào quá trình xử lý dữ liệu được thực hiện các hoạt động xử lý dữ liệu theo quy định.
+*   **Thông tin liên hệ:** Nếu có thắc mắc về việc bảo vệ dữ liệu cá nhân, khách hàng có thể liên hệ qua:
+    *   Địa chỉ: Công ty Cổ phần Vinpearl - Đảo Hòn Tre, Phường Vĩnh Nguyên, Thành phố Nha Trang, Tỉnh Khánh Hòa, Việt Nam.
+    *   Email: [email protected]
+    *   Điện thoại: 1900 23 23 89 (nhánh 3).
+
+Chính sách này có hiệu lực áp dụng từ ngày 05 tháng 11 năm 2024.",69707,pass
+memory-hoi-an,Memory,"Tôi đang lên kế hoạch đi Hội An với gia đình. | Ở Hội An Vinpearl có những resort nào? | Hiện có ưu đãi nào ở Hội An không? Ví dụ «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines» còn áp dụng chứ? | Trong các lựa chọn trên, Vinpearl Resort & Golf Nam Hoi An có phù hợp gia đình không? | Bạn còn nhớ tôi đang hỏi về Hội An chứ? | Tóm tắt lại những gì tôi đã hỏi từ đầu.",Ghi nhớ điểm đến: Hội An; đối tượng: gia đình. || Liệt kê resort tại Hội An: Vinpearl Resort & Golf Nam Hoi An || Ưu đãi liên quan: Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines; Enter code HAPPY10 to receive exclusive discount on MyVinpearl app up to 10% || Tư vấn dựa trên Vinpearl Resort & Golf Nam Hoi An và ngữ cả…,"Chào bạn, dưới đây là thông tin về các trải nghiệm giải trí và lưu trú tại Hội An dành cho chuyến đi của gia đình bạn:
+
+**Về các điểm tham quan và giải trí:**
+Tại khu phức hợp Vinpearl Nam Hội An, gia đình bạn có thể tham gia nhiều hoạt động đa dạng:
+*   **VinWonders Nam Hội An:** Một tổ hợp văn hóa, kiến trúc và nghệ thuật, nơi bạn có thể khám phá những trải nghiệm đa văn hóa.
+*   **Đảo Văn hóa Dân gian:** Nơi tái hiện tinh hoa văn hóa của ba miền Việt Nam.
+*   **River Safari:** Công viên bảo tồn động vật hoang dã trên sông, nơi bạn có thể chiêm ngưỡng hơn 500 loài động vật quý hiếm.
+*   **Vinpearl Golf Nam Hội An:** Sân golf 18 hố tiêu chuẩn quốc tế với những cồn cát trắng và hàng thông xanh.
+*   **Phố cổ Hội An:** Một di sản văn hóa thế giới được UNESCO công nhận, nơi bạn có thể dành trọn một ngày để khám phá văn hóa và ẩm thực địa phương.
+
+**Về lưu trú:**
+Bạn có thể lựa chọn **Vinpearl Resort & Golf Nam Hội An**, tọa lạc tại đường Võ Chí Công, xã Bình Minh, huyện Thăng Bình, tỉnh Quảng Nam. Đây là khu nghỉ dưỡng nằm dọc theo bãi biển Bình Minh hoang sơ.
+
+Tại khu nghỉ dưỡng này, gia đình bạn có thể trải nghiệm các dịch vụ ẩm thực như:
+*   **An Restaurant:** Phục vụ ẩm thực châu Á (bao gồm các món Hàn Quốc, Ấn Độ và Trung Hoa) trong không gian hiện đại, mở cửa từ 11:00 đến 22:00.
+*   **Lobby bar:** Không gian thư giãn phục vụ cocktail và đồ ăn nhẹ, mở cửa từ 08:00 đến 23:00.
+
+Để biết thêm chi tiết, bạn có thể tham khảo tại:
+*   Thông tin chung: [https://vinwonders.com/en/nam-hoi-an-destination/](https://vinwonders.com/en/nam-hoi-an-destination/)
+*   Thông tin khách sạn: [https://vinpearl.com/en/hotels/vinpearl-resort-golf-nam-hoi-an](https://vinpearl.com/en/hotels/vinpearl-resort-golf-nam-hoi-an) || Tại Hội An, hệ thống Vinpearl hiện có resort sau:
+
+*   **Vinpearl Resort & Golf Nam Hoi An**: Tọa lạc tại đường Võ Chí Công, xã Bình Minh, huyện Thăng Bình, tỉnh Quảng Nam. Đây là khu nghỉ dưỡng nằm dọc theo bãi biển Bình Minh.
+
+Bạn có thể tìm hiểu thêm thông tin chi tiết tại: https://vinpearl.com/en/hotels/vinpearl-resort-golf-nam-hoi-an || Tại Hội An, hiện đang áp dụng chương trình ưu đãi **""Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines""**.
+
+Dưới đây là thông tin chi tiết về chương trình này:
+
+*   **Trạng thái:** Đang hoạt động (thời hạn đặt phòng và lưu trú đến hết ngày 10/10/2026).
+*   **Nội dung ưu đãi:** Khi đặt combo Vinpearl và Vietnam Airlines, bạn sẽ nhận được các ưu đãi sau:
+    *   Giảm giá lên đến 15% khi đặt combo khách sạn Vinpearl kèm vé máy bay Vietnam Airlines.
+    *   Giảm giá lên đến 30% cho các dịch vụ tại khách sạn (ẩm thực, spa, giải trí... tùy theo điều kiện áp dụng).
+*   **Lợi ích:** Tiết kiệm chi phí so với việc đặt riêng lẻ từng dịch vụ, quy trình đặt chỗ thuận tiện và linh hoạt trong việc lựa chọn chuyến bay, khách sạn cũng như thời gian lưu trú.
+
+Bạn có thể đặt combo này tại trang web: [https://booking.vinpearl.com/](https://booking.vinpearl.com/). || Vinpearl Resort & Golf Nam Hoi An là một lựa chọn phù hợp cho kỳ nghỉ của bạn. Dưới đây là thông tin chi tiết dựa trên yêu cầu của bạn:
+
+**Về khả năng phục vụ gia đình (Khách sạn):**
+Hiện tại, cơ sở dữ liệu không ghi nhận đầy đủ thông tin chi tiết về các tiện ích dành riêng cho gia đình (như câu lạc bộ trẻ em hay dịch vụ trông trẻ). Tuy nhiên, khu nghỉ dưỡng cung cấp các dịch vụ ẩm thực đa dạng phù hợp cho khách lưu trú, bao gồm:
+*   **An Restaurant:** Không gian ẩm thực hiện đại phục vụ các món ăn châu Á (ẩm thực Ấn Độ, Trung Hoa và đồ nướng Hàn Quốc) trong không khí ấm cúng, thư giãn (mở cửa từ 11:00 đến 22:00).
+*   **Lobby bar:** Nơi lý tưởng để thư giãn với các loại cocktail thủ công và đồ ăn nhẹ (mở cửa từ 08:00 đến 23:00).
+
+**Về tiện ích Golf:**
+Vinpearl Golf Nam Hoi An nằm trong khu phức hợp Vinpearl Nam Hội An, là sân golf 18 hố (Par 72) với địa hình cát tự nhiên và cảnh quan thay đổi theo mùa. Các dịch vụ hỗ trợ tại sân bao gồm:
+*   **Đội ngũ Caddies:** Chuyên nghiệp và giàu kinh nghiệm.
+*   **Cho thuê thiết bị:** Cung cấp dịch vụ cho thuê gậy và giày golf cao cấp.
+*   **Ẩm thực:** Nhà hàng tại sân golf có sức chứa lên đến 120 khách, phục vụ đa dạng các món ăn Á - Âu, bao gồm cả các món đặc sản của Quảng Nam. || Chào bạn, tôi vẫn ghi nhớ các thông tin bạn đang tìm hiểu về Hội An. Dưới đây là các thông tin chi tiết dựa trên cơ sở dữ liệu hiện có về các dịch vụ, khách sạn và sân golf tại khu vực này:
+
+**Về dịch vụ và tiện ích tại Vinpearl Resort & Golf Nam Hội An:**
+*   Khu nghỉ dưỡng tọa lạc dọc theo bãi biển Bình Minh, mang đến trải nghiệm nghỉ dưỡng sang trọng.
+*   Du khách có thể tham gia các hoạt động như khám phá River Safari (công viên bảo tồn động vật bán hoang dã duy nhất tại Việt Nam) hoặc tìm hiểu văn hóa tại Đảo Văn hóa Dân gian.
+*   Về ẩm thực, khu nghỉ dưỡng có nhà hàng An Restaurant, phục vụ các món ăn Á Đông (ẩm thực Hàn Quốc, Ấn Độ và Trung Hoa) trong không gian thư giãn, mở cửa từ 11:00 đến 22:00.
+
+**Về khách sạn:**
+*   Vinpearl Resort & Golf Nam Hội An là khu nghỉ dưỡng nằm tại đường Võ Chí Công, xã Bình Minh, huyện Thăng Bình, tỉnh Quảng Nam. Đây là một phần của tổ hợp Vinpearl Nam Hội An.
+
+**Về sân golf:**
+*   Vinpearl Golf Nam Hội An là sân golf 18 hố, par 72, được thiết kế bởi IMG Worldwide với chiều dài 7.038 yards. Sân có địa hình cát tự nhiên, các đường fairway rộng và khu vực green nhấp nhô.
+*   Các dịch vụ hỗ trợ tại sân golf bao gồm:
+    *   Đội ngũ caddie chuyên nghiệp sẵn sàng hỗ trợ người chơi.
+    *   Dịch vụ cho thuê dụng cụ chơi golf (giày và gậy golf cao cấp).
+    *   Nhà hàng tại sân golf với sức chứa lên đến 120 khách, cung cấp các lựa chọn ẩm thực đa dạng và dịch vụ tổ chức sự kiện.
+
+Bạn có cần thêm thông tin chi tiết nào khác về các địa điểm này không? || Dưới đây là tóm tắt các thông tin liên quan đến các yêu cầu của bạn tại Hội An dựa trên cơ sở dữ liệu hiện có:
+
+**1. Về khách sạn (Vinpearl Resort & Golf Nam Hội An)**
+*   **Vinpearl Resort & Golf Nam Hội An:** Là khu nghỉ dưỡng nằm tại đường Võ Chí Công, xã Bình Minh, huyện Thăng Bình, tỉnh Quảng Nam.
+*   **Dịch vụ ăn uống:** Khu nghỉ dưỡng có nhà hàng **An Restaurant**, phục vụ ẩm thực Pan-Asian (kết hợp các hương vị Hàn Quốc, Ấn Độ và Trung Hoa) trong không gian hiện đại, mở cửa từ 11:00 đến 22:00 hàng ngày.
+
+**2. Về Golf (Vinpearl Golf Nam Hội An)**
+*   **Thông tin sân:** Sân có 18 hố, Par 72, chiều dài 7.038 yards, được thiết kế bởi IMG Worldwide. Sân nằm cách sân bay quốc tế Đà Nẵng 45 phút lái xe và cách phố cổ Hội An 17 km về phía Nam.
+*   **Tiện ích:**
+    *   **Caddies:** Đội ngũ caddie chuyên nghiệp hỗ trợ người chơi.
+    *   **Cho thuê thiết bị:** Dịch vụ cho thuê gậy và giày golf cao cấp.
+    *   **Nhà hàng:** Có nhà hàng phục vụ ẩm thực và tổ chức sự kiện với sức chứa lên đến 120 khách.
+
+**3. Về các chương trình khuyến mãi**
+Hiện có một số ưu đãi cho vé vui chơi tại VinWonders Nam Hội An:
+*   **Mã VWNHA30:** Giảm 30% cho vé VinWonders Nam Hội An.
+*   **Mã PEARLVW8:** Giảm 8% khi mua vé vui chơi tại VinWonders Nam Hội An (thuộc chương trình Happy Member Day).
+
+*Lưu ý: Cơ sở dữ liệu hiện tại không ghi nhận thông tin cụ thể về ""sự phù hợp cho gia đình"" tại Hội An.*",321883,pass
+memory-promo-followup,Memory,Cho tôi hỏi về ưu đãi «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines». | Ưu đãi này còn đang áp dụng không? | Điều kiện chính / đối tượng áp dụng là gì? | Bạn còn nhớ tôi đang hỏi ưu đãi nào không? | Tóm tắt ngắn ưu đãi đó giúp tôi.,Ghi nhớ ưu đãi đang hỏi: «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines». || Xác nhận trạng thái ưu đãi «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines» theo dữ liệu crawl. || Tóm tắt điều kiện chính của «Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines» từ nộ…,"Chương trình ưu đãi **«Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines»** có các thông tin chi tiết như sau:
+
+**1. Thông tin ưu đãi:**
+*   **Thời gian áp dụng:** Từ nay đến hết ngày 10 tháng 10 năm 2026.
+*   **Quyền lợi:**
+    *   Giảm tới 15% khi đặt combo khách sạn Vinpearl kèm vé máy bay Vietnam Airlines.
+    *   Giảm tới 30% cho các dịch vụ tại khách sạn (ẩm thực, spa, giải trí... tùy theo điều kiện áp dụng).
+*   **Lợi ích của combo:** Tiết kiệm chi phí so với đặt riêng lẻ từng dịch vụ, quy trình đặt chỗ thuận tiện (một lần đặt cho toàn bộ chuyến đi) và linh hoạt lựa chọn chuyến bay, khách sạn cũng như thời gian lưu trú.
+*   **Điểm đến:** Chương trình áp dụng cho các điểm đến nghỉ dưỡng tại Phú Quốc, Nha Trang và Hội An.
+
+**2. Hướng dẫn đặt combo:**
+Bạn có thể thực hiện đặt combo theo các bước sau:
+*   **Bước 1:** Truy cập kênh đặt combo chính thức tại [booking.vinpearl.com](https://booking.vinpearl.com/), chọn mục ""Hotel + Flight tickets"".
+*   **Bước 2:** Chọn điểm đi - điểm đến, ngày nhận phòng - trả phòng, số lượng phòng và số lượng khách, sau đó nhấn ""Search"".
+*   **Bước 3:** Chọn khách sạn và loại phòng.
+*   **Bước 4:** Chọn hãng hàng không ""Vietnam Airlines"" và chuyến bay phù hợp.
+*   **Bước 5:** Kiểm tra lại ưu đãi và hoàn tất thanh toán. || Ưu đãi ""Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines"" hiện vẫn đang được áp dụng.
+
+Thời gian đặt phòng và thời gian lưu trú cho chương trình này kéo dài từ nay cho đến hết ngày 10 tháng 10 năm 2026. || Dưới đây là thông tin về chương trình khuyến mãi ""Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines"" dựa trên dữ liệu hiện có:
+
+**Về điều kiện chính (Terms and conditions):**
+*   **Thời gian đặt và lưu trú:** Từ nay đến hết ngày 10/10/2026.
+*   **Ưu đãi:** 
+    *   Giảm tới 15% khi đặt combo khách sạn Vinpearl + vé máy bay Vietnam Airlines.
+    *   Giảm tới 30% cho các dịch vụ tại khách sạn (ẩm thực, spa, giải trí... tùy theo điều kiện áp dụng).
+*   **Quy định chung về voucher (nếu có):**
+    *   Voucher điện tử chỉ áp dụng cho người đặt và thành viên lưu trú; không được phép mua bán hoặc chuyển nhượng.
+    *   Mỗi voucher chỉ được áp dụng một lần, không hoàn tiền và không được quy đổi thành tiền mặt.
+    *   Không được thay đổi ngày sử dụng dịch vụ sau khi đã đặt.
+    *   Voucher Hotel credit áp dụng cho các dịch vụ trực tiếp do Vinpearl cung cấp tại khách sạn (như Spa, F&B, giặt ủi...), không áp dụng cho các dịch vụ từ nhà cung cấp bên ngoài, đồ uống có cồn, dịch vụ phòng, Golf, VinWonders, Safari và các chi phí phát sinh khác.
+    *   Khách hàng cần thông báo cho lễ tân khi nhận phòng để được hướng dẫn sử dụng dịch vụ.
+
+**Về đối tượng áp dụng:**
+Hiện tại, cơ sở dữ liệu không chứa đủ thông tin để xác định cụ thể các đối tượng được áp dụng cho chương trình khuyến mãi này. || Chào bạn, tôi vẫn ghi nhớ ưu đãi mà bạn đang quan tâm là chương trình **""Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines""** (tạm dịch: Mua giá hời, nghỉ thảnh thơi cùng Vinpearl và Vietnam Airlines).
+
+Dưới đây là các thông tin chi tiết về ưu đãi này dựa trên dữ liệu hiện có:
+
+*   **Thời gian áp dụng:** Từ nay đến hết ngày 10/10/2026.
+*   **Nội dung ưu đãi:**
+    *   Giảm tới 15% khi đặt combo khách sạn Vinpearl kèm vé máy bay Vietnam Airlines.
+    *   Giảm tới 30% cho các dịch vụ tại khách sạn (ẩm thực, spa, giải trí... tùy theo điều kiện áp dụng).
+*   **Các điểm đến áp dụng:** Phú Quốc, Nha Trang, Hội An, Hà Nội và Thành phố Hồ Chí Minh.
+*   **Hướng dẫn đặt combo:**
+    *   Bước 1: Truy cập kênh đặt combo chính thức tại [booking.vinpearl.com](https://booking.vinpearl.com/), chọn mục ""Hotel + Flight tickets"".
+    *   Bước 2: Chọn điểm đi - điểm đến, ngày nhận phòng - trả phòng, số lượng phòng và khách. Nhấn ""Search"".
+    *   Bước 3: Chọn khách sạn và loại phòng.
+    *   Bước 4: Chọn hãng hàng không ""Vietnam Airlines"" và chuyến bay phù hợp.
+    *   Bước 5: Kiểm tra lại ưu đãi và hoàn tất thanh toán.
+
+Nếu bạn cần thêm thông tin cụ thể về bất kỳ phần nào của chương trình này, hãy cho tôi biết nhé! || Chương trình ưu đãi ""Buy at a bargain price and relax in peace with Vinpearl and Vietnam Airlines"" có các thông tin tóm tắt như sau:
+
+*   **Thời gian áp dụng:** Từ nay đến hết ngày 10 tháng 10 năm 2026.
+*   **Nội dung ưu đãi:**
+    *   Giảm tới 15% khi đặt combo khách sạn Vinpearl kèm vé máy bay Vietnam Airlines.
+    *   Giảm tới 30% cho các dịch vụ tại khách sạn (ẩm thực, spa, giải trí... tùy theo điều kiện áp dụng).
+*   **Lợi ích của combo:** Tiết kiệm chi phí so với đặt lẻ từng dịch vụ, quy trình đặt chỗ thuận tiện (một lần đặt cho toàn bộ chuyến đi) và linh hoạt lựa chọn chuyến bay, khách sạn cũng như thời gian lưu trú.
+*   **Cách thức đặt combo:**
+    1. Truy cập kênh đặt combo chính thức tại [booking.vinpearl.com](https://booking.vinpearl.com/), chọn mục ""Hotel + Flight tickets"".
+    2. Chọn điểm đi - điểm đến, ngày nhận - trả phòng, số lượng phòng và khách. Nhấn ""Search"".
+    3. Chọn khách sạn và loại phòng.
+    4. Chọn hãng hàng không ""Vietnam Airlines"" và chuyến bay phù hợp.
+    5. Kiểm tra ưu đãi và hoàn tất thanh toán.",353505,pass
+memory-hai-phong,Memory,Tôi đang xem Hải Phòng. | Ở Hải Phòng Vinpearl Golf thế nào? | Có ưu đãi nào ở Hải Phòng không? Ví dụ «VIN33 Birthday: Up to 30% discount for VinClub members»? | Bạn còn nhớ điểm đến của tôi là Hải Phòng chứ? | Đừng trả lời sang Nha Trang hay Phú Quốc.,"Ghi nhớ điểm đến: Hải Phòng. || Trả lời về Vinpearl Golf Hải Phòng (số lỗ/tiện ích theo crawl). || Ưu đãi: VIN33 Birthday: Up to 30% discount for VinClub members; [EXCLUSIVE] Fastpass Games VinWonders – Play quickly without waiting! || Phải nhớ điểm đến hiện tại là Hải Phòng. || Giữ ngữ cảnh Hải Phòng, không nhảy điểm đến khác.","Tại Hải Phòng, bạn có thể khám phá khu phức hợp **Vu Yen Royal Island**. Dưới đây là các thông tin nổi bật về điểm đến này:
+
+*   **Giải trí đẳng cấp:** Bạn có thể thưởng thức các màn trình diễn pháo hoa và các chương trình âm nhạc cao cấp tại quảng trường Vu Yen.
+*   **Trải nghiệm thể thao:** Bạn có cơ hội rèn luyện kỹ năng chơi golf trong không gian thiên nhiên rộng lớn, nơi mỗi lỗ golf đều mang đến những thử thách mới.
+*   **Trải nghiệm sống thượng lưu:** Bạn có thể tận hưởng nghệ thuật cưỡi ngựa nhàn nhã và tham gia các hoạt động ưu tú tại Học viện cưỡi ngựa Vinpearl (Vinpearl Horse Academy).
+
+Để biết thêm chi tiết, bạn có thể tham khảo tại: https://vinwonders.com/en/vu-yen-royal-island/ || Tại Hải Phòng, Vinpearl Golf Hải Phòng là điểm đến nổi bật với các thông tin chi tiết như sau:
+
+**Về Golf:**
+Vinpearl Golf Hải Phòng tọa lạc trên đảo Vũ Yên, cách trung tâm thành phố khoảng 15 phút di chuyển. Đây là sân golf trên đảo với 36 hố, được thiết kế bởi IMG Worldwide, bao gồm hai sân với đặc điểm riêng biệt:
+*   **Marsh Course:** Nổi tiếng với địa hình đầm lầy tự nhiên đầy thử thách.
+*   **Lake Course:** Sở hữu cảnh quan tuyệt đẹp với các hồ nước đa dạng, mang lại trải nghiệm chơi golf vừa thư thái vừa thú vị.
+*   **Thông số kỹ thuật:** Par 72; chiều dài sân Lake là 7.318 yards và sân Marsh là 7.508 yards.
+
+Các dịch vụ và tiện ích đi kèm bao gồm:
+*   **Caddies:** Đội ngũ caddie chuyên nghiệp và am hiểu sẵn sàng hỗ trợ người chơi.
+*   **Cho thuê thiết bị:** Cung cấp dịch vụ cho thuê gậy và giày golf cao cấp.
+*   **Ẩm thực:** Nhà hàng có sức chứa 200 khách lẻ hoặc 300 khách sự kiện, phục vụ đa dạng ẩm thực Á - Âu và các món ăn địa phương. Ngoài ra, sân còn có phòng VIP dành cho các cuộc họp riêng tư với sức chứa lên đến 30 khách.
+
+**Về Khách sạn:**
+Hiện tại, cơ sở dữ liệu của chúng tôi chưa ghi nhận đủ thông tin để xác nhận các chi tiết cụ thể về dịch vụ khách sạn tại điểm đến này. Tuy nhiên, khu vực đảo Vũ Yên (Vu Yen Royal Island) tại Hải Phòng được giới thiệu là nơi mang đến các trải nghiệm giải trí đẳng cấp thế giới, các hoạt động như cưỡi ngựa tại Vinpearl Horse Academy và các chương trình biểu diễn âm nhạc, pháo hoa tại quảng trường Vũ Yên. || Tại Hải Phòng, hiện có một số chương trình ưu đãi và thông tin về các khu nghỉ dưỡng/giải trí như sau:
+
+**Về các chương trình ưu đãi (Promotion):**
+*   **VIN33 Birthday:** Ưu đãi giảm giá lên đến 30% dành cho thành viên VinClub áp dụng tại Vinpearl Golf Hải Phòng. Để biết thêm chi tiết, bạn có thể liên hệ qua email [email protected] hoặc số điện thoại 0936366758.
+*   **Ưu đãi vé VinWonders:** Chương trình [MEGA SALE 8.8] giảm giá lên đến 50% giá vé VinWonders.
+*   **Ưu đãi tại VinKE & Vinpearl Aquarium:** Giảm 15% giá vé vào cửa Vinpearl Aquarium và VinKE. Ngoài ra, còn có chương trình giảm giá lên đến 15% vé VinWonders dành cho tất cả hành khách của hãng hàng không STARLUX.
+
+**Về thông tin khách sạn/khu nghỉ dưỡng (Hotel):**
+Tại Hải Phòng, bạn có thể trải nghiệm tại **Vu Yen Royal Island** với các dịch vụ đẳng cấp như:
+*   **Mastering the sport of the privileged:** Trải nghiệm chơi golf tại sân golf với cảnh quan thiên nhiên rộng lớn.
+*   **Experience aristocratic living:** Tận hưởng các hoạt động thượng lưu như cưỡi ngựa tại Vinpearl Horse Academy.
+*   **World-class entertainment:** Thưởng thức các màn trình diễn pháo hoa và các chương trình âm nhạc cao cấp tại quảng trường Vũ Yên.
+
+Bạn có thể tìm hiểu thêm thông tin chi tiết tại: https://vinwonders.com/en/vu-yen-royal-island/ || Chào bạn, tôi vẫn ghi nhận Hải Phòng là điểm đến mà bạn quan tâm.
+
+Dựa trên cơ sở dữ liệu hiện tại về các dịch vụ và trải nghiệm tại Hải Phòng (cụ thể là tại khu phức hợp Vũ Yên Royal Island), dưới đây là thông tin liên quan đến yêu cầu của bạn:
+
+**Về dịch vụ lưu trú (hotel):**
+Hiện tại, cơ sở dữ liệu của chúng tôi chưa chứa đủ thông tin để xác nhận các dịch vụ lưu trú cụ thể tại điểm đến này.
+
+Tuy nhiên, tại Vũ Yên Royal Island (Hải Phòng), bạn có thể trải nghiệm các hoạt động giải trí và tiện ích đẳng cấp sau:
+*   **Trải nghiệm phong cách sống thượng lưu:** Thưởng thức nghệ thuật cưỡi ngựa tại Vinpearl Horse Academy.
+*   **Giải trí đẳng cấp thế giới:** Chiêm ngưỡng pháo hoa và các chương trình âm nhạc cao cấp tại quảng trường Vũ Yên.
+*   **Khám phá thế giới kỳ diệu:** Tham gia vô số trò chơi và khám phá hàng ngàn loài động vật tại VinWonders Vũ Yên.
+*   **Chinh phục môn thể thao của giới thượng lưu:** Hoàn thiện cú đánh golf trong không gian thiên nhiên rộng lớn.
+*   **Trải nghiệm mua sắm sang trọng:** Mua sắm các thương hiệu toàn cầu hàng đầu tại Vincom Mega Mall Royal Island.
+
+Bạn có thể tìm hiểu thêm thông tin chi tiết tại: https://vinwonders.com/en/vu-yen-royal-island/ || Tại Đảo Hoàng Gia Vũ Yên (Hải Phòng), các dịch vụ và trải nghiệm được ghi nhận như sau:
+
+**Về các điểm tham quan và dịch vụ:**
+*   **VinWonders Vũ Yên:** Nơi bạn có thể tham gia vào hành trình kỳ diệu với vô số trò chơi và hàng ngàn loài động vật.
+*   **Trải nghiệm thể thao:** Bạn có thể rèn luyện kỹ năng đánh golf trong không gian thiên nhiên rộng lớn, nơi mỗi lỗ golf đều mang đến những thử thách mới.
+*   **Trải nghiệm thượng lưu:** Bạn có thể tận hưởng nghệ thuật cưỡi ngựa thư thái và tham gia các hoạt động đẳng cấp tại Học viện cưỡi ngựa Vinpearl (Vinpearl Horse Academy).
+
+**Về khách sạn:**
+Hiện tại, cơ sở dữ liệu của chúng tôi không chứa đủ thông tin để xác nhận các dịch vụ khách sạn cụ thể tại Đảo Hoàng Gia Vũ Yên.",274168,pass
+memory-compare-hotels,Memory,"Tôi đang phân vân chọn resort ở Nha Trang. | So sánh giúp tôi Vinpearl Resort & Spa Nha Trang Bay và Vinpearl Resort Nha Trang. | Nếu đi cặp đôi thì nên chọn bên nào hơn? | Ok, tôi nghiêng về Vinpearl Resort & Spa Nha Trang Bay. | Bạn còn nhớ tôi đang nghiêng về resort nào không? | Vậy kể thêm ưu điểm của Vinpearl Resort & Spa Nha Trang Bay phù hợp cặp đôi.",Ghi nhớ điểm đến: Nha Trang; đang so sánh resort. || So sánh Vinpearl Resort & Spa Nha Trang Bay vs Vinpearl Resort Nha Trang dựa About crawl. || Tư vấn theo ngữ cảnh cặp đôi; giữ 2 lựa chọn đã nêu. || Ghi nhận lựa chọn nghiêng về: Vinpearl Resort & Spa Nha Trang Bay. || Phải nhớ lựa chọn hiện tại là Vinpearl Resort & Spa Nha Trang Bay. || Bổ sung…,"Chào bạn, tại Nha Trang, hệ thống Vinpearl hiện có các lựa chọn lưu trú sau đây để bạn tham khảo:
+
+*   **Hon Tam Resort**: Tọa lạc tại đảo Hòn Tằm, Nha Trang, Khánh Hòa.
+    *   Thông tin chi tiết: [https://vinpearl.com/en/hotels/hon-tam-resort](https://vinpearl.com/en/hotels/hon-tam-resort)
+*   **Vinpearl Beachfront Nha Trang**: Tọa lạc tại số 78 – 80 đường Trần Phú, Nha Trang.
+    *   Thông tin chi tiết: [https://vinpearl.com/en/hotels/vinpearl-beachfront-nha-trang](https://vinpearl.com/en/hotels/vinpearl-beachfront-nha-trang)
+*   **Vinpearl Empire Nha Trang, Affiliated by Meliá**: Tọa lạc tại số 44 - 46 đường Lê Thánh Tôn, Nha Trang, Khánh Hòa.
+    *   Thông tin chi tiết: [https://vinpearl.com/en/hotels/vinpearl-empire-nha-trang-affiliated-by-melia](https://vinpearl.com/en/hotels/vinpearl-empire-nha-trang-affiliated-by-melia)
+
+Ngoài ra, các cơ sở này đều thuộc tổ hợp **Vinpearl Nha Trang**. Bạn có thể truy cập các đường dẫn trên để xem thêm thông tin về phòng nghỉ và dịch vụ ăn uống tại từng địa điểm. || Dựa trên cơ sở dữ liệu hiện tại, tôi xin phản hồi về yêu cầu của bạn như sau:
+
+**Về thông tin khách sạn (hotel):**
+Hiện tại, cơ sở dữ liệu của chúng tôi không chứa đủ thông tin để thực hiện so sánh chi tiết về tiện nghi và vị trí giữa ""Vinpearl Resort & Spa Nha Trang Bay"" và ""Vinpearl Resort Nha Trang"". Hệ thống hiện chỉ ghi nhận các khách sạn/khu nghỉ dưỡng khác tại Nha Trang như: Hon Tam Resort, Vinpearl Beachfront Nha Trang, và Vinpearl Empire Nha Trang, Affiliated by Meliá.
+
+**Về dịch vụ (service):**
+Tương tự như trên, do cơ sở dữ liệu không có thông tin cụ thể về hai khu nghỉ dưỡng mà bạn đã nêu, chúng tôi không thể cung cấp sự so sánh về dịch vụ cho hai địa điểm này. 
+
+Tuy nhiên, tại điểm đến Nha Trang, hệ thống có ghi nhận các trải nghiệm chung như ""Beachside Paradise Getaway"" (kỳ nghỉ dưỡng sang trọng bên vịnh Nha Trang) và ""Dynamic Entertainment Universe"" (công viên giải trí với nhiều hoạt động). || Chào bạn, dưới đây là thông tin về các lựa chọn lưu trú tại Nha Trang để bạn tham khảo cho chuyến đi cặp đôi:
+
+**Về các lựa chọn lưu trú:**
+Dựa trên dữ liệu hiện có, bạn có thể cân nhắc các cơ sở sau tại Nha Trang:
+*   **Hon Tam Resort:** Tọa lạc tại đảo Hòn Tằm, Nha Trang.
+*   **Vinpearl Beachfront Nha Trang:** Nằm tại địa chỉ 78 – 80 đường Trần Phú, Nha Trang.
+*   **Vinpearl Empire Nha Trang, Affiliated by Meliá:** Nằm tại địa chỉ 44 - 46 đường Lê Thánh Tôn, Nha Trang.
+*   **Vinpearl Resort Nha Trang:** Tọa lạc tại đảo Hòn Tre, Nha Trang.
+
+**Gợi ý cho cặp đôi:**
+Trong hệ thống dữ liệu, hạng phòng **Beachfront Villa** tại **Vinpearl Luxury Nha Trang** được mô tả là có hồ bơi riêng, tầm nhìn hướng biển và được đánh giá là phù hợp cho các cặp đôi.
+
+Hiện tại, cơ sở dữ liệu không cung cấp thông tin so sánh trực tiếp hoặc xếp hạng ưu tiên giữa các khách sạn/resort này cho mục đích đi cặp đôi. Bạn có thể truy cập vào các đường dẫn sau để tìm hiểu chi tiết hơn về phòng ốc và dịch vụ ăn uống của từng nơi:
+*   [Hon Tam Resort](https://vinpearl.com/en/hotels/hon-tam-resort)
+*   [Vinpearl Beachfront Nha Trang](https://vinpearl.com/en/hotels/vinpearl-beachfront-nha-trang)
+*   [Vinpearl Empire Nha Trang, Affiliated by Meliá](https://vinpearl.com/en/hotels/vinpearl-empire-nha-trang-affiliated-by-melia)
+*   [Vinpearl Resort Nha Trang](https://vinpearl.com/en/hotels/vinpearl-resort-nha-trang)
+*   [Vinpearl Luxury Nha Trang (thông tin về Beachfront Villa)](https://vinpearl.com/en/hotels/vinpearl-luxury-nha-trang/rooms) || Dựa trên cơ sở dữ liệu hiện tại, tôi xin cung cấp thông tin liên quan đến yêu cầu của bạn như sau:
+
+**Về thông tin khách sạn và dịch vụ tại Vinpearl Resort & Spa Nha Trang Bay:**
+Hiện tại, cơ sở dữ liệu của chúng tôi không ghi nhận hoặc không chứa đủ thông tin chi tiết về các loại phòng, tiện nghi và dịch vụ cụ thể cho ""Vinpearl Resort & Spa Nha Trang Bay"".
+
+Tuy nhiên, tại điểm đến Nha Trang, hệ thống của chúng tôi có thông tin về các cơ sở lưu trú và dịch vụ khác thuộc hệ thống Vinpearl như:
+*   **Hon Tam Resort** (Đảo Hòn Tằm, Nha Trang)
+*   **Vinpearl Beachfront Nha Trang** (78 – 80 đường Trần Phú, Nha Trang)
+*   **Vinpearl Empire Nha Trang, Affiliated by Meliá** (44 - 46 đường Lê Thánh Tôn, Nha Trang)
+
+Ngoài ra, tại Nha Trang, bạn có thể trải nghiệm các dịch vụ giải trí và nghỉ dưỡng nổi bật như:
+*   **Beachside Paradise Getaway:** Trải nghiệm nghỉ dưỡng sang trọng bên vịnh Nha Trang.
+*   **Dynamic Entertainment Universe:** Khám phá công viên giải trí với nhiều hoạt động hấp dẫn.
+
+Nếu bạn cần thêm thông tin về các địa điểm nêu trên, vui lòng cho tôi biết. || Dựa trên dữ liệu hiện tại, cơ sở dữ liệu của chúng tôi không ghi nhận thông tin về lựa chọn resort mà bạn đã đề cập trong các lượt trò chuyện trước đó.
+
+Tuy nhiên, tại Nha Trang, hệ thống của chúng tôi có thông tin về một số khu nghỉ dưỡng và hạng phòng như sau:
+
+*   **Vinpearl Beachfront Nha Trang:** Cung cấp các hạng phòng như *Studio Oceanfront King Bed* và *Studio Oceanfront Twin Bed*.
+*   **Vinpearl Luxury Nha Trang:** Cung cấp hạng phòng *Beachfront Villa*.
+
+Nếu bạn cần thêm thông tin chi tiết về các khu nghỉ dưỡng này, vui lòng cho tôi biết nhé! || Dựa trên cơ sở dữ liệu hiện tại, thông tin về Vinpearl Resort & Spa Nha Trang Bay được ghi nhận như sau:
+
+**Về khách sạn và dịch vụ:**
+Hiện tại, cơ sở dữ liệu của chúng tôi không chứa đủ thông tin chi tiết để liệt kê các ưu điểm cụ thể dành riêng cho cặp đôi tại Vinpearl Resort & Spa Nha Trang Bay.
+
+Tuy nhiên, trong hệ thống Vinpearl tại Nha Trang, bạn có thể tham khảo các trải nghiệm nổi bật sau:
+*   **Beachside Paradise Getaway:** Trải nghiệm kỳ nghỉ dưỡng sang trọng bên vịnh Nha Trang – một trong 29 vịnh biển đẹp nhất thế giới – tại hệ thống các khu nghỉ dưỡng cao cấp của Vinpearl.
+*   **Dynamic Entertainment Universe:** Khám phá công viên giải trí với hàng trăm hoạt động thú vị và các kỷ lục ấn tượng.
+
+Các thông tin chi tiết hơn về dịch vụ phòng và ẩm thực của các khu nghỉ dưỡng khác trong hệ thống tại Nha Trang như Hon Tam Resort, Vinpearl Beachfront Nha Trang, hay Vinpearl Empire Nha Trang, Affiliated by Meliá có thể được tìm thấy tại các đường dẫn chính thức của từng cơ sở.",351967,pass
+memory-voucher-gift,Memory,Tôi muốn mua voucher Vinpearl làm quà. | Tôi có nhận được ưu đãi gì khi mua voucher số lượng lớn không? | Người khác dùng hộ được không? | Voucher có đổi ra tiền mặt được không? | Bạn còn nhớ tôi đang hỏi về voucher chứ? | Tóm tắt lưu ý khi mua/tặng voucher.,"Ghi nhớ mục đích: mua voucher làm quà. || Khách hàng mua voucher số lượng lớn sẽ nhận được các ưu đãi tùy theo chính sách của từng chương trình khuyến mãi. || Trả lời quyền dùng hộ / định danh theo FAQ voucher. || Trả lời không quy đổi tiền mặt (theo FAQ). || Phải nhớ chủ đề voucher. || Tóm tắt: mua làm quà, điều kiện sử dụng, không đổi tiền mặt.","Dựa trên cơ sở dữ liệu hiện tại, dưới đây là thông tin liên quan đến việc sử dụng voucher tại Vinpearl:
+
+**Về việc mua voucher làm quà tặng:**
+Hiện tại, cơ sở dữ liệu không ghi nhận thông tin hướng dẫn cụ thể về việc mua voucher Vinpearl để làm quà tặng.
+
+**Các thông tin liên quan đến voucher trong hệ thống:**
+*   **Hình thức voucher:** Tùy thuộc vào từng chương trình khuyến mãi, Vinpearl sẽ phát hành voucher điện tử hoặc voucher thẻ cứng.
+*   **Sử dụng voucher cho người khác:** Nếu voucher là loại vô danh (không định danh), khách hàng có thể mua làm quà tặng. Người sử dụng voucher chỉ cần cung cấp ID của voucher để được hỗ trợ đặt dịch vụ. Tuy nhiên, bạn cần kiểm tra kỹ các điều kiện cụ thể của từng loại voucher trước khi mua.
+*   **Lưu ý quan trọng:** Vinpearl không chịu trách nhiệm đối với các tranh chấp phát sinh trong quá trình khách hàng mua, bán lại hoặc trao đổi thông tin làm lộ mã voucher. Các voucher điện tử thường được định danh cho người dùng và không được phép bán hoặc chuyển nhượng.
+
+Để được hỗ trợ chi tiết hơn, bạn có thể liên hệ Trung tâm Chăm sóc Khách hàng của Vinpearl qua số hotline 1900 232389. || Khi mua voucher với số lượng lớn, quý khách sẽ nhận được các ưu đãi tùy thuộc vào chính sách của từng chương trình khuyến mãi cụ thể. || Việc người khác có thể sử dụng hộ voucher của bạn hay không phụ thuộc vào điều kiện cụ thể của từng loại voucher. Bạn vui lòng lưu ý các thông tin sau:
+
+*   **Đối với voucher ẩn danh:** Nếu voucher là loại ẩn danh, bạn có thể mua làm quà tặng. Người sử dụng chỉ cần cung cấp mã Voucher (Voucher ID) để được hỗ trợ đặt dịch vụ.
+*   **Đối với các voucher có quy định cụ thể:** Một số chương trình khuyến mãi quy định rõ rằng voucher điện tử chỉ áp dụng cho người đặt và thành viên lưu trú, không được phép mua bán hoặc chuyển nhượng.
+*   **Lời khuyên:** Bạn cần kiểm tra kỹ các điều khoản và điều kiện đi kèm của từng loại voucher trước khi mua hoặc sử dụng. Vinpearl không chịu trách nhiệm đối với các tranh chấp phát sinh từ việc mua bán, chuyển nhượng hoặc lộ thông tin mã voucher.
+
+Để biết chính xác trường hợp của bạn, vui lòng tham khảo thông tin chi tiết trên voucher hoặc liên hệ Trung tâm Chăm sóc Khách hàng qua số điện thoại 1900232389 để được hỗ trợ. || Theo thông tin từ hệ thống, các voucher của Vinpearl không thể đổi thành tiền mặt và không được hoàn tiền. || Dựa trên các thông tin hiện có trong hệ thống, tôi xin giải đáp các thắc mắc của bạn về điều khoản voucher tại Vinpearl như sau:
+
+**Về việc quy đổi thành tiền mặt:**
+Các loại voucher (bao gồm Credit voucher 250.000 VND, Hotel credit gift 150k, Food voucher 2.000.000 VND và Service upgrade) đều có quy định chung là **không được quy đổi thành tiền mặt**.
+
+**Về việc chuyển nhượng:**
+Các voucher điện tử chỉ áp dụng cho người đặt phòng và thành viên lưu trú. Bạn **không được phép mua, bán hoặc chuyển nhượng** các voucher này.
+
+Nếu bạn cần thêm thông tin chi tiết về các điều khoản khác, vui lòng cho tôi biết. || Dưới đây là tóm tắt các lưu ý quan trọng khi mua và sử dụng voucher tại hệ thống Vinpearl/VinWonders dựa trên dữ liệu hiện có:
+
+**1. Quy định chung về Voucher:**
+*   **Định nghĩa:** Voucher là thẻ/phiếu mua dịch vụ trả trước (dạng vật lý hoặc dữ liệu điện tử) do Vinpearl phát hành.
+*   **Tuân thủ:** Việc sử dụng voucher phải tuân thủ các quy định chung (GTC), quy định tại khách sạn (QDC) và các điều kiện chi tiết đi kèm từng loại voucher.
+*   **Trình diện:** Khách hàng cần xuất trình voucher gốc khi làm thủ tục nhận phòng (đối với voucher khách sạn) hoặc cung cấp cho nhân viên tại quầy dịch vụ khi thanh toán. Nếu không xuất trình được voucher hợp lệ, khách hàng phải thanh toán theo giá công bố tại thời điểm đó.
+
+**2. Lưu ý về việc tặng/chuyển nhượng:**
+*   **Không được phép mua bán, chuyển nhượng:** Các voucher điện tử thường được định danh cho người đặt dịch vụ và thành viên lưu trú, do đó không được phép mua, bán hoặc chuyển nhượng cho người khác.
+
+**3. Quy định về sử dụng và thay đổi dịch vụ:**
+*   **Không hoàn hủy:** Sau khi đã đặt dịch vụ, voucher không được hoàn tiền, hủy hoặc thay đổi (trừ các trường hợp bất khả kháng).
+*   **Số lần sử dụng:** Mỗi voucher chỉ được áp dụng một lần duy nhất. Voucher không được quy đổi thành tiền mặt.
+*   **Giá trị sử dụng:** Voucher áp dụng theo giá công bố tại quầy/khách sạn. Nếu không sử dụng hết giá trị, voucher sẽ không được hoàn lại hoặc bảo lưu.
+*   **Thời hạn:** Một số loại voucher (như voucher quà tặng sinh nhật/nâng hạng thẻ VinClub) có thời hạn sử dụng trong vòng 03 tháng kể từ ngày phát hành.
+*   **Tính độc lập:** Voucher thường không được áp dụng đồng thời với các chương trình khuyến mãi khác của Vinpearl/VinWonders.
+
+**4. Lưu ý cụ thể theo loại voucher:**
+*   **Voucher quà tặng (Merchant/Hotel Credit):** Chỉ áp dụng cho các dịch vụ trực tiếp tại Vinpearl (như Spa, F&B, giặt là...). Không áp dụng cho các dịch vụ từ nhà cung cấp bên ngoài, đồ uống có cồn, dịch vụ phòng, Golf, VinWonders, Safari hoặc các chi phí phát sinh liên quan đến phòng (nâng hạng, mua thêm phòng).
+*   **Voucher VinClub:** Cần đăng nhập vào tài khoản VinClub trên website/ứng dụng để kiểm tra và sử dụng đúng hạn.
+
+**Lời khuyên:** Bạn nên đọc kỹ các điều khoản và điều kiện chi tiết được ghi trên từng voucher cụ thể trước khi sử dụng để đảm bảo quyền lợi.",571515,pass
