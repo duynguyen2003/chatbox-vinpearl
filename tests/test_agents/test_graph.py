@@ -15,16 +15,19 @@ from src.backend.agents.graph import (
     agent_graph,
     route_after_assessment,
     route_after_classification,
+    route_after_safety,
 )
 
 EXPECTED_NODES = {
     "language",
     "classify",
+    "sensitive",
     "greeting",
     "out_of_scope",
     "retrieve",
     "assess",
     "answer",
+    "language_guard",
     "ticket",
 }
 
@@ -41,6 +44,15 @@ def test_graph_has_expected_nodes() -> None:
 @pytest.mark.parametrize("route", ["greeting", "out_of_scope", "rag"])
 def test_route_after_classification(route: str) -> None:
     assert route_after_classification({"route": route}) == route
+
+
+def test_route_after_safety_blocks_sensitive_request() -> None:
+    assert route_after_safety({"safety_action": "block"}) == "sensitive"
+
+
+@pytest.mark.parametrize("state", [{"safety_action": "allow"}, {}])
+def test_route_after_safety_allows_normal_flow(state: dict) -> None:
+    assert route_after_safety(state) == "classify"
 
 
 def test_route_after_assessment_enough_info() -> None:

@@ -1,4 +1,10 @@
 # P-013 — Vinpearl Multilingual Travel Agent
+## LINK SCHEMAS
+
+https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
+
+## LINK DEPLOY
+https://frontend-production-48c1.up.railway.app/
 
 ## 1. Setup môi trường local
 
@@ -12,7 +18,7 @@ py -3.11 -m venv .venv
 ### Cài dependencies
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install -r requirements.txt 
 ```
 
 ---
@@ -333,7 +339,261 @@ docker compose down
 
 ---
 
-## 11. Trạng thái hiện tại
+
+## 11. Deploy Railway
+
+Project hiện đã được triển khai trên Railway với các service:
+
+- Backend FastAPI
+- Frontend React/Vite
+- PostgreSQL
+- Redis
+- Railway Volume cho Chroma Vector Store
+
+### Backend Railway
+
+Public Backend URL:
+
+```text
+https://backend-production-9576.up.railway.app
+```
+
+Swagger:
+
+```text
+https://backend-production-9576.up.railway.app/docs
+```
+
+Readiness check:
+
+```text
+https://backend-production-9576.up.railway.app/ready
+```
+
+Kỳ vọng:
+
+```json
+{"status":"ready"}
+```
+
+Backend sử dụng `Dockerfile` ở root project.
+
+`railway.toml` cho Backend:
+
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/ready"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+```
+
+Backend Railway cần cấu hình các Variables tương ứng với môi trường production. Các secret như API key, database password và bootstrap key không ghi trực tiếp vào README.
+
+Một số biến production đang sử dụng:
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini/gemini-3.5-flash-lite
+
+LOCAL_EMBEDDING_MODEL=intfloat/multilingual-e5-small
+EMBEDDING_BACKEND=onnx_int8
+EMBEDDING_ONNX_FILE=onnx/model_qint8_avx512_vnni.onnx
+EMBEDDING_ONNX_PROVIDER=CPUExecutionProvider
+EMBEDDING_ONNX_THREADS=1
+EMBEDDING_BATCH_SIZE=4
+EMBEDDING_MAX_LENGTH=512
+
+CHROMA_DIR=/app/storage/chroma_local
+CHROMA_COLLECTION=vinpearl_multilingual_e5_small_prod
+
+TOP_K=5
+MIN_RELEVANCE_SCORE=0.35
+
+RAILWAY_RUN_UID=0
+```
+
+Database và Redis được cấu hình bằng Railway Variables / service references, không hard-code credential production trong source.
+
+### Railway PostgreSQL
+
+Dữ liệu PostgreSQL local đã được migrate lên Railway PostgreSQL.
+
+Backend production sử dụng PostgreSQL Railway thông qua `DATABASE_URL`.
+
+Alembic migration được chạy khi Backend khởi động để đồng bộ schema:
+
+```powershell
+alembic upgrade head
+```
+
+Có thể kiểm tra migration hiện tại:
+
+```powershell
+alembic current
+```
+
+### Railway Redis
+
+Redis được triển khai thành service riêng trên Railway.
+
+Backend production kết nối Redis thông qua Railway internal networking / Variables.
+
+### Railway Volume cho Chroma
+
+Chroma Vector Store production được lưu tại:
+
+```text
+/app/storage/chroma_local
+```
+
+Collection production:
+
+```text
+vinpearl_multilingual_e5_small_prod
+```
+
+Collection production đã được ingest từ PostgreSQL và hiện chứa dữ liệu RAG dùng bởi Backend.
+
+Khi cần ingest lại Chroma trên Railway:
+
+```powershell
+python -m src.backend.services.ingest_postgres --reset
+```
+
+Không nên chạy `--reset` trên production nếu chưa xác định đúng `CHROMA_COLLECTION`.
+
+### Frontend Railway
+
+Public Frontend URL:
+
+```text
+https://frontend-production-4ca5.up.railway.app
+```
+
+Frontend production sử dụng:
+
+```env
+VITE_API_BASE_URL=https://backend-production-9576.up.railway.app
+```
+
+`VITE_API_BASE_URL` là biến build-time của Vite. Nếu thay đổi giá trị trên Railway thì cần rebuild/redeploy Frontend.
+
+Frontend sử dụng `Dockerfile.frontend`.
+
+Ví dụ `railway.frontend.toml`:
+
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.frontend"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+```
+
+Frontend service cần trỏ Config-as-code tới:
+
+```text
+/railway.frontend.toml
+```
+
+### CORS giữa Frontend và Backend
+
+Do Frontend và Backend chạy trên hai domain Railway khác nhau, Backend phải cho phép Frontend origin.
+
+Biến Backend:
+
+```env
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://frontend-production-4ca5.up.railway.app
+```
+
+Không thêm dấu `/` ở cuối origin.
+
+CORS được đọc từ:
+
+```text
+src/backend/config.py
+src/backend/main.py
+```
+
+và áp dụng bằng `CORSMiddleware`.
+
+### Kiểm tra API production
+
+Swagger:
+
+```text
+https://backend-production-9576.up.railway.app/docs
+```
+
+Ví dụ API đăng ký user:
+
+```text
+POST /api/v1/auth/register
+```
+
+Response đăng ký thành công:
+
+```text
+201 Created
+```
+
+Ví dụ test RAG production:
+
+```json
+{
+  "message": "VinWonders Phú Quốc có gì?",
+  "session_id": "test-session",
+  "user_id": "admin"
+}
+```
+
+Response thành công có thể gồm:
+
+```text
+route = rag
+language = vi
+sources != []
+```
+
+### Quy trình deploy sau khi sửa source
+
+Sau khi test local:
+
+```powershell
+git status
+git add .
+git commit -m "update deployment"
+git push
+```
+
+Railway sẽ build/deploy lại service tương ứng nếu service đang theo dõi branch Git hiện tại.
+
+Nếu thay đổi Backend:
+
+1. Railway build Backend image.
+2. Backend chạy migration nếu entrypoint đã cấu hình `alembic upgrade head`.
+3. Healthcheck `/ready` phải trả `200`.
+4. Kiểm tra Swagger và API cần thiết.
+
+Nếu thay đổi Frontend:
+
+1. Railway build bằng `Dockerfile.frontend`.
+2. Vite sử dụng `VITE_API_BASE_URL` tại build-time.
+3. Healthcheck `/` phải thành công.
+4. Kiểm tra Frontend gọi được Backend và không bị lỗi CORS.
+
+---
+
+## 12. Trạng thái hiện tại
 
 ### Đã hoàn thành
 
@@ -353,7 +613,7 @@ docker compose down
 - `/ask`
 - Docker local test
 
-### Chưa thực hiện
+### Đã triển khai trên Railway
 
 - Railway deployment
 - Railway PostgreSQL
@@ -361,5 +621,9 @@ docker compose down
 - Railway Volume cho Chroma
 - Public Backend URL
 - Public Frontend URL
+- Backend `/ready` hoạt động
+- Swagger production hoạt động
+- Frontend gọi Backend qua public URL
+- CORS đã cấu hình cho Frontend Railway
+- Chroma production collection đã ingest và được Backend sử dụng cho RAG
 
-Railway sẽ triển khai ở bước tiếp theo.

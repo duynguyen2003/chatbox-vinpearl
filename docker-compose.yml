@@ -15,7 +15,7 @@ services:
       REDIS_URL: redis://redis:6379/0
 
       # PostgreSQL chạy trên máy Windows host
-      DATABASE_URL: postgresql+pg8000://vinpearl:210303@host.docker.internal:5432/vinpearl
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER:-vinpearl}:${POSTGRES_PASSWORD:-vinpearl}@host.docker.internal:5432/${POSTGRES_DB:-vinpearl}
 
       # =========================
       # LLM

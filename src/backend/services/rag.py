@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from math import ceil
 from typing import Any
 
 import chromadb
 import numpy as np
-from sentence_transformers import SentenceTransformer
-
 from src.backend.config import get_settings
+from src.backend.services.onnx_embeddings import OnnxE5Embedder, OnnxEmbeddingConfig
 from src.backend.services.query_parser import (
     build_intent_query,
+    load_destination_catalog,
     normalize_text,
     parse_retrieval_query,
 )
@@ -33,9 +34,20 @@ class RAGService:
         settings = get_settings()
         settings.chroma_dir.mkdir(parents=True, exist_ok=True)
         self.settings = settings
-        self.model = SentenceTransformer(
-            settings.local_embedding_model,
-            device=settings.embedding_device,
+        if settings.embedding_backend != "onnx_int8":
+            raise RuntimeError(
+                "This deployment build supports EMBEDDING_BACKEND=onnx_int8 only. "
+                "Use the ONNX INT8 backend to keep Railway memory usage low."
+            )
+        self.model = OnnxE5Embedder(
+            OnnxEmbeddingConfig(
+                model_name=settings.local_embedding_model,
+                onnx_file=settings.embedding_onnx_file,
+                provider=settings.embedding_onnx_provider,
+                batch_size=settings.embedding_batch_size,
+                max_length=settings.embedding_max_length,
+                intra_op_threads=settings.embedding_onnx_threads,
+            )
         )
         self.chroma = chromadb.PersistentClient(path=str(settings.chroma_dir))
         self.collection = self.chroma.get_or_create_collection(
@@ -45,22 +57,11 @@ class RAGService:
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         passages = [f"passage: {text}" for text in texts]
-        embeddings = self.model.encode(
-            passages,
-            batch_size=self.settings.embedding_batch_size,
-            normalize_embeddings=True,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-        )
+        embeddings = self.model.encode(passages)
         return embeddings.tolist()
 
     def embed_query(self, query: str) -> list[float]:
-        embedding = self.model.encode(
-            f"query: {query}",
-            normalize_embeddings=True,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-        )
+        embedding = self.model.encode([f"query: {query}"])[0]
         return embedding.tolist()
 
     def embed(self, texts: list[str]) -> list[list[float]]:
@@ -101,6 +102,101 @@ class RAGService:
             )
         return output
 
+    def semantic_search_many(
+        self,
+        queries: list[str],
+        top_k: int | None = None,
+    ) -> list[list[dict[str, Any]]]:
+        """Run multiple semantic queries in one ONNX batch and one Chroma call.
+
+        This is used by the semantic fallback to preserve both the user's exact
+        wording and the LLM-rewritten standalone RAG query without paying the
+        overhead of two independent model invocations.
+        """
+        self._ensure_not_empty()
+        cleaned = [str(query or "").strip() for query in queries]
+        if not cleaned:
+            return []
+
+        embeddings = self.model.encode([f"query: {query}" for query in cleaned]).tolist()
+        result = self.collection.query(
+            query_embeddings=embeddings,
+            n_results=top_k or self.settings.top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+
+        all_documents = result.get("documents", []) or []
+        all_metadatas = result.get("metadatas", []) or []
+        all_distances = result.get("distances", []) or []
+        outputs: list[list[dict[str, Any]]] = []
+
+        for query_index in range(len(cleaned)):
+            documents = all_documents[query_index] if query_index < len(all_documents) else []
+            metadatas = all_metadatas[query_index] if query_index < len(all_metadatas) else []
+            distances = all_distances[query_index] if query_index < len(all_distances) else []
+            output: list[dict[str, Any]] = []
+
+            for text, metadata, distance in zip(documents, metadatas, distances):
+                score = max(0.0, 1.0 - float(distance))
+                output.append(
+                    {
+                        "text": text,
+                        "metadata": metadata or {},
+                        "score": round(score, 4),
+                        "semantic_score": round(score, 4),
+                        "keyword_score": 0.0,
+                        "retrieval_mode": "semantic",
+                    }
+                )
+            outputs.append(output)
+
+        return outputs
+
+    def _exact_faq_matches(
+        self,
+        user_message: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        """Return exact FAQ-question matches from the lightweight lexical cache.
+
+        FAQ rows store the question in ``entity_name``. If the user asks that
+        exact normalized question, the matching FAQ is authoritative evidence and
+        should not be lost because an LLM rewrite generalized the wording.
+        """
+        target = normalize_text(user_message)
+        if not target:
+            return []
+
+        cache = self._load_corpus_cache()
+        matches: list[dict[str, Any]] = []
+
+        for index, metadata in enumerate(cache["metadatas"]):
+            entity_type = normalize_text(
+                str(metadata.get("entity_type") or metadata.get("category") or "")
+            )
+            if entity_type != "faq":
+                continue
+
+            entity_name = normalize_text(str(metadata.get("entity_name") or ""))
+            if entity_name != target:
+                continue
+
+            matches.append(
+                {
+                    "text": cache["documents"][index],
+                    "metadata": metadata,
+                    "score": 1.0,
+                    "semantic_score": 0.0,
+                    "keyword_score": 1.0,
+                    "retrieval_mode": "exact_faq",
+                    "query_source": "original_exact",
+                }
+            )
+            if len(matches) >= top_k:
+                break
+
+        return matches
+
     def _load_corpus_cache(self) -> dict[str, Any]:
         self._ensure_not_empty()
         count = self.collection.count()
@@ -117,36 +213,25 @@ class RAGService:
         documents: list[str] = []
         metadatas: list[dict[str, Any]] = []
         normalized: list[str] = []
-        embeddings: list[list[float] | None] = []
 
+        # Keep only the lightweight lexical fields in process memory.
+        # Document embeddings stay persisted in Chroma and are fetched only for the
+        # small candidate set that survives keyword filtering. This avoids loading
+        # the full vector corpus into the long-lived FastAPI process.
         batch_size = 500
         for offset in range(0, count, batch_size):
             batch = self.collection.get(
                 limit=min(batch_size, count - offset),
                 offset=offset,
-                include=["documents", "metadatas", "embeddings"],
+                include=["documents", "metadatas"],
             )
             batch_ids = batch.get("ids", []) or []
             batch_docs = batch.get("documents", []) or []
             batch_meta = batch.get("metadatas", []) or []
-            # Chroma may return embeddings as a NumPy array. Avoid ``or []`` here
-            # because NumPy arrays do not have a scalar truth value.
-            batch_embeddings = batch.get("embeddings")
 
-            for index, (doc_id, text, metadata) in enumerate(
-                zip(batch_ids, batch_docs, batch_meta)
-            ):
+            for doc_id, text, metadata in zip(batch_ids, batch_docs, batch_meta):
                 text = text or ""
                 metadata = metadata or {}
-                stored_embedding: list[float] | None = None
-                if batch_embeddings is not None and index < len(batch_embeddings):
-                    raw_embedding = batch_embeddings[index]
-                    if raw_embedding is not None:
-                        stored_embedding = (
-                            raw_embedding.tolist()
-                            if hasattr(raw_embedding, "tolist")
-                            else list(raw_embedding)
-                        )
                 searchable = " ".join(
                     [
                         text,
@@ -160,14 +245,12 @@ class RAGService:
                 documents.append(text)
                 metadatas.append(metadata)
                 normalized.append(normalize_text(searchable))
-                embeddings.append(stored_embedding)
 
         cache = {
             "ids": ids,
             "documents": documents,
             "metadatas": metadatas,
             "normalized": normalized,
-            "embeddings": embeddings,
         }
         RAGService._corpus_cache = cache
         RAGService._corpus_cache_collection = collection_name
@@ -230,9 +313,6 @@ class RAGService:
                     "id": cache["ids"][index],
                     "text": cache["documents"][index],
                     "metadata": metadata,
-                    # Reuse the vector already persisted during Chroma ingestion.
-                    # Runtime retrieval should only embed the user's query.
-                    "embedding": cache["embeddings"][index],
                     "keyword_score": round(keyword_score, 4),
                     "matched_aliases": matched_aliases[:5],
                     "matched_destination_id": destination_id,
@@ -375,10 +455,40 @@ class RAGService:
         if not candidates:
             return []
 
-        # Documents were already embedded when they were ingested into Chroma.
-        # Re-embedding up to hundreds of candidates on every chat request is both
-        # expensive and unnecessary. Only the query needs a fresh embedding.
-        candidates = [item for item in candidates if item.get("embedding") is not None]
+        # Documents were already embedded during ingestion. Fetch vectors only for
+        # the keyword-filtered candidate IDs instead of retaining all corpus vectors
+        # in process memory. The ONNX INT8 model is still used for the query vector.
+        candidate_ids = [str(item.get("id") or "") for item in candidates]
+        candidate_ids = [doc_id for doc_id in candidate_ids if doc_id]
+        if not candidate_ids:
+            return []
+
+        stored = self.collection.get(
+            ids=candidate_ids,
+            include=["embeddings"],
+        )
+        stored_ids = stored.get("ids", []) or []
+        stored_embeddings = stored.get("embeddings")
+
+        embedding_map: dict[str, np.ndarray] = {}
+        if stored_embeddings is not None:
+            for doc_id, embedding in zip(stored_ids, stored_embeddings):
+                if embedding is not None:
+                    embedding_map[str(doc_id)] = np.asarray(
+                        embedding,
+                        dtype=np.float32,
+                    )
+
+        candidates_with_vectors: list[dict[str, Any]] = []
+        for item in candidates:
+            vector = embedding_map.get(str(item.get("id") or ""))
+            if vector is None:
+                continue
+            item_with_vector = dict(item)
+            item_with_vector["embedding"] = vector
+            candidates_with_vectors.append(item_with_vector)
+
+        candidates = candidates_with_vectors
         if not candidates:
             return []
 
@@ -447,6 +557,7 @@ class RAGService:
         query: str,
         user_message: str = "",
         top_k: int | None = None,
+        resolved_destinations: list[dict[str, Any]] | None = None,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         """Run destination-aware retrieval with native multi-intent support.
 
@@ -457,7 +568,27 @@ class RAGService:
         """
         k = top_k or self.settings.top_k
         parsed = parse_retrieval_query(user_message=user_message, rag_query=query)
-        destinations = list(parsed.get("destinations") or [])
+
+        # When the semantic context resolver has run, its closed/validated
+        # destination set is authoritative. This prevents a later text parser from
+        # re-guessing destinations from an LLM rewrite and losing conversation
+        # references (or adding locations that were merely mentioned elsewhere).
+        if resolved_destinations is not None:
+            catalog = load_destination_catalog()
+            destinations: list[dict[str, Any]] = []
+            seen_destination_ids: set[str] = set()
+            for raw in resolved_destinations:
+                destination_id = str(raw.get("id") or "").strip()
+                if not destination_id or destination_id in seen_destination_ids:
+                    continue
+                canonical = catalog.get(destination_id)
+                if not canonical:
+                    continue
+                destinations.append(dict(canonical))
+                seen_destination_ids.add(destination_id)
+        else:
+            destinations = list(parsed.get("destinations") or [])
+
         intents = list(parsed.get("intents") or [])
         primary_intent = parsed.get("intent")
 
@@ -569,17 +700,88 @@ class RAGService:
             if any(result.get("status") == "not_found" for result in intent_results.values()):
                 mode += "_partial"
         else:
-            # Without a resolved destination, keep the existing semantic fallback. For
-            # multi-intent wording we still expose the detected intents in diagnostics.
-            documents = self.semantic_search(query=query, top_k=k)
-            mode = "semantic_fallback"
+            # No destination was resolved. Preserve the user's original wording as
+            # retrieval evidence instead of relying only on the LLM-rewritten query.
+            # This specifically protects exact FAQ questions from rewrite drift while
+            # keeping the rewritten query for multilingual/follow-up understanding.
+            original_query = str(user_message or "").strip()
+            rewritten_query = str(query or "").strip()
+
+            exact_faq = self._exact_faq_matches(original_query, top_k=k)
+
+            semantic_queries: list[tuple[str, str]] = []
+            seen_queries: set[str] = set()
+
+            # If an exact FAQ is already found, re-embedding the same original wording
+            # adds no value. Keep the rewritten semantic branch only as supplemental
+            # evidence, so this common FAQ case is not slower than the old path.
+            if original_query and not exact_faq:
+                normalized_original = normalize_text(original_query)
+                if normalized_original:
+                    semantic_queries.append(("original", original_query))
+                    seen_queries.add(normalized_original)
+
+            normalized_rewritten = normalize_text(rewritten_query)
+            if rewritten_query and normalized_rewritten not in seen_queries:
+                semantic_queries.append(("rewritten", rewritten_query))
+                seen_queries.add(normalized_rewritten)
+
+            semantic_groups = self.semantic_search_many(
+                [item[1] for item in semantic_queries],
+                top_k=k,
+            ) if semantic_queries else []
+
+            merged_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+
+            def add_result(item: dict[str, Any], query_source: str) -> None:
+                candidate = dict(item)
+                candidate["query_source"] = query_source
+                metadata = candidate.get("metadata", {}) or {}
+                key = (
+                    str(metadata.get("entity_type") or ""),
+                    str(
+                        metadata.get("entity_id")
+                        or metadata.get("entity_name")
+                        or candidate.get("text", "")[:120]
+                    ),
+                )
+                existing = merged_by_key.get(key)
+                if existing is None or float(candidate.get("score", 0.0) or 0.0) > float(
+                    existing.get("score", 0.0) or 0.0
+                ):
+                    merged_by_key[key] = candidate
+
+            for item in exact_faq:
+                add_result(item, "original_exact")
+
+            for (query_source, _semantic_query), group in zip(semantic_queries, semantic_groups):
+                for item in group:
+                    add_result(item, query_source)
+
+            documents = sorted(
+                merged_by_key.values(),
+                key=lambda item: float(item.get("score", 0.0) or 0.0),
+                reverse=True,
+            )[:k]
+
+            if exact_faq:
+                mode = "semantic_fallback_exact_faq"
+            elif len(semantic_queries) > 1:
+                mode = "semantic_dual_query"
+            else:
+                mode = "semantic_fallback"
+
             if intents:
+                best_score = max(
+                    (float(item.get("score", 0.0) or 0.0) for item in documents),
+                    default=0.0,
+                )
                 for intent in intents:
                     intent_results[intent] = {
-                        "status": "unknown",
-                        "document_count": 0,
-                        "candidate_count": 0,
-                        "best_score": 0.0,
+                        "status": "found" if documents else "not_found",
+                        "document_count": len(documents),
+                        "candidate_count": len(merged_by_key),
+                        "best_score": round(best_score, 4),
                         "query": query,
                         "missing_destination_ids": [],
                     }
@@ -653,3 +855,9 @@ class RAGService:
             total += len(block)
 
         return "\n---\n".join(blocks)
+
+
+@lru_cache(maxsize=1)
+def get_rag_service() -> RAGService:
+    """Return one process-wide RAG/model instance for API traffic."""
+    return RAGService()

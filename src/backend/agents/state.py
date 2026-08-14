@@ -5,6 +5,8 @@ RouteName = Literal["greeting", "out_of_scope", "conversation_context", "rag"]
 InsufficiencyAction = Literal["no_data", "ticket"]
 RequestMode = Literal["information", "support_action"]
 ResolutionMode = Literal["information_only", "self_serve", "human_required"]
+SafetyAction = Literal["allow", "block"]
+ScopeAction = Literal["allow", "block"]
 
 
 class AgentState(TypedDict, total=False):
@@ -17,9 +19,41 @@ class AgentState(TypedDict, total=False):
     recent_destinations: list[dict[str, str]]
     recent_destination_summary: str
 
+    # Semantic reference resolution. These fields describe the destination focus
+    # of the CURRENT user request before retrieval runs. They are deliberately
+    # separate from ``detected_*`` below, which are retrieval diagnostics.
+    explicit_destinations: list[dict[str, Any]]
+    resolved_destinations: list[dict[str, Any]]
+    resolved_destination_ids: list[str]
+    resolved_destination_names: list[str]
+    context_uses_memory: bool
+    context_resolution_reason: str
+    context_resolution_confidence: float
+    context_resolution_source: str
+
     original_language: str
+    original_language_name: str
     rag_query: str
     route: RouteName
+
+    # Semantic safety guard. This is intentionally model-classified rather than
+    # keyword-matched so paraphrases, euphemisms and multilingual requests are
+    # handled consistently.
+    safety_action: SafetyAction
+    safety_category: str
+    safety_reason: str
+    safety_confidence: float
+
+    # Authoritative semantic scope + prompt-injection guard. Downstream nodes
+    # consume sanitized_user_request instead of the raw user_message.
+    scope_action: ScopeAction
+    scope_reason: str
+    scope_confidence: float
+    prompt_injection_detected: bool
+    prompt_injection_reason: str
+    sanitized_user_request: str
+    guardrail_reason: str
+    guardrail_confidence: float
 
     retrieved_documents: list[dict[str, Any]]
     context: str

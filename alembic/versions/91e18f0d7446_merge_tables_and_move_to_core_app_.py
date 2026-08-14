@@ -1,7 +1,7 @@
 """merge tables and move to core app schemas
 
 Revision ID: 91e18f0d7446
-Revises: e1a3d9b2b327
+Revises: c6a0f7b9d2e1
 Create Date: 2026-08-10 15:05:34.009403
 """
 
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "91e18f0d7446"
-down_revision: Union[str, Sequence[str], None] = "e1a3d9b2b327"
+down_revision: Union[str, Sequence[str], None] = "c6a0f7b9d2e1"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

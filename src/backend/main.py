@@ -11,7 +11,10 @@ from src.backend.api.auth_routes import router as auth_router
 from src.backend.api.staff_routes import router as staff_router
 from src.backend.api.ticket_routes import router as ticket_router
 from src.backend.api.promotions_routes import router as promotions_router
+from src.backend.api.catalog_routes import router as catalog_router
+from src.backend.api.about_routes import router as about_router
 from src.backend.agents.graph import agent_graph
+from src.backend.config import get_settings
 
 
 app = FastAPI(
@@ -19,9 +22,17 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+def _cors_origins() -> list[str]:
+    raw = get_settings().cors_origins
+    origins = [item.strip().rstrip("/") for item in raw.split(",") if item.strip()]
+    # Keep a safe local fallback rather than opening production with "*".
+    return origins or ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +43,8 @@ app.include_router(auth_router)
 app.include_router(staff_router)
 app.include_router(ticket_router)
 app.include_router(promotions_router)
+app.include_router(catalog_router)
+app.include_router(about_router)
 
 
 @app.get("/health")
@@ -103,7 +116,7 @@ def ask(
 
     answer = str(state.get("answer") or "").strip()
     if not answer:
-        answer = "No answer was generated."
+        raise HTTPException(status_code=500, detail="Agent returned an empty answer")
 
     return {
         "answer": answer,

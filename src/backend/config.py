@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,10 +21,16 @@ class Settings(BaseSettings):
     llm_timeout: float = 60.0
     llm_max_retries: int = 2
 
-    # Local embedding
+    # Local embedding — ONNX INT8 keeps the same E5 model family while
+    # avoiding PyTorch/CUDA runtime memory on small Railway instances.
     local_embedding_model: str = "intfloat/multilingual-e5-small"
-    embedding_device: str = "cpu"
-    embedding_batch_size: int = 128
+    embedding_backend: str = "onnx_int8"
+    embedding_onnx_file: str = "onnx/model_qint8_avx512_vnni.onnx"
+    embedding_onnx_provider: str = "CPUExecutionProvider"
+    embedding_onnx_threads: int = 1
+    embedding_max_length: int = 512
+    embedding_device: str = "cpu"  # retained for backward-compatible env files
+    embedding_batch_size: int = 16
 
     # Database
     database_url: str = (
@@ -31,10 +38,30 @@ class Settings(BaseSettings):
     )
     db_echo: bool = False
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value: object) -> object:
+        """Make Railway/Postgres URLs explicit for SQLAlchemy + pg8000.
+
+        Railway exposes DATABASE_URL as postgres://... or postgresql://....
+        This project intentionally uses the pure-Python pg8000 driver, so normalize
+        those generic URLs to postgresql+pg8000://... while leaving already-explicit
+        SQLAlchemy URLs untouched.
+        """
+        if not isinstance(value, str):
+            return value
+
+        url = value.strip()
+        if url.startswith("postgres://"):
+            return "postgresql+pg8000://" + url[len("postgres://") :]
+        if url.startswith("postgresql://"):
+            return "postgresql+pg8000://" + url[len("postgresql://") :]
+        return url
+
     # Data
     data_dir: Path = Path("./data")
     chroma_dir: Path = Path("./storage/chroma_local")
-    chroma_collection: str = "vinpearl_multilingual_e5_small"
+    chroma_collection: str = "vinpearl_multilingual_e5_small_onnx_int8"
     ticket_file: Path = Path("./storage/tickets.jsonl")
     chat_history_file: Path = Path("./storage/chat_history.jsonl")
 
@@ -56,6 +83,7 @@ class Settings(BaseSettings):
     # API
     app_host: str = "0.0.0.0"
     app_port: int = 8000
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     model_config = SettingsConfigDict(
         env_file=".env",
