@@ -18,10 +18,16 @@ class Settings(BaseSettings):
     llm_timeout: float = 60.0
     llm_max_retries: int = 2
 
-    # Local embedding
+    # Local embedding — ONNX INT8 keeps the same E5 model family while
+    # avoiding PyTorch/CUDA runtime memory on small Railway instances.
     local_embedding_model: str = "intfloat/multilingual-e5-small"
-    embedding_device: str = "cpu"
-    embedding_batch_size: int = 128
+    embedding_backend: str = "onnx_int8"
+    embedding_onnx_file: str = "onnx/model_qint8_avx512_vnni.onnx"
+    embedding_onnx_provider: str = "CPUExecutionProvider"
+    embedding_onnx_threads: int = 1
+    embedding_max_length: int = 512
+    embedding_device: str = "cpu"  # retained for backward-compatible env files
+    embedding_batch_size: int = 16
 
     # Database
     database_url: str = (
@@ -52,7 +58,7 @@ class Settings(BaseSettings):
     # Data
     data_dir: Path = Path("./data")
     chroma_dir: Path = Path("./storage/chroma_local")
-    chroma_collection: str = "vinpearl_multilingual_e5_small"
+    chroma_collection: str = "vinpearl_multilingual_e5_small_onnx_int8"
     ticket_file: Path = Path("./storage/tickets.jsonl")
     chat_history_file: Path = Path("./storage/chat_history.jsonl")
 
