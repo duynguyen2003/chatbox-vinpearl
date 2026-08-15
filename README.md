@@ -5,6 +5,8 @@ https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/
 
 ## LINK DEPLOY
 https://frontend-production-48c1.up.railway.app/
+## LNIK WORKFLOW
+https://docs.google.com/document/d/1kOYRXs0noKdzSWT_Hqm0gXm0XnzzzgErYjTdLjcHwIs/edit?tab=t.wi74v9yh9pbt
 
 ## 1. Setup môi trường local
 
@@ -593,83 +595,6 @@ Nếu thay đổi Frontend:
 
 ---
 
-```mermaid
-flowchart TD
-    START(["Start"])
-    LOAD["Load conversation memory<br/>(load_conversation_memory)"]
-    GUARD["Input guardrail<br/>(enforce_input_guardrail)"]
-    GDEC{"route_after_guardrail"}
-
-    SENSITIVE["Sensitive content response<br/>(sensitive_content_response)"]
-    OOS["Out-of-scope response<br/>(out_of_scope_response)"]
-    LANG["Language + control<br/>(detect_language_and_translate)"]
-    LDEC{"route_after_safety"}
-
-    RESOLVE["Resolve conversation context<br/>(resolve_conversation_context)"]
-    CLASSIFY["Classify input<br/>(classify_input)"]
-    CDEC{"route_after_classification"}
-
-    GREETING["Greeting response<br/>(greeting_response)"]
-    CONV["Conversation context response<br/>(conversation_context_response)"]
-    RETRIEVE["Retrieve context<br/>(retrieve_context)"]
-    TRIAGE["Support triage<br/>(analyze_support_request)"]
-    TDEC{"route_after_support_triage"}
-
-    TICKET["Create ticket<br/>(create_ticket)"]
-    ASSESS["Assess information<br/>(assess_information)"]
-    ADEC{"route_after_assessment"}
-
-    ANSWER["Generate answer<br/>(generate_answer)"]
-    GROUND["Grounding validation<br/>(validate_grounding)"]
-    NODATA["No-data response<br/>(no_data_response)"]
-
-    LANGGUARD["Response language guard<br/>(enforce_response_language)"]
-    SAVE["Save conversation memory<br/>(save_conversation_memory)"]
-    END(["End"])
-
-    START --> LOAD
-    LOAD --> GUARD
-    GUARD --> GDEC
-
-    GDEC -->|safety_action = block| SENSITIVE
-    GDEC -->|scope_action != allow| OOS
-    GDEC -->|otherwise| LANG
-
-    LANG --> LDEC
-    LDEC -->|safety_action = block| SENSITIVE
-    LDEC -->|otherwise| RESOLVE
-
-    RESOLVE --> CLASSIFY
-    CLASSIFY --> CDEC
-
-    CDEC -->|greeting| GREETING
-    CDEC -->|out_of_scope| OOS
-    CDEC -->|conversation_context| CONV
-    CDEC -->|rag| RETRIEVE
-
-    RETRIEVE --> TRIAGE
-    TRIAGE --> TDEC
-
-    TDEC -->|resolution_mode = human_required| TICKET
-    TDEC -->|otherwise| ASSESS
-
-    ASSESS --> ADEC
-    ADEC -->|resolution_mode = human_required| TICKET
-    ADEC -->|enough_information = true| ANSWER
-    ADEC -->|otherwise| NODATA
-
-    ANSWER --> GROUND
-
-    SENSITIVE --> LANGGUARD
-    OOS --> LANGGUARD
-    GREETING --> LANGGUARD
-    CONV --> LANGGUARD
-    TICKET --> LANGGUARD
-    NODATA --> LANGGUARD
-    GROUND --> LANGGUARD
-
-    LANGGUARD --> SAVE
-    SAVE --> END
 ```
 
 ## Giải thích luồng
