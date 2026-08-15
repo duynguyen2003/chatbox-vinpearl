@@ -5,6 +5,8 @@ https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/
 
 ## LINK DEPLOY
 https://frontend-production-48c1.up.railway.app/
+## LNIK WORKFLOW
+https://docs.google.com/document/d/1kOYRXs0noKdzSWT_Hqm0gXm0XnzzzgErYjTdLjcHwIs/edit?tab=t.wi74v9yh9pbt
 
 ## 1. Setup môi trường local
 
@@ -593,37 +595,36 @@ Nếu thay đổi Frontend:
 
 ---
 
-## 12. Trạng thái hiện tại
+```
 
-### Đã hoàn thành
+## Giải thích luồng
 
-- PostgreSQL schema
-- Alembic migrations
-- Seed destination
-- Load Core data
-- PostgreSQL → Chroma ingestion
-- FastAPI Backend
-- React/Vite Frontend
-- Admin bootstrap
-- Redis
-- Docker image
-- Docker Compose
-- `/health`
-- `/ready`
-- `/ask`
-- Docker local test
+1. `load_conversation_memory`: tải các lượt hội thoại gần đây và context đã lưu của session hiện tại.
+2. `enforce_input_guardrail`: kiểm tra an toàn, phạm vi và làm sạch request trước khi cho đi tiếp.
+   - `safety_action = block` → `sensitive_content_response`.
+   - `scope_action != allow` → `out_of_scope_response`.
+   - Còn lại → `detect_language_and_translate`.
+3. `detect_language_and_translate`: xác định ngôn ngữ trả lời, tạo `rag_query`, coarse route và safety decision.
+   - Nếu `safety_action = block` → `sensitive_content_response`.
+   - Còn lại → `resolve_conversation_context`.
+4. `resolve_conversation_context`: giải quyết destination/entity/reference dựa trên message hiện tại và memory.
+5. `classify_input`: xác định `route`.
+   - `greeting` → `greeting_response`.
+   - `conversation_context` → `conversation_context_response`.
+   - `out_of_scope` → `out_of_scope_response`.
+   - `rag` → `retrieve_context`.
+6. `retrieve_context`: lấy evidence/context từ RAG cho câu hỏi.
+7. `analyze_support_request`: phân loại support.
+   - `resolution_mode = human_required` → `create_ticket`.
+   - Còn lại → `assess_information`.
+8. `assess_information`: đánh giá evidence có đủ để trả lời hay không.
+9. `route_after_assessment`:
+   - `resolution_mode = human_required` → `create_ticket` (fail-safe có khai báo trong graph).
+   - `enough_information = true` → `generate_answer`.
+   - Còn lại → `no_data_response`.
+10. `generate_answer` → `validate_grounding`: sinh câu trả lời rồi kiểm tra claim có bám evidence hay không.
+11. Tất cả nhánh trả lời người dùng (`sensitive`, `out_of_scope`, `greeting`, `conversation_context`, `ticket`, `no_data`, `grounding`) đều đi qua `enforce_response_language`.
+12. `save_conversation_memory`: lưu lượt hội thoại hiện tại.
+13. Sau `save_conversation_memory` là `END`.
 
-### Đã triển khai trên Railway
-
-- Railway deployment
-- Railway PostgreSQL
-- Railway Redis
-- Railway Volume cho Chroma
-- Public Backend URL
-- Public Frontend URL
-- Backend `/ready` hoạt động
-- Swagger production hoạt động
-- Frontend gọi Backend qua public URL
-- CORS đã cấu hình cho Frontend Railway
-- Chroma production collection đã ingest và được Backend sử dụng cho RAG
 
