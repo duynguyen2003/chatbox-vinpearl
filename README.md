@@ -593,37 +593,113 @@ Nếu thay đổi Frontend:
 
 ---
 
-## 12. Trạng thái hiện tại
+```mermaid
+flowchart TD
+    START(["Start"])
+    LOAD["Load conversation memory<br/>(load_conversation_memory)"]
+    GUARD["Input guardrail<br/>(enforce_input_guardrail)"]
+    GDEC{"route_after_guardrail"}
 
-### Đã hoàn thành
+    SENSITIVE["Sensitive content response<br/>(sensitive_content_response)"]
+    OOS["Out-of-scope response<br/>(out_of_scope_response)"]
+    LANG["Language + control<br/>(detect_language_and_translate)"]
+    LDEC{"route_after_safety"}
 
-- PostgreSQL schema
-- Alembic migrations
-- Seed destination
-- Load Core data
-- PostgreSQL → Chroma ingestion
-- FastAPI Backend
-- React/Vite Frontend
-- Admin bootstrap
-- Redis
-- Docker image
-- Docker Compose
-- `/health`
-- `/ready`
-- `/ask`
-- Docker local test
+    RESOLVE["Resolve conversation context<br/>(resolve_conversation_context)"]
+    CLASSIFY["Classify input<br/>(classify_input)"]
+    CDEC{"route_after_classification"}
 
-### Đã triển khai trên Railway
+    GREETING["Greeting response<br/>(greeting_response)"]
+    CONV["Conversation context response<br/>(conversation_context_response)"]
+    RETRIEVE["Retrieve context<br/>(retrieve_context)"]
+    TRIAGE["Support triage<br/>(analyze_support_request)"]
+    TDEC{"route_after_support_triage"}
 
-- Railway deployment
-- Railway PostgreSQL
-- Railway Redis
-- Railway Volume cho Chroma
-- Public Backend URL
-- Public Frontend URL
-- Backend `/ready` hoạt động
-- Swagger production hoạt động
-- Frontend gọi Backend qua public URL
-- CORS đã cấu hình cho Frontend Railway
-- Chroma production collection đã ingest và được Backend sử dụng cho RAG
+    TICKET["Create ticket<br/>(create_ticket)"]
+    ASSESS["Assess information<br/>(assess_information)"]
+    ADEC{"route_after_assessment"}
+
+    ANSWER["Generate answer<br/>(generate_answer)"]
+    GROUND["Grounding validation<br/>(validate_grounding)"]
+    NODATA["No-data response<br/>(no_data_response)"]
+
+    LANGGUARD["Response language guard<br/>(enforce_response_language)"]
+    SAVE["Save conversation memory<br/>(save_conversation_memory)"]
+    END(["End"])
+
+    START --> LOAD
+    LOAD --> GUARD
+    GUARD --> GDEC
+
+    GDEC -->|safety_action = block| SENSITIVE
+    GDEC -->|scope_action != allow| OOS
+    GDEC -->|otherwise| LANG
+
+    LANG --> LDEC
+    LDEC -->|safety_action = block| SENSITIVE
+    LDEC -->|otherwise| RESOLVE
+
+    RESOLVE --> CLASSIFY
+    CLASSIFY --> CDEC
+
+    CDEC -->|greeting| GREETING
+    CDEC -->|out_of_scope| OOS
+    CDEC -->|conversation_context| CONV
+    CDEC -->|rag| RETRIEVE
+
+    RETRIEVE --> TRIAGE
+    TRIAGE --> TDEC
+
+    TDEC -->|resolution_mode = human_required| TICKET
+    TDEC -->|otherwise| ASSESS
+
+    ASSESS --> ADEC
+    ADEC -->|resolution_mode = human_required| TICKET
+    ADEC -->|enough_information = true| ANSWER
+    ADEC -->|otherwise| NODATA
+
+    ANSWER --> GROUND
+
+    SENSITIVE --> LANGGUARD
+    OOS --> LANGGUARD
+    GREETING --> LANGGUARD
+    CONV --> LANGGUARD
+    TICKET --> LANGGUARD
+    NODATA --> LANGGUARD
+    GROUND --> LANGGUARD
+
+    LANGGUARD --> SAVE
+    SAVE --> END
+```
+
+## Giải thích luồng
+
+1. `load_conversation_memory`: tải các lượt hội thoại gần đây và context đã lưu của session hiện tại.
+2. `enforce_input_guardrail`: kiểm tra an toàn, phạm vi và làm sạch request trước khi cho đi tiếp.
+   - `safety_action = block` → `sensitive_content_response`.
+   - `scope_action != allow` → `out_of_scope_response`.
+   - Còn lại → `detect_language_and_translate`.
+3. `detect_language_and_translate`: xác định ngôn ngữ trả lời, tạo `rag_query`, coarse route và safety decision.
+   - Nếu `safety_action = block` → `sensitive_content_response`.
+   - Còn lại → `resolve_conversation_context`.
+4. `resolve_conversation_context`: giải quyết destination/entity/reference dựa trên message hiện tại và memory.
+5. `classify_input`: xác định `route`.
+   - `greeting` → `greeting_response`.
+   - `conversation_context` → `conversation_context_response`.
+   - `out_of_scope` → `out_of_scope_response`.
+   - `rag` → `retrieve_context`.
+6. `retrieve_context`: lấy evidence/context từ RAG cho câu hỏi.
+7. `analyze_support_request`: phân loại support.
+   - `resolution_mode = human_required` → `create_ticket`.
+   - Còn lại → `assess_information`.
+8. `assess_information`: đánh giá evidence có đủ để trả lời hay không.
+9. `route_after_assessment`:
+   - `resolution_mode = human_required` → `create_ticket` (fail-safe có khai báo trong graph).
+   - `enough_information = true` → `generate_answer`.
+   - Còn lại → `no_data_response`.
+10. `generate_answer` → `validate_grounding`: sinh câu trả lời rồi kiểm tra claim có bám evidence hay không.
+11. Tất cả nhánh trả lời người dùng (`sensitive`, `out_of_scope`, `greeting`, `conversation_context`, `ticket`, `no_data`, `grounding`) đều đi qua `enforce_response_language`.
+12. `save_conversation_memory`: lưu lượt hội thoại hiện tại.
+13. Sau `save_conversation_memory` là `END`.
+
 
