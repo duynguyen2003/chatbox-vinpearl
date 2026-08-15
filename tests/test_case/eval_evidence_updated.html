@@ -45,45 +45,20 @@
     .section { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; margin:0 0 16px; }
     .type-row { display:grid; grid-template-columns:220px 1fr 260px; gap:10px; align-items:center; margin:8px 0; }
     .type-name { font-size:13px; font-weight:600; }
-    .type-bar { background:#e8eeeb; border-radius:999px; height:10px; overflow:hidden; }
-    .type-bar span { display:block; height:100%; background:linear-gradient(90deg,var(--green),#2a9d7c); border-radius:999px; }
+    .type-bar { background:#e8eeeb; border-radius:999px; height:12px; overflow:hidden; }
+    .type-fill { display:flex; height:100%; border-radius:999px; overflow:hidden; }
+    .type-ok { height:100%; background:linear-gradient(90deg,var(--green),#2a9d7c); }
+    .type-fail { height:100%; background:linear-gradient(90deg,#c83a3a,var(--rose)); }
     .type-num { font-size:12px; color:var(--muted); text-align:right; }
+    .chart-legend { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:10px 0 14px; color:var(--muted); font-size:12px; }
+    .legend-item { display:inline-flex; align-items:center; gap:6px; font-weight:700; }
+    .legend-dot { width:11px; height:11px; border-radius:3px; display:inline-block; }
+    .legend-ok { background:#2a9d7c; }
+    .legend-fail { background:var(--rose); }
+    .legend-note { font-weight:400; }
     .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
     .chip { background:var(--green-soft); color:var(--green); border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700; }
     .chip-fail { background:var(--rose-soft); color:var(--rose); }
-    .flows { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .flow { background:var(--green-soft); border-radius:16px; padding:16px; }
-    .flow.memory { background:var(--violet-soft); }
-    .flow h3 { margin:0 0 10px; font-size:16px; }
-    .steps { list-style:none; margin:0; padding:0; }
-    .steps li {
-      position:relative;
-      margin:0 0 10px;
-      padding:10px 12px 10px 42px;
-      background:#fff;
-      border-radius:12px;
-      border:1px solid var(--line);
-      line-height:1.45;
-    }
-    .steps li:last-child { margin-bottom:0; }
-    .steps li::before {
-      content:attr(data-n);
-      position:absolute; left:10px; top:10px;
-      width:24px; height:24px; border-radius:50%;
-      background:var(--green); color:#fff;
-      font-size:12px; font-weight:800;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .flow.memory .steps li::before { background:var(--violet); }
-    .example {
-      margin-top:12px;
-      padding:12px;
-      background:#fff;
-      border-left:4px solid var(--violet);
-      border-radius:10px;
-      font-size:14px;
-      line-height:1.55;
-    }
     .chat-frame {
       background:var(--card);
       border:1px solid var(--line);
@@ -161,90 +136,165 @@
         Có 20 case Memory (hội thoại nhiều lượt, cùng session).
       </p>
       
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-dot legend-ok"></span>Đúng</span>
+        <span class="legend-item"><span class="legend-dot legend-fail"></span>Sai / lệch hint</span>
+        <span class="legend-note">Độ dài thanh thể hiện số lượng case, lấy nhóm lớn nhất (62 case) làm mốc 100%.</span>
+      </div>
+
             <div class="type-row">
               <div class="type-name">FAQ - VinWonders Safari</div>
-              <div class="type-bar"><span style="width:100%"></span></div>
-              <div class="type-num">62 case · 57 đúng · 5 lệch · 91.9%</div>
+              <div class="type-bar" title="57 đúng · 5 sai trên 62 case">
+                <div class="type-fill" style="width:100.0%">
+                  <span class="type-ok" style="width:91.9%"></span>
+                  <span class="type-fail" style="width:8.1%"></span>
+                </div>
+              </div>
+              <div class="type-num">62 case · 57 đúng · 5 sai · 91.9%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - VinClub</div>
-              <div class="type-bar"><span style="width:85%"></span></div>
-              <div class="type-num">53 case · 52 đúng · 1 lệch · 98.1%</div>
+              <div class="type-bar" title="52 đúng · 1 sai trên 53 case">
+                <div class="type-fill" style="width:85.5%">
+                  <span class="type-ok" style="width:98.1%"></span>
+                  <span class="type-fail" style="width:1.9%"></span>
+                </div>
+              </div>
+              <div class="type-num">53 case · 52 đúng · 1 sai · 98.1%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Promotion</div>
-              <div class="type-bar"><span style="width:82%"></span></div>
-              <div class="type-num">51 case · 47 đúng · 4 lệch · 92.2%</div>
+              <div class="type-bar" title="47 đúng · 4 sai trên 51 case">
+                <div class="type-fill" style="width:82.3%">
+                  <span class="type-ok" style="width:92.2%"></span>
+                  <span class="type-fail" style="width:7.8%"></span>
+                </div>
+              </div>
+              <div class="type-num">51 case · 47 đúng · 4 sai · 92.2%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - Tours Experiences</div>
-              <div class="type-bar"><span style="width:35%"></span></div>
-              <div class="type-num">22 case · 21 đúng · 1 lệch · 95.5%</div>
+              <div class="type-bar" title="21 đúng · 1 sai trên 22 case">
+                <div class="type-fill" style="width:35.5%">
+                  <span class="type-ok" style="width:95.5%"></span>
+                  <span class="type-fail" style="width:4.5%"></span>
+                </div>
+              </div>
+              <div class="type-num">22 case · 21 đúng · 1 sai · 95.5%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Memory</div>
-              <div class="type-bar"><span style="width:32%"></span></div>
-              <div class="type-num">20 case · 18 đúng · 2 lệch · 90.0%</div>
+              <div class="type-bar" title="18 đúng · 2 sai trên 20 case">
+                <div class="type-fill" style="width:32.3%">
+                  <span class="type-ok" style="width:90.0%"></span>
+                  <span class="type-fail" style="width:10.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">20 case · 18 đúng · 2 sai · 90.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - Hotels</div>
-              <div class="type-bar"><span style="width:19%"></span></div>
-              <div class="type-num">12 case · 12 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="12 đúng · 0 sai trên 12 case">
+                <div class="type-fill" style="width:19.4%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">12 case · 12 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Golf</div>
-              <div class="type-bar"><span style="width:18%"></span></div>
-              <div class="type-num">11 case · 9 đúng · 2 lệch · 81.8%</div>
+              <div class="type-bar" title="9 đúng · 2 sai trên 11 case">
+                <div class="type-fill" style="width:17.7%">
+                  <span class="type-ok" style="width:81.8%"></span>
+                  <span class="type-fail" style="width:18.2%"></span>
+                </div>
+              </div>
+              <div class="type-num">11 case · 9 đúng · 2 sai · 81.8%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - Flights</div>
-              <div class="type-bar"><span style="width:16%"></span></div>
-              <div class="type-num">10 case · 9 đúng · 1 lệch · 90.0%</div>
+              <div class="type-bar" title="9 đúng · 1 sai trên 10 case">
+                <div class="type-fill" style="width:16.1%">
+                  <span class="type-ok" style="width:90.0%"></span>
+                  <span class="type-fail" style="width:10.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">10 case · 9 đúng · 1 sai · 90.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Hotel</div>
-              <div class="type-bar"><span style="width:15%"></span></div>
-              <div class="type-num">9 case · 9 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="9 đúng · 0 sai trên 9 case">
+                <div class="type-fill" style="width:14.5%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">9 case · 9 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - General</div>
-              <div class="type-bar"><span style="width:13%"></span></div>
-              <div class="type-num">8 case · 8 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="8 đúng · 0 sai trên 8 case">
+                <div class="type-fill" style="width:12.9%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">8 case · 8 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - Bundle Hotels Flights</div>
-              <div class="type-bar"><span style="width:11%"></span></div>
-              <div class="type-num">7 case · 7 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="7 đúng · 0 sai trên 7 case">
+                <div class="type-fill" style="width:11.3%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">7 case · 7 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Regulation</div>
-              <div class="type-bar"><span style="width:11%"></span></div>
-              <div class="type-num">7 case · 7 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="7 đúng · 0 sai trên 7 case">
+                <div class="type-fill" style="width:11.3%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">7 case · 7 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">Package</div>
-              <div class="type-bar"><span style="width:8%"></span></div>
-              <div class="type-num">3 case · 3 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="3 đúng · 0 sai trên 3 case">
+                <div class="type-fill" style="width:4.8%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">3 case · 3 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">About</div>
-              <div class="type-bar"><span style="width:8%"></span></div>
-              <div class="type-num">2 case · 2 đúng · 0 lệch · 100.0%</div>
+              <div class="type-bar" title="2 đúng · 0 sai trên 2 case">
+                <div class="type-fill" style="width:3.2%">
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
+                </div>
+              </div>
+              <div class="type-num">2 case · 2 đúng · 0 sai · 100.0%</div>
             </div>
-            
       <div class="chips" style="margin-top:16px">
         <span class="chip">261 / 277 đúng ý</span>
         <span class="chip">20 Memory</span>
@@ -254,44 +304,8 @@
       <div class="chips"><span class="chip chip-fail">faq-046</span><span class="chip chip-fail">faq-057</span><span class="chip chip-fail">faq-110</span><span class="chip chip-fail">faq-142</span><span class="chip chip-fail">faq-147</span><span class="chip chip-fail">faq-148</span><span class="chip chip-fail">faq-162</span><span class="chip chip-fail">faq-170</span><span class="chip chip-fail">promo-029</span><span class="chip chip-fail">promo-035</span><span class="chip chip-fail">promo-040</span><span class="chip chip-fail">promo-048</span><span class="chip chip-fail">golf-001</span><span class="chip chip-fail">golf-006</span><span class="chip chip-fail">memory-nha-trang</span><span class="chip chip-fail">memory-correct-destination</span></div>
     </section>
 
-    <section class="section">
-      <h2>2. Phân luồng đánh giá — ví dụ cụ thể</h2>
-      <div class="flows">
-        <div class="flow">
-          <h3>Case đơn (FAQ / Golf / Ưu đãi)</h3>
-          <ol class="steps">
-            <li data-n="1">Chọn 1 <code>test_id</code>, ví dụ <strong>faq-003</strong>: “CSKH phản hồi bao lâu?”</li>
-            <li data-n="2">Gửi đúng 1 câu <code>user_message</code> lên <code>POST /api/v1/chat</code>.</li>
-            <li data-n="3">Ghi <code>assistant_answer</code> và <code>response_time_ms</code> (faq-003 = 10.067 ms).</li>
-            <li data-n="4">Đối chiếu hint: phải có mốc <strong>48 giờ làm việc</strong>.</li>
-            <li data-n="5">Đủ ý chính → ghi nhận đúng; thiếu mốc / bịa số → lệch hint.</li>
-          </ol>
-        </div>
-        <div class="flow memory">
-          <h3>Case Memory (nhiều lượt, cùng session)</h3>
-          <ol class="steps">
-            <li data-n="1">Tách <code>user_message</code> theo dấu <code>|</code>. Phú Quốc có 6 lượt.</li>
-            <li data-n="2">Mọi lượt dùng chung <code>session_id</code>, không mở trang/chat mới.</li>
-            <li data-n="3">Nối đáp án bằng <code>||</code>, thời gian từng lượt cũng nối <code>||</code>.</li>
-            <li data-n="4">Lượt 5 phải nhớ đúng chủ đề (Phú Quốc / quy định / thanh toán).</li>
-            <li data-n="5">Lượt 6 tóm tắt được mạch đã hỏi từ đầu.</li>
-          </ol>
-        </div>
-      </div>
-      <div class="example">
-        <strong>Ví dụ phân luồng memory-phu-quoc:</strong>
-        Lượt 1 ghi nhớ “Phú Quốc + gia đình” →
-        Lượt 2 liệt kê VinHolidays Fiesta / Wonderworld / Resort &amp; Spa Phu Quoc →
-        Lượt 3 xác nhận combo Vinpearl × Vietnam Airlines còn trong dữ liệu →
-        Lượt 4 trả lời Fiesta có phù hợp gia đình không →
-        Lượt 5 xác nhận vẫn nhớ Phú Quốc →
-        Lượt 6 tóm tắt toàn bộ hội thoại.
-        Trong trang này, bấm từng <em>Lượt</em> để xem nhánh, không sang trang khác.
-      </div>
-    </section>
-
     <section class="section" style="background:transparent;border:0;padding:0">
-      <h2>3. Ít nhất 5 test case manual với output thực tế</h2>
+      <h2>2. Ít nhất 5 test case manual với output thực tế</h2>
       <p class="meta">
         3 hội thoại Memory + 5 case khác. Câu hỏi nền xanh, câu trả lời nền be.
         Bấm nút lượt/câu để đổi nhánh trên cùng trang.
