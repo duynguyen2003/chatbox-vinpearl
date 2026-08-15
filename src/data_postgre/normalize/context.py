@@ -128,7 +128,7 @@ class Context:
                 entity_type=entity_type,
                 json_path=json_path,
                 raw_value=text,
-                message="Thêm bí danh vào src/data_postgre/normalize/destinations.yaml",
+                message="Thêm bí danh vào src/normalize/destinations.yaml",
             )
         return found
 

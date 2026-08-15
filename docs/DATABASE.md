@@ -97,16 +97,11 @@ crawler bắt nhầm link hotline thành giá. Bỏ `raw` là mất khả năng 
 "amenities": ["Telephone", "WIFI", "Air-conditioner", "TV", "Shower", ...]
 ```
 **1.796 giá trị nhưng chỉ ~50 giá trị khác nhau** (`Telephone` 109 lần, `WIFI` 102 lần)
-→ `amenity` (50 dòng, từ vựng chuẩn) + `room.amenity_ids TEXT[]` (1.796 tham chiếu).
+→ `amenity` (50 dòng) + `room_amenity` (1.796 dòng).
 
 **Tiêu chí:** tỉ lệ lặp cao (1796 ÷ 50 ≈ 36 lần mỗi giá trị). Lặp cao nghĩa là đây là
 **từ vựng chung**, không phải văn bản tự do. Chuẩn hoá cho phép sửa một chỗ
-(`WIFI` → `Wi-Fi`) áp dụng cho cả 102 dòng.
-
-> **Cập nhật:** bảng nối `room_amenity` đã gộp thành cột mảng. Truy vấn đổi từ
-> `JOIN room_amenity` sang `WHERE amenity_ids @> ARRAY['bathtub']` (index GIN).
-> Cái mất là khoá ngoại — Postgres không ràng buộc được phần tử mảng. Từ vựng
-> chuẩn vẫn giữ nguyên ở bảng `amenity`.
+(`WIFI` → `Wi-Fi`) áp dụng cho cả 102 dòng, và lọc `WHERE amenity_id = 'bathtub'` bằng index.
 
 ---
 
@@ -115,7 +110,7 @@ crawler bắt nhầm link hotline thành giá. Bỏ `raw` là mất khả năng 
 ```jsonc
 "redemption_steps": ["Bước 1: ...", "Bước 2: ...", "Bước 3: ..."]
 ```
-→ `promotion_term(promotion_id, kind='step', ord, text)`
+→ `promotion_step(promotion_id, ord, text)`
 
 **Vì sao không nhét JSONB:** cần trả lời *"bước 3 của ưu đãi X là gì"*, và lớp RAG
 cần chunk riêng từng đoạn để trích dẫn chính xác.
@@ -207,9 +202,13 @@ erDiagram
     property         ||--o{ attraction        : "chứa (tuỳ chọn)"
     property         ||--o{ mice_venue        : "nằm trong (tuỳ chọn)"
 
+    room             ||--o{ room_amenity      : ""
+    amenity          ||--o{ room_amenity      : ""
+
     attraction       ||--o{ attraction        : "cha-con"
 
     golf_course      ||--o{ golf_feature      : ""
+    golf_course      ||--o{ golf_course_map   : ""
 
     mice_venue       ||--o{ mice_room         : ""
     mice_room        ||--o{ mice_room_capacity: ""
@@ -226,11 +225,13 @@ erDiagram
 erDiagram
     promotion ||--o{ promotion_benefit       : "có quyền lợi"
     promotion ||--o{ promotion_destination   : "áp dụng tại"
+    promotion ||--o{ promotion_tag           : "phân loại"
     promotion ||--o{ promotion_code          : "mã giảm giá"
     promotion ||--o{ promotion_property_raw  : "kiểm dịch"
-    promotion ||--o{ promotion_term          : "điều khoản + bước đổi"
     promotion ||--o{ promotion_section       : "nội dung trang"
     promotion ||--o{ promotion_block         : "bảng/danh sách"
+    promotion ||--o{ promotion_step          : "các bước đổi"
+    promotion ||--o{ promotion_term          : "điều khoản"
     promotion ||--o{ promotion_relation      : "liên quan tới"
     destination ||--o{ promotion_destination : ""
 ```
@@ -264,24 +265,26 @@ erDiagram
 | `page_link` | entertainment + promotion | `page_data.links[]`, `content_blocks[].links[]`, `card_data.topic_url`, `detail_url`, `option_url`, `related_promotions[]` |
 | `property` | `hotel/vinpearl_hotel_room_dining_rag.json` | `hotels[]` |
 | `room` | ↑ | `hotels[].rooms[]` |
-| `amenity` + `room.amenity_ids[]` | ↑ | `hotels[].rooms[].amenities[]` |
+| `amenity`, `room_amenity` | ↑ | `hotels[].rooms[].amenities[]` |
 | `dining_service` | ↑ | `hotels[].dining_services[]` |
 | `attraction` | `entertainment/*.json` (8 file) | Dạng A `sections{}.*.items[]` · Dạng B `+ items[].detail` · Dạng C `unique_experiences[]`, `experience_journeys[]`, `all_topics[]` |
+| `attraction_itinerary_day` | `entertainment/nha-trang.json` | `all_topics[].journey_data.itinerary[]` |
 | `golf_course` | `golf/golf.json` | `golf_courses[]` |
 | `golf_feature` | ↑ | `.amenities[]`, `.experiences[]`, `.general_information.distinctive_features[]`, `.awards_and_recognitions[]` |
-| `golf_feature` (kind=`map`) | ↑ | `.golf_course_maps[]` |
+| `golf_course_map` | ↑ | `.golf_course_maps[]` |
 | `mice_venue` | `event/vinpearl_mice_rag_en.json` | `venues[]` |
 | `mice_room` | ↑ | `venues[].detail.rooms[]` |
 | `mice_room_capacity` | ↑ | `venues[].detail.rooms[].capacities{}` |
 | `promotion` | `promotion/*.json` (9 file) | `promotions[]` |
 | `promotion_benefit` | ↑ | `.benefits[]` |
 | `promotion_destination` | ↑ | `.destinations[]` |
-| `promotion.tags` (JSONB) | ↑ | `.promotion_type[]`, `.applicable_services[]`, `.channels[]`, `.customer_groups[]`, `.member_tiers[]` |
+| `promotion_tag` | ↑ | `.promotion_type[]`, `.applicable_services[]`, `.channels[]`, `.customer_groups[]`, `.member_tiers[]` |
 | `promotion_code` | ↑ | `.promo_codes[]` (kèm `.conditions[]`, `.validity`, `.source_text`) |
 | `promotion_property_raw` | ↑ | `.applicable_properties[]` |
 | `promotion_section` | ↑ | `.sections[].{heading, level, content[]}` |
 | `promotion_block` | ↑ | `.tables[]`, `.bullet_lists[]`, `.headings[]` |
-| `promotion_term` | ↑ | `.terms_and_conditions[]`, `.combination_rules[]`, `.contact_information[]`, `.redemption_steps[]` |
+| `promotion_step` | ↑ | `.redemption_steps[]` |
+| `promotion_term` | ↑ | `.terms_and_conditions[]`, `.combination_rules[]`, `.contact_information[]` |
 | `promotion_relation` | ↑ | `.related_promotions[]`, `.related_brands[]`, `.related_articles[]` |
 | `faq` | `faqs/vinpearl_faqs.json` | `items[]` |
 | `policy_document` | `regulations/vinpearl_regulations.json` | `documents[]` |
@@ -307,9 +310,9 @@ Quan hệ cha–con là **hình dạng có sẵn của JSON**, không phải suy
 | `mice_room_capacity` → `mice_room` | `rooms[].capacities{}` |
 | `promotion_benefit` / `_destination` / `_tag` / `_code` → `promotion` | Đều lồng trong `promotions[]` |
 | `policy_section` / `policy_block` → `policy_document` | `documents[].sections[]`, `.tables[]`, `.lists[]` |
-| `golf_feature` (5 `kind`, kể cả `map`) → `golf_course` | Lồng trong `golf_courses[]` |
+| `golf_feature` / `golf_course_map` → `golf_course` | Lồng trong `golf_courses[]` |
 | `attraction` → `attraction` (cha–con) | `items[].detail` (dạng B), `all_topics` (dạng C) |
-| `room.amenity_ids[]` → `amenity` | `rooms[].amenities[]` |
+| `room_amenity` → `room` | `rooms[].amenities[]` |
 
 ### Mức B — suy ra bằng khớp chuỗi (đã đo tỉ lệ)
 
@@ -328,7 +331,7 @@ Quan hệ cha–con là **hình dạng có sẵn của JSON**, không phải suy
 | Tách bảng `amenity` | Nguồn chỉ là mảng chuỗi lặp lại (`Telephone` 109 lần, `WIFI` 102 lần) — chuẩn hoá là quyết định của tôi, không phải bằng chứng |
 | Tách bảng `brand` | Field `source_brand` có sẵn, nhưng nâng thành bảng là quy ước |
 | Gộp `media` đa hình | Data có 5–6 tên field ảnh khác nhau; gom về một bảng là quyết định |
-| Gộp `promotion.tags` | 5 mảng chuỗi cùng hình dạng |
+| Gộp `promotion_tag` | 5 mảng chuỗi cùng hình dạng |
 | Gộp `golf_feature` | 4 mảng khác tên nhưng cùng shape `{title, description}` |
 | Toàn bộ `app_user` … `event_log` | **Không hề có trong `data/`** — suy từ code hiện có |
 | `ingest_run`, `data_quality_issue` | Không có nguồn |
@@ -509,7 +512,7 @@ Cột `source_id` trên mỗi bảng chỉ là **nguồn chính**. Bảng này c
 | `role` | TEXT | CHECK (`primary`,`secondary`,`detail`) | |
 
 Cần thiết vì: `golf_courses[].source_urls[]` có **2 URL mỗi sân**, và mỗi `amenity` /
-`experience` / bản đồ sân con lại mang `source_url` riêng;
+`experience` / `golf_course_map` con lại mang `source_url` riêng;
 `promotions[].source_urls[]` + `source_domains[]` tương tự.
 
 ### `page_link` — đồ thị điều hướng của website
@@ -594,14 +597,8 @@ Nguồn: `page_data.links[]` (248) · `content_blocks[].links[]` (64) · `card_d
 | `name_vi` | TEXT | | |
 | `category` | TEXT | CHECK (`bathroom`,`tech`,`comfort`,`service`,`other`) | |
 
-### `room.amenity_ids` — mảng thay cho bảng nối
-
-1.796 cạnh phòng–tiện nghi nằm trong cột `TEXT[]` của chính `room`, không còn
-bảng `room_amenity`. Index GIN cho `amenity_ids @> ARRAY['bathtub']`.
-
-Postgres **không** có khoá ngoại cho phần tử mảng, nên giá trị ở đây không được
-database bảo đảm tồn tại trong `amenity`. Hai chốt chặn thay thế: adapter chỉ ghi
-id do chính nó vừa tạo, và `tests/test_loaded_data.py` kiểm tra không có id mồ côi.
+### `room_amenity` — ~1.796 dòng
+`room_id` FK · `amenity_id` FK · **PK** `(room_id, amenity_id)`
 
 ### `dining_service` — 68 dòng
 
@@ -684,15 +681,15 @@ câu tiếp thị thành hoạt động có thật.
 > ⚠️ **Không đưa bảng này vào lớp RAG** khi trả lời câu hỏi kiểu *"có gì chơi ở X"*.
 > Nó chỉ dùng cho câu mở đầu giới thiệu điểm đến.
 
-### `attraction.itinerary` — cột JSONB
+### `attraction_itinerary_day` — 7 dòng
+Từ `journey_data.itinerary[]` (chỉ 3 topic có, trong nha-trang.json).
 
-7 ngày hành trình của 3 topic (trong `nha-trang.json`, `journey_data.itinerary[]`)
-nằm trong cột JSONB của chính `attraction`, không còn bảng `attraction_itinerary_day`.
-Mỗi phần tử: `{day_number, heading, text, activities[]}`.
-
-Cột khai bằng `JSONB(none_as_null=True)` — mặc định SQLAlchemy biến `None` của Python
-thành JSON `null` (một scalar), khiến `jsonb_array_length()` báo lỗi
-"cannot get array length of a scalar".
+| Cột | Kiểu | Ràng buộc | Nguồn |
+|---|---|---|---|
+| `id` | TEXT | PK | |
+| `attraction_id` | TEXT | FK ON DELETE CASCADE | |
+| `day_number` | INT | NOT NULL | `itinerary[].day_number` |
+| `heading` | TEXT | | `"Day 1: Conquer VinWonders…"` |
 | `text` | TEXT | | |
 | `activities` | JSONB | | `itinerary[].activities[]` (41 dòng) |
 
@@ -746,8 +743,8 @@ Gộp `distinctive_features`, `awards_and_recognitions`, `amenities`, `experienc
 | `description`, `image_url`, `detail_url` | TEXT | | |
 | `sort_order` | INT | | |
 
-> Bản đồ sân (`golf_course_maps[]`) nằm trong chính `golf_feature` với
-> `kind='map'`; `course_type` (`Marsh Course`) giữ ở cột `variant`.
+### `golf_course_map`
+`id` PK · `course_id` FK · `course_type` TEXT (`Marsh Course`) · `map_name` · `map_url`
 
 ### `mice_venue` — 10 dòng · nguồn `data/event/vinpearl_mice_rag_en.json`
 
@@ -841,17 +838,34 @@ vì câu hỏi thật là *"phòng nào chứa 500 khách kiểu banquet?"* → 
 > `review_notes[]` (35 giá trị) **không** thành cột → đổ vào `data_quality_issue` với `severity='info'`
 > (Luật 9). Riêng `quality_score` và `needs_review` giữ làm cột vì tool cần `WHERE` theo chúng.
 
-### `promotion_section` — 164 dòng
-`id` PK · `promotion_id` FK ON DELETE CASCADE · `ord` · `heading` · `level` · `content`
-· **UNIQUE** `(promotion_id, ord)`
+### `promotion_section` — ~132 dòng
+Cấu trúc trang ưu đãi, hình dạng giống hệt `policy_section` (Luật 1 + Luật 5).
 
-### `promotion_block` — 507 dòng
-`id` PK · `promotion_id` FK ON DELETE CASCADE · `ord` · `block_type`
-CHECK (`table`,`list`,`heading`) · `caption` · `payload` JSONB
-· **UNIQUE** `(promotion_id, ord)`
+| Cột | Kiểu | Ràng buộc | Nguồn |
+|---|---|---|---|
+| `id` | TEXT | PK | |
+| `promotion_id` | TEXT | FK ON DELETE CASCADE | |
+| `ord` | INT | NOT NULL | Thứ tự trong `sections[]` |
+| `heading` | TEXT | | `sections[].heading` |
+| `level` | INT | | `sections[].level` |
+| `content` | TEXT | | Nối `sections[].content[]` (758 dòng) |
 
-> `redemption_steps[]` nằm ở `promotion_term` với `kind='step'`.
-> Vì sao hai bảng này **không** gộp với `policy_section`/`policy_block`: xem §14.1.
+**UNIQUE** `(promotion_id, ord)`
+
+### `promotion_block` — ~250 dòng
+Gộp `tables[]` (665 ô), `bullet_lists[]` (527 mục), `headings[]` (158) — đều là khối có cấu trúc.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | |
+| `promotion_id` | TEXT FK | |
+| `ord` | INT | |
+| `block_type` | TEXT CHECK (`table`,`bullet_list`,`heading`) | |
+| `caption` | TEXT | `tables[].caption` |
+| `payload` | JSONB | table → `{rows}` · list → `{type, items}` · heading → `{level, text}` |
+
+### `promotion_step` — 74 dòng
+`id` PK · `promotion_id` FK · `ord` INT · `text` TEXT — từ `redemption_steps[]` (Luật 5).
 
 ### `promotion_term` — ~54 dòng
 Gộp ba mảng cùng bản chất "điều khoản dạng danh sách có thứ tự":
@@ -907,15 +921,14 @@ WHERE is_active
 > 49 cặp lệch nhau và **lệch duy nhất ở trường `destinations`**. Vậy `promotion` lấy bản đầu tiên,
 > `promotion_destination` lấy **hợp** của tất cả các bản. Không cần luật ưu tiên.
 
-### `promotion.tags` — JSONB thay cho bảng nối
+### `promotion_tag`
+Gộp 4 chiều phân loại có cùng hình dạng (mảng chuỗi slug) vào một bảng.
 
-5 chiều phân loại (561 giá trị cho 38 ưu đãi) nằm trong một cột JSONB của chính
-`promotion`, hình dạng `{"member_tier": ["gold"], "service": [...]}`. Index GIN cho
-`tags @> '{"member_tier":["gold"]}'`.
-
-JSONB **không** có CHECK theo khoá, nên tên chiều viết sai không bị chặn ở tầng
-database. Chốt chặn: `build_tags()` chỉ sinh khoá từ `TAG_FIELDS`, và có test
-`test_tag_dimension_names_stay_inside_the_five_allowed`.
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `promotion_id` | TEXT | FK, PK phần 1 | |
+| `tag_type` | TEXT | PK phần 2, CHECK (`promotion_type`,`service`,`channel`,`customer_group`,`member_tier`) | |
+| `tag_value` | TEXT | PK phần 3 | |
 
 Từ vựng thực tế: `promotion_type` 235 giá trị (`cross_brand_offer`, `food_offer`, `ticket_discount`…);
 `service` 209 (`experience`, `theme_park_ticket`, `food_and_beverage`…);
@@ -982,38 +995,219 @@ Từ vựng thực tế: `promotion_type` 235 giá trị (`cross_brand_offer`, `
 | `effective_from` | DATE | | Nếu trích được |
 | `source_id` | TEXT | FK → `source` | |
 
-### §14.1 Vì sao bốn bảng `*_section` / `*_block` **không** gộp làm hai
+### `policy_section` — 36 dòng
+`id` PK · `document_id` FK ON DELETE CASCADE · `ord` INT · `heading` TEXT · `content` TEXT
+· **UNIQUE** `(document_id, ord)`
 
-`promotion_section` và `policy_section` chỉ khác nhau đúng cột `level`.
-`promotion_block` và `policy_block` chỉ khác tên cột cha. Đã **thử gộp thật**
-thành hai bảng đa hình khoá theo `(entity_type, entity_id)`, chạy được, rồi
-**tách lại**. Ghi lại đây để không ai làm lại lần nữa.
+### `policy_block` — ~10 dòng
+Gộp `tables[]` và `lists[]` — đều là khối có cấu trúc, hiếm khi truy vấn riêng lẻ.
 
-**Cái được:** 2 bảng thay vì 4.
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | |
+| `document_id` | TEXT FK | |
+| `ord` | INT | |
+| `block_type` | TEXT CHECK (`table`,`list`) | |
+| `payload` | JSONB | table → `{headers, rows}`; list → `{type: "ol", items: [...]}` |
 
-**Cái mất — ba thứ, đều cụ thể:**
+### `org_info` — 1 dòng · nguồn `data/about/vinpearl_about.json`
+Ràng buộc một dòng duy nhất: `id SMALLINT PK DEFAULT 1 CHECK (id = 1)`.
+Cột: `headline`, `introduction`, `address`, `hotline`, `account_holder`, `bank_account`,
+`bank`, `business_registration`, `issued_by`, `source_id`.
 
-| Mất | Hệ quả |
+Thêm ba cột cho khối giới thiệu trang MICE (`event/vinpearl_mice_rag_en.json` → `page_intro`):
+`mice_intro_title`, `mice_intro_description`, `mice_intro_cta` (`"Send an Inquiry"`).
+
+### `org_highlight` — ~14 dòng
+`id` PK · `kind` CHECK (`hotel_resort`,`package`,`mice`,`meeting_event`) · `name` · `description`
+· `destination_id` FK NULL · `property_id` FK NULL · `sort_order` · `source_id`
+
+> `property_id`: **9/9** mục `hotels_and_resorts[]` khớp chính xác tuyệt đối `hotel_name`.
+> Đây là quan hệ khớp chuỗi đáng tin nhất trong toàn bộ data.
+
+---
+
+## 10. Ứng dụng
+
+### `app_user`
+Anonymous-first: người dùng chưa đăng nhập **vẫn có một dòng**. Khi nào cần tài khoản
+thật thì điền `email` + `password_hash` vào đúng dòng đó — lịch sử chat không mất.
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `id` | UUID | PK DEFAULT `gen_random_uuid()` | |
+| `anon_id` | TEXT | UNIQUE | Client sinh, lưu localStorage |
+| `email` | CITEXT | UNIQUE, NULL | NULL = chưa từng đăng nhập |
+| `password_hash` | TEXT | NULL | argon2/bcrypt |
+| `display_name` | TEXT | | |
+| `locale` | TEXT | DEFAULT `vi` | |
+| `is_staff` | BOOLEAN | DEFAULT false | Cho trang quản trị ticket |
+| `created_at`, `last_seen_at` | TIMESTAMPTZ | | |
+
+### `session`
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `id` | TEXT | PK | Client sinh — khớp `ChatRequest.session_id` |
+| `user_id` | UUID | FK → `app_user` ON DELETE SET NULL | Nullable, khớp `user_id: str \| None` hiện tại |
+| `channel` | TEXT | CHECK (`web`,`api`) | |
+| `language` | TEXT | | |
+| `started_at`, `last_activity_at` | TIMESTAMPTZ | | |
+| `client_meta` | JSONB | | UA + platform. **Đừng lưu đủ để fingerprint thiết bị.** |
+
+### `message`
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `id` | UUID | PK | |
+| `session_id` | TEXT | FK → `session` ON DELETE CASCADE | |
+| `user_id` | UUID | FK → `app_user` ON DELETE SET NULL | |
+| `seq` | INT | NOT NULL | **UNIQUE** `(session_id, seq)` |
+| `role` | TEXT | CHECK (`user`,`assistant`,`system`,`tool`) | |
+| `content` | TEXT | NOT NULL | **Nơi duy nhất lưu nội dung thô** (chứa PII) |
+| `language` | TEXT | | Từ `AgentState.original_language` |
+| `route` | TEXT | CHECK (`greeting`,`out_of_scope`,`rag`) | Khớp `RouteName` ở `src/agents/state.py` |
+| `model` | TEXT | | |
+| `prompt_tokens`, `completion_tokens` | INT | | |
+| `cost_usd` | NUMERIC(10,6) | | |
+| `latency_ms` | INT | | |
+| `finish_reason`, `error` | TEXT | | |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() | |
+
+### `message_citation`
+Hiện `routes.py` dựng `SourceItem` rồi **vứt đi**. Bảng này giữ lại — nền tảng cho `eval/`.
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `message_id` | UUID | FK ON DELETE CASCADE, PK phần 1 | |
+| `rank` | INT | PK phần 2 | |
+| `entity_type` | TEXT | | Trỏ thẳng CORE — **dùng được ngay khi chưa có bảng `chunk`** |
+| `entity_id` | TEXT | | |
+| `chunk_id` | TEXT | NULL | Điền sau khi có lớp RAG |
+| `score` | REAL | | |
+
+### `message_feedback`
+`id` PK · `message_id` FK **UNIQUE** · `user_id` FK · `rating` SMALLINT CHECK (`-1`,`1`) ·
+`comment` TEXT · `created_at`
+
+### `ticket`
+Thay `storage/tickets.jsonl`.
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| `id` | TEXT | PK | Giữ format `VP-XXXXXXXXXX` đang dùng |
+| `user_id` | UUID | FK → `app_user` | |
+| `session_id` | TEXT | FK → `session` | |
+| `message_id` | UUID | FK → `message` | Tin nhắn châm ngòi |
+| `status` | TEXT | CHECK (`open`,`in_progress`,`resolved`,`closed`) | |
+| `reason` | TEXT | | Từ `AgentState.ticket_id` flow |
+| `priority` | TEXT | CHECK (`low`,`normal`,`high`) | |
+| `message`, `language` | TEXT | | |
+| `assignee` | TEXT | | |
+| `created_at`, `updated_at`, `resolved_at` | TIMESTAMPTZ | | |
+
+### `event_log`
+`id` BIGSERIAL · `ts` · `user_id` · `session_id` · `event_type` · `payload` JSONB
+
+> **Không lưu `content` thô ở đây** — chỉ độ dài + hash. Nội dung chỉ tồn tại ở `message`,
+> một chỗ duy nhất, để chính sách xoá/lưu trữ chỉ phải áp một nơi.
+
+---
+
+## 11. Đặt chỗ cho lớp RAG (chưa tạo)
+
+```sql
+chunk(
+  id TEXT PK, entity_type TEXT, entity_id TEXT,
+  destination_id TEXT FK, language TEXT,
+  title TEXT, text TEXT, token_count INT, content_hash TEXT,
+  metadata JSONB,
+  embedding vector(384),                      -- multilingual-e5-small
+  tsv tsvector GENERATED ALWAYS AS (...) STORED
+)
+```
+Điều kiện tiên quyết đã thoả ở CORE: **id tất định** + `content_hash` để chỉ re-embed phần đổi.
+
+---
+
+## 12. Index cần có ngay
+
+```sql
+CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE UNIQUE INDEX ON destination_alias (alias_normalized);
+CREATE INDEX ON room (property_id);
+CREATE INDEX ON room (price_from_amount) WHERE price_from_amount IS NOT NULL;
+CREATE INDEX ON attraction (destination_id, kind);
+CREATE INDEX ON attraction (parent_id);
+CREATE INDEX ON promotion (validity_to) WHERE is_active;
+CREATE INDEX ON promotion_tag (tag_type, tag_value);
+CREATE INDEX ON mice_room_capacity (layout, pax);
+CREATE INDEX ON faq (category, subcategory);
+CREATE INDEX ON media (entity_type, entity_id);
+CREATE INDEX ON message (session_id, seq);
+CREATE INDEX ON data_quality_issue (rule);
+CREATE INDEX ON property USING gin (name gin_trgm_ops);
+```
+
+---
+
+## 13. Những quyết định gây tranh cãi
+
+| Quyết định | Lý do | Đánh đổi |
+|---|---|---|
+| `media` đa hình **không FK** | 6 loại entity đều có ảnh; 6 bảng ảnh riêng là ồn ào vô ích | Không có toàn vẹn tham chiếu — phải dọn mồ côi bằng job định kỳ |
+| `attraction` một bảng cho 8 `kind` | Ba schema nguồn thực chất cùng hình dạng *card + detail* | Vài cột luôn NULL với `kind` nhất định |
+| `promotion_tag` gộp 4 chiều | Cùng hình dạng mảng chuỗi, cùng cách truy vấn | Không có FK tới từ vựng chuẩn; sai chính tả lọt được |
+| `mice_room_capacity` là **bảng**, không JSONB | Câu hỏi thật cần `WHERE layout=? AND pax>=?` | Thêm một bảng cho 216 dòng |
+| Bỏ `promotion_status` đã cào | Tính lúc `2026-08-01`, sai ngay khi nạp | Phải tự parse ngày, 4/38 sẽ `unknown` |
+| `promotion_property_raw` tách riêng | 327 giá trị hầu hết là chuỗi cụt do lỗi parse | Cần bước khớp mờ sau, không dùng ngay được |
+| `TEXT` + `CHECK` thay `ENUM` | Enum Postgres không xoá được value, migrate rất khổ | Mất một chút an toàn kiểu ở tầng DB |
+| Không có bảng `raw_document` | File JSON đã nằm trong git — đó chính là lớp bronze | Khi crawler chạy tự động và không commit nữa thì phải bổ sung |
+
+---
+
+## 14. Tổng kết số lượng
+
+| Nhóm | Số bảng | Số dòng ước tính |
+|---|---:|---:|
+| Vận hành | 2 | thay đổi |
+| Trục dùng chung | 8 | ~95 + ~400 liên kết |
+| Lưu trú | 5 | ~2.045 |
+| Trải nghiệm | 3 | ~240–440 |
+| Golf & MICE | 6 | ~310 |
+| Ưu đãi | 11 | ~1.140 |
+| Tri thức | 6 | ~240 |
+| Ứng dụng | 7 | tăng dần |
+| **Tổng** | **48** | **≈ 4.430 + log** |
+
+### Cấu trúc URL của vinpearl.com (khảo sát 2026-08-06)
+
+Xác nhận phân tầng của lược đồ. `vinpearl.com` và `vinwonders.com` chặn truy cập tự động (403),
+nên phần này lấy từ kết quả tìm kiếm cộng với 3.100 URL có sẵn trong data.
+
+| Khuôn mẫu URL | Ứng với bảng |
 |---|---|
-| 2 khoá ngoại thật | Postgres không kiểm tra `entity_id` có tồn tại; phải thay bằng test |
-| `ON DELETE CASCADE` | Xoá một ưu đãi không còn tự xoá section của nó |
-| DataGrip không vẽ được đường nối | Bảng treo lơ lửng trên sơ đồ, không rõ thuộc về ai |
+| `/en/hotels` | index |
+| `/en/hotels-{destination}` | lọc theo `destination` |
+| `/en/hotels/{slug}` (113 lần trong data) | `property` |
+| `/en/hotels/{slug}/rooms` (144) | `room` |
+| `/en/hotels/{slug}/foods` (102) | `dining_service` |
+| `/en/{destination}` · `/en/{destination}/{category}/{item}` | `complex` + `attraction` |
+| `/vi/uu-dai/{slug}` (464 trên vinwonders) | `promotion` |
+| `/en/wonderpedia/{category}/{slug}` (~500) | **chưa có bảng** — bài viết biên tập, hiện chỉ tồn tại như đích của `page_link` |
 
-**Phép thử quyết định: đếm số loại chủ sở hữu.**
+### Độ phủ so với dữ liệu nguồn
 
-| Bảng đa hình | Số loại chủ | Kết luận |
-|---|---:|---|
-| `media` | **8** | Chính đáng — 8 bảng ảnh riêng mới là điên |
-| `entity_source` | mở | Chính đáng — bất kỳ thực thể nào cũng có thể nhiều nguồn |
-| `content_section` (đã bỏ) | **2** | Không đáng |
+| | Số lượng |
+|---|---:|
+| Đường dẫn lá khác nhau trong `data/` | 639 |
+| Cố ý bỏ (`statistics.*`, `items_by_category` trùng `items[]`, `extraction.*`) | ~60 |
+| Hoãn sang lớp RAG (`rag.chunks[]`, `page_data.content_blocks[]`, `sections[].blocks[]`) | ~180 |
+| **Còn lại — schema phải phủ** | **~400** |
 
-Đa hình trả giá bằng ràng buộc, và cái giá đó **cố định** dù có 2 hay 20 loại chủ.
-Lợi ích thì tỉ lệ với số loại chủ. Hai loại là quá ít để hoà vốn.
-
-**Một thứ giữ lại từ lần gộp:** `promotion_block.block_type` giờ ghi `'list'` chứ
-không phải `'bullet_list'` như bản đầu, khớp với `policy_block`. Cùng hình dạng
-payload `{type, items}`, nên hai bảng đọc như nhau dù đứng riêng.
-
+---
 
 ## 15. Quyết định đã chốt
 
@@ -1105,14 +1299,14 @@ khi crawler mang về một chuỗi địa danh chưa có bí danh — thiếu b
 
 ## 16. Chạy database
 
-Mã nguồn tầng database nằm ở **`src/data_postgre/db/`** — `base.py` (Base, AppBase, mixin), `core.py` (36 bảng CORE),
+Mã nguồn tầng database nằm ở **`src/db/`** — `base.py` (Base, mixin), `core.py` (41 bảng CORE),
 `app.py` (7 bảng ứng dụng), `errors.py` (đọc SQLSTATE độc lập driver).
 `src/models/` chỉ chứa Pydantic schema của API, cố ý **không** import gì từ `src/db/`
 để tầng API không phải nạp SQLAlchemy.
 
 ```bash
 make db-up          # Postgres 16 + pgvector, chờ tới khi healthy
-make migrate-up     # alembic upgrade head -> 43 bảng + 11 view
+make migrate-up     # alembic upgrade head -> 48 bảng
 make db-check       # báo lỗi nếu model và DB lệch nhau
 make db-tables      # liệt kê bảng
 make db-reset       # XOÁ SẠCH dữ liệu rồi dựng lại
@@ -1195,33 +1389,24 @@ python -m scripts.seed_destinations
 python -m scripts.load_core          # thêm --dry-run để chỉ đếm, --dump build/ để soi JSONL
 ```
 
-**4.223 dòng, 0 dòng bị database từ chối, 200 vấn đề chất lượng đã ghi lại.**
-Chạy lại bao nhiêu lần cũng ra đúng 4.223 — idempotent như thiết kế.
-
-Con số này thấp hơn 6.587 của bản trước **không phải vì mất dữ liệu**: 1.796 cạnh
-phòng–tiện nghi và 561 nhãn ưu đãi giờ nằm trong cột mảng/JSONB của bảng cha chứ
-không còn là dòng riêng. Ba con số kiểm chứng điều đó nằm ở
-`test_amenity_links_survived_the_move_into_an_array` và
-`test_promotion_tags_survived_the_move_into_jsonb`.
+**6.587 dòng, 0 dòng bị database từ chối, 200 vấn đề chất lượng đã ghi lại.**
+Chạy lần thứ tư vẫn ra đúng 6.587 — idempotent như thiết kế.
 
 | Bảng | Dòng | | Bảng | Dòng |
 |---|---:|---|---|---:|
-| `media` | 768 | | `promotion_term` | 188 |
-| `page_link` | 603 | | `faq` | 171 |
-| `promotion_block` | 507 | | `source` | 131 |
-| `promotion_property_raw` | 327 | | `promotion_relation` | 131 |
-| `promotion_benefit` | 310 | | `room` | 116 |
-| `promotion_section` | 164 | | `promotion_destination` | 89 |
-| `mice_room_capacity` | 191 | | `attraction` | 78 |
-| `dining_service` | 68 | | `golf_feature` | 67 |
+| `room_amenity` | 1.796 | | `promotion_section` | 164 |
+| `media` | 765 | | `promotion_relation` | 131 |
+| `page_link` | 603 | | `source` | 131 |
+| `promotion_tag` | 561 | | `room` | 116 |
+| `promotion_block` | 507 | | `promotion_term` | 110 |
+| `promotion_property_raw` | 327 | | `mice_room_capacity` | 191 |
+| `promotion_benefit` | 310 | | `attraction` | 78 |
+| `faq` | 171 | | `promotion_step` | 78 |
+| `dining_service` | 68 | | `golf_feature` | 61 |
 | `amenity` | 50 | | `promotion_code` | 45 |
 | `promotion` | 38 | | `mice_room` | 36 |
-| `destination_alias` | 32 | | `destination_highlight` | 28 |
+| `policy_section` | 36 | | `destination_highlight` | 28 |
 | `property` | 15 | | `org_highlight` | 14 |
-| `destination` | 13 | | `mice_venue` | 10 |
-| `complex` | 8 | | `policy_document` | 7 |
-| `brand` | 7 | | `golf_course` | 6 |
-| `entity_source` | 6 | | `org_info` | 1 |
 
 ### 17.1 Ba lỗi dữ liệu chỉ lộ ra khi nạp thật
 
@@ -1267,88 +1452,3 @@ Thay bằng cơ chế tương đương mà rẻ hơn: `upsert()` chèn theo lô 
 hỏng thì **thử lại từng dòng** để khoanh đúng dòng lỗi rồi ghi `data_quality_issue` kèm
 SQLSTATE, tên ràng buộc và nội dung dòng. Vẫn biết chính xác dòng nào hỏng vì sao, không cần
 lớp model thứ hai.
-
-
----
-
-## 18. Ba schema: `core`, `app`, `api`
-
-43 bảng không còn nằm phẳng trong `public`. Từ migration `27b9683b75a6` và
-`e94fc771da30`:
-
-| Schema | Nội dung | Số lượng |
-|---|---|---|
-| `core` | Bảng nghiệp vụ + hai bảng vận hành nạp | 36 bảng |
-| `app` | Hội thoại, ticket, nhật ký | 7 bảng |
-| `api` | View đọc, đã gộp sẵn | 11 view |
-| `public` | Chỉ `alembic_version` | 1 bảng |
-
-Không dòng dữ liệu nào thay đổi. `ALTER TABLE ... SET SCHEMA` chuyển bảng kèm
-index, ràng buộc, sequence và khoá ngoại — thao tác chỉ đụng catalog.
-
-### 18.1 `search_path` và vì sao `public` phải đứng đầu
-
-`search_path` mặc định của database là `public, core, app, api`, nên SQL không ghi
-schema vẫn chạy: `SELECT * FROM room` tìm thấy `core.room`. Điều này giữ cho psql,
-console DataGrip và các test cũ không phải sửa gì.
-
-**`public` bắt buộc đứng đầu** dù giờ chỉ còn `alembic_version`. `current_schema()`
-trả về phần tử đầu của `search_path`, và SQLAlchemy lấy đó làm schema mặc định của
-kết nối — bảng nào nằm ở schema mặc định sẽ được phản chiếu với `schema=None`. Đặt
-`core` lên đầu thì mọi bảng core phản chiếu không kèm schema, không khớp với
-metadata khai `schema='core'`, và `alembic check` báo thiếu cả 36 bảng.
-
-Thay đổi này chỉ có hiệu lực với **kết nối mở sau khi migration commit**.
-
-### 18.2 Tên trần vẫn là định danh nghiệp vụ
-
-Khoá của `metadata.tables` giờ có tiền tố (`core.room`). Nhưng tên trần được dùng
-ở nhiều nơi ngoài lược đồ: khoá của `Context.rows`, `entity_type` trong `media`,
-`entity_source`, `message_citation`, và `INTENT_ENTITY_TYPES` của `query_parser`.
-Đổi chúng theo schema sẽ làm hỏng trích dẫn đã lưu.
-
-Nên `src/data_postgre/db/__init__.py` dựng hai dict tra theo tên trần:
-
-```python
-from src.data_postgre.db import CORE_TABLES, APP_TABLES
-
-CORE_TABLES["room"].fullname   # 'core.room'
-```
-
-Phải dựng trong `__init__.py` chứ không phải `base.py`: lúc `base.py` chạy thì chưa
-model nào được khai báo và metadata còn rỗng.
-
-### 18.3 View trong `api`
-
-Quy tắc: **`core.*` là bảng thật, `api.*` là cùng thứ đó đã join và gộp sẵn.** Đổi
-tiền tố schema là chuyển qua lại giữa hai dạng.
-
-| View | Gộp sẵn những gì |
-|---|---|
-| `api.hotel` | Khách sạn + địa danh + thương hiệu + phòng (JSON) + nhà hàng (JSON) |
-| `api.room` | Phòng + tên khách sạn + **tên tiện nghi đã tra từ `amenity_ids`** |
-| `api.promotion` | Ưu đãi + địa danh + nhãn + quyền lợi + mã + điều khoản theo `kind` |
-| `api.attraction` | Điểm tham quan + địa danh + khu phức hợp + mục cha |
-| `api.golf_course` | Sân golf + đặc điểm nhóm theo `kind` |
-| `api.mice_venue` | Địa điểm + phòng họp kèm sức chứa + `max_pax` |
-| `api.policy_document` | Văn bản + các mục đã gộp thành JSON |
-| `api.faq`, `api.destination` | Kèm tên địa danh; `destination` kèm bí danh và số đếm |
-| `api.data_health` | Lần nạp + số vấn đề theo luật |
-| `api.promotion_active` | Ưu đãi còn hiệu lực **tính theo hôm nay** |
-
-Tên trùng nhau là cố ý (`core.room` bảng, `api.room` view). `core` đứng trước `api`
-trong `search_path` nên `room` không ghi schema **luôn** là bảng; view chỉ trả lời
-khi gọi `api.room`.
-
-Đây là view thường, không phải materialized: dữ liệu nhỏ (bảng lớn nhất 768 dòng)
-và materialized view sẽ phải refresh sau mỗi lần nạp.
-
-`api.promotion_active` được dựng lại chứ không chuyển schema — bản cũ viết
-`SELECT *`, mà Postgres khai triển ngay lúc tạo view, nên nó không bao giờ thấy cột
-`tags` do lần gộp thêm vào.
-
-### 18.4 Xem trong DataGrip
-
-Ba schema hiện thành ba thư mục gập được, thay vì một danh sách 45 mục phẳng.
-Trong cây `vinpearl` → `schemas`, chỉ tick `core`, `app`, `api` ở
-**Database Explorer → Settings → Show Schemas** để ẩn phần còn lại.
