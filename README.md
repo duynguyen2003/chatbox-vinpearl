@@ -3,6 +3,8 @@
 
 https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
 
+## LINK DEPLOY
+https://frontend-production-48c1.up.railway.app/
 
 ## 1. Setup môi trường local
 

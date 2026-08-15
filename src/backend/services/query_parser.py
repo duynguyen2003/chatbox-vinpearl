@@ -52,6 +52,17 @@ INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
         "policy", "policies", "regulation", "regulations", "terms", "term",
         "chinh sach", "chính sách", "quy dinh", "quy định", "dieu khoan", "điều khoản",
         "check-in", "check-out", "check in", "check out",
+        # Booking/refund lifecycle is policy even when the user does not literally
+        # say "policy". Keeping these here lets mixed questions such as
+        # "payment + refund" create separate payment/policy retrieval branches.
+        "refund", "refunds", "refundable", "non-refundable", "nonrefundable",
+        "cancellation", "cancel booking", "cancel reservation", "booking cancellation",
+        "amendment", "reschedule", "change booking", "change reservation",
+        "hoan tien", "hoàn tiền", "hoan ve", "hoàn vé",
+        "huy dat phong", "hủy đặt phòng", "huỷ đặt phòng",
+        "huy booking", "hủy booking", "huỷ booking",
+        "huy dat cho", "hủy đặt chỗ", "huỷ đặt chỗ",
+        "doi dat cho", "đổi đặt chỗ", "thay doi dat cho", "thay đổi đặt chỗ",
     ),
     "payment": (
         "payment", "payments", "pay", "bank", "account", "swift",
@@ -60,14 +71,14 @@ INTENT_KEYWORDS: dict[str, tuple[str, ...]] = {
 }
 
 INTENT_ENTITY_TYPES: dict[str, set[str]] = {
+    # Keep branch evidence semantically strict. Generic destination/highlight/complex
+    # documents are useful for attraction discovery, but should not make a hotel or
+    # service branch look "found" when there is no actual hotel/service record.
     "hotel": {
-        "property", "room", "amenity", "dining_service",
-        "destination", "destination_highlight", "complex",
+        "property", "room",
     },
     "service": {
-        "property", "room", "amenity", "dining_service",
-        "destination_highlight", "golf_feature", "mice_venue", "mice_room",
-        "attraction", "complex",
+        "amenity", "dining_service", "golf_feature", "mice_venue", "mice_room",
     },
     "dining": {"dining_service", "property", "amenity"},
     "promotion": {
@@ -84,6 +95,57 @@ INTENT_ENTITY_TYPES: dict[str, set[str]] = {
     "policy": {"policy_document", "policy_section", "policy_block", "faq"},
     "payment": {"policy_document", "policy_section", "policy_block", "faq"},
 }
+
+
+
+# Generic destination discovery is intentionally mapped to several existing
+# catalog intents instead of adding a synthetic entity type. This keeps
+# retrieval branch-specific and gives the answerer a balanced set of grounded
+# evidence for broad requests such as "tôi muốn đi du lịch Hà Nội" or
+# "what can I do in Phu Quoc?".
+GENERIC_DISCOVERY_INTENTS: tuple[str, ...] = (
+    "attraction",
+    "hotel",
+    "dining",
+    "service",
+)
+
+# These markers are evaluated only when no explicit supported intent was found.
+# Current-message wording is checked first; the standalone RAG query is also
+# checked so non-Latin languages can benefit from the LLM's English rewrite.
+_GENERIC_DISCOVERY_MARKERS: tuple[str, ...] = (
+    "du lich",
+    "di choi",
+    "choi gi",
+    "co gi",
+    "goi y",
+    "kham pha",
+    "tham quan",
+    "lich trinh",
+    "muon di",
+    "travel",
+    "tourism",
+    "travel guide",
+    "travel advice",
+    "trip",
+    "visit",
+    "visiting",
+    "things to do",
+    "what to do",
+    "what is there",
+    "what s there",
+    "recommend",
+    "recommendation",
+    "explore",
+    "itinerary",
+    "vacation",
+    "holiday",
+)
+
+# Scope is decided once, upstream, by the authoritative semantic guardrail.
+# This parser deliberately does not maintain an external-topic keyword deny-list:
+# terms such as flight, shuttle, transfer, rain, passport, or payment can be valid
+# Vinpearl FAQ/service content and must not suppress retrieval after scope was allowed.
 
 INTENT_QUERY_LABELS: dict[str, str] = {
     "hotel": "hotels resorts rooms accommodation",
@@ -292,6 +354,30 @@ def build_intent_query(
     return f"{fallback_query} {intent_part}".strip()
 
 
+
+def _is_generic_destination_discovery(
+    user_message: str,
+    rag_query: str,
+    destinations: list[dict[str, Any]],
+) -> bool:
+    """Return True only for broad destination exploration/planning requests.
+
+    This is deliberately a fallback: callers invoke it only after explicit
+    intents (hotel, golf, policy, payment, ...) have failed to match. The
+    destination requirement prevents generic phrases such as "gợi ý cho tôi"
+    from turning into a broad corpus search.
+    """
+    if not destinations:
+        return False
+
+    normalized_message = normalize_text(user_message)
+    normalized_rag = normalize_text(rag_query)
+    combined = f"{normalized_message} {normalized_rag}".strip()
+    if not combined:
+        return False
+
+    return any(marker in combined for marker in _GENERIC_DISCOVERY_MARKERS)
+
 def parse_retrieval_query(user_message: str, rag_query: str) -> dict[str, Any]:
     # The LLM-created RAG query remains the canonical destination target because it
     # resolves references/complaints from memory. Current-message intents, however,
@@ -300,8 +386,20 @@ def parse_retrieval_query(user_message: str, rag_query: str) -> dict[str, Any]:
     if not destinations:
         destinations = detect_destinations(user_message)
 
+    # Explicit intent words in the CURRENT user message always win. If the
+    # current wording is broad discovery/planning, do not let the LLM rewrite
+    # accidentally narrow it to only one or two categories (e.g. "hotel services").
+    # Only use rewritten-query intents when the current message is neither explicit
+    # nor a generic discovery request. This keeps multilingual specific requests
+    # working while making broad travel consultation deterministic.
     intents = detect_intents(user_message)
-    if not intents:
+    if not intents and _is_generic_destination_discovery(
+        user_message=user_message,
+        rag_query=rag_query,
+        destinations=destinations,
+    ):
+        intents = list(GENERIC_DISCOVERY_INTENTS)
+    elif not intents:
         intents = detect_intents(rag_query)
 
     primary_intent = intents[0] if intents else None
