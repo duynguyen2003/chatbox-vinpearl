@@ -8,12 +8,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # LLM
     llm_provider: str = "gemini"
-    llm_model: str = "gemini/gemini-2.0-flash"
+    llm_model: str = "gemini/gemini-3.1-flash-lite"
     llm_api_key: str | None = None
     llm_api_key_backup: str | None = None
     llm_base_url: str | None = None
     llm_model_fallbacks: str = (
-        "gemini/gemini-2.5-flash,gemini/gemini-2.0-flash,gemini/gemini-2.5-flash-lite"
+        "gemini/gemini-3.5-flash-lite,"
+        "gemini/gemini-2.5-flash-lite,"
+        "gemini/gemini-3.6-flash"
     )
 
     llm_temperature: float = 0.2

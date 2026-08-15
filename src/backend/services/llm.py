@@ -17,6 +17,39 @@ from litellm.exceptions import (
 from src.backend.config import get_settings
 
 
+def _is_quota_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return (
+        isinstance(exc, RateLimitError)
+        or "rate limit" in text
+        or "quota" in text
+        or "resource_exhausted" in text
+        or "429" in text
+    )
+
+
+def _is_unavailable_model(exc: Exception) -> bool:
+    text = str(exc).lower()
+    name = type(exc).__name__.lower()
+    return (
+        "notfound" in name
+        or "no longer available" in text
+        or "is not found" in text
+        or ("not found" in text and "model" in text)
+    )
+
+
+def _is_denied_access(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return (
+        isinstance(exc, AuthenticationError)
+        or "permission_denied" in text
+        or "denied access" in text
+        or "api key not valid" in text
+        or "invalid api key" in text
+    )
+
+
 class LLMService:
     def __init__(self) -> None:
         settings = get_settings()
@@ -106,36 +139,51 @@ class LLMService:
                         )
                         break
 
-                    except (
-                        RateLimitError,
-                        ServiceUnavailableError,
-                        APIConnectionError,
-                        Timeout,
-                        APIError,
-                        ValueError,
-                    ) as exc:
+                    except Exception as exc:
                         last_error = exc
                         print(
                             f"Gemini {model} key {key_index} failed: "
                             f"{type(exc).__name__} ({attempt}/{self.max_retries})"
                         )
+                        if (
+                            _is_denied_access(exc)
+                            or _is_unavailable_model(exc)
+                            or _is_quota_error(exc)
+                        ):
+                            break
+                        if not isinstance(
+                            exc,
+                            (
+                                RateLimitError,
+                                ServiceUnavailableError,
+                                APIConnectionError,
+                                Timeout,
+                                APIError,
+                                ValueError,
+                            ),
+                        ):
+                            raise
                         if attempt == self.max_retries:
                             break
-                        if isinstance(exc, RateLimitError):
-                            wait_seconds = min(
-                                20.0,
-                                (3 ** attempt) + random.uniform(0, 1),
-                            )
-                        else:
-                            wait_seconds = min(
-                                8.0,
-                                (2 ** attempt) + random.uniform(0, 1),
-                            )
+                        wait_seconds = min(
+                            8.0,
+                            (2 ** attempt) + random.uniform(0, 1),
+                        )
                         time.sleep(wait_seconds)
+                if last_error is not None and _is_unavailable_model(last_error):
+                    break
 
-        if isinstance(last_error, RateLimitError):
+        if last_error is not None and _is_quota_error(last_error):
             raise RuntimeError(
                 "Gemini rate limit exceeded. Please wait a moment and try again."
+            ) from last_error
+        if last_error is not None and _is_unavailable_model(last_error):
+            raise RuntimeError(
+                "Gemini model is no longer available. Update LLM_MODEL."
+            ) from last_error
+        if last_error is not None and _is_denied_access(last_error):
+            raise RuntimeError(
+                "Gemini API key is invalid or unauthorized."
             ) from last_error
         if isinstance(last_error, AuthenticationError):
             raise RuntimeError(
