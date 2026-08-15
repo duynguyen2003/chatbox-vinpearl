@@ -105,7 +105,7 @@ def check(spec: dict[str, Any]) -> int:
         print(f"\nTHIẾU BÍ DANH ({len(missing)}):")
         for value, where in sorted(missing.items()):
             print(f"  {value!r}  (xuất hiện ở: {', '.join(sorted(where))})")
-        print("\nThêm chúng vào src/normalize/destinations.yaml rồi chạy lại.")
+        print("\nThêm chúng vào src/data_postgre/normalize/destinations.yaml rồi chạy lại.")
         return 1
 
     print("\nMọi chuỗi địa danh trong data/ đều khớp được.")

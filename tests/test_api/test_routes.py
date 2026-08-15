@@ -1,7 +1,7 @@
 """Kiểm thử API.
 
 ``test_agent_status`` cũ gọi ``GET /api/v1/status`` — endpoint mã mẫu của
-template, chưa từng tồn tại trong src/api/routes.py. Thay bằng các phép kiểm
+template, chưa từng tồn tại trong src/backend/api/routes.py. Thay bằng các phép kiểm
 validate đầu vào của /api/v1/chat: chúng chạy trước khi handler gọi LLM nên
 không cần API key hay Chroma.
 """

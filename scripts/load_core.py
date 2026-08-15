@@ -69,7 +69,7 @@ def load_order(tables: list[str]) -> list[str]:
     Model cố ý không khai ``relationship()`` nên ``Session.flush`` KHÔNG tự sắp
     thứ tự INSERT — phải lấy từ metadata (docs/DATABASE.md §16.1).
     """
-    ordered = [t.name for t in Base.metadata.sorted_tables]
+    ordered = list(CORE_TABLES)
     return [t for t in ordered if t in set(tables)]
 
 
@@ -84,7 +84,15 @@ def upsert(session: Session, table_name: str, rows: list[dict[str, Any]],
     if "ingest_run_id" in columns:
         for row in rows:
             row["ingest_run_id"] = run_id
-    payload = [{k: v for k, v in row.items() if k in columns} for row in rows]
+    # Mọi dòng trong một lô phải có CÙNG tập khoá.
+    #
+    # insert().values([...]) lấy khoá của dòng ĐẦU TIÊN làm khuôn cho cả câu lệnh.
+    # Dòng nào mang thêm cột mà dòng đầu không có thì cột đó bị bỏ lặng lẽ — không
+    # lỗi, không cảnh báo, chỉ mất dữ liệu. Đây từng làm mất trắng duration_days,
+    # duration_nights, duration_label và itinerary của attraction, vì thẻ giới
+    # thiệu (không có mấy cột đó) luôn được thêm trước trang chi tiết.
+    keys = sorted({k for row in rows for k in row} & columns)
+    payload = [{k: row.get(k) for k in keys} for row in rows]
 
     # Bọc lô trong SAVEPOINT: lô hỏng chỉ huỷ tới điểm lưu, không giết giao dịch
     # ngoài. Dùng session.rollback() ở đây sẽ đóng luôn transaction và mọi bảng
