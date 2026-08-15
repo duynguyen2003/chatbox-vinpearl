@@ -352,7 +352,7 @@ function Chatbot() {
         {
           id: `error-${Date.now()}`,
           sender: 'assistant',
-          text: (error instanceof Error && error.message) || t.assistantUnavailable,
+          text: t.assistantUnavailable,
           timestamp: displayTime(),
           language,
           isError: true,

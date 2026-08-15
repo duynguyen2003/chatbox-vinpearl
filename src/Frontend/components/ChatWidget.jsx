@@ -90,7 +90,7 @@ function ChatWidget() {
         {
           id: `err-${Date.now()}`,
           sender: 'assistant',
-          text: err?.message || t.chatError,
+          text: t.chatError,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ])

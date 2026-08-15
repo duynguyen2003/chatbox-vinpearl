@@ -240,35 +240,7 @@ def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_option
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập phiên chat này.") from exc
     except Exception as exc:
-        detail = str(exc) or "Chat request failed."
-        lowered = detail.lower()
-        if "rate limit" in lowered or "quota" in lowered:
-            raise HTTPException(
-                status_code=503,
-                detail="AI đang quá tải (rate limit). Vui lòng thử lại sau vài giây.",
-            ) from exc
-        if "no longer available" in lowered or "update llm_model" in lowered:
-            raise HTTPException(
-                status_code=503,
-                detail="Model Gemini hiện tại đã ngừng hỗ trợ. Cần cập nhật LLM_MODEL.",
-            ) from exc
-        if "vector database is empty" in lowered:
-            raise HTTPException(
-                status_code=503,
-                detail="Cơ sở dữ liệu tìm kiếm đang trống. Cần nạp lại Chroma.",
-            ) from exc
-        if (
-            "api key" in lowered
-            or "unauthorized" in lowered
-            or "authentication" in lowered
-            or "permission_denied" in lowered
-            or "denied access" in lowered
-        ):
-            raise HTTPException(
-                status_code=503,
-                detail="Cấu hình Gemini API key chưa hợp lệ. Vui lòng kiểm tra LLM_API_KEY.",
-            ) from exc
-        raise HTTPException(status_code=500, detail=detail) from exc
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     sources = _build_sources(state)
 
