@@ -9,7 +9,11 @@ https://docs.google.com/document/d/1R3XtwiKt8Pi7U_XpSM57luqbYPXar0SjAWXT3rkGi4Q/
 https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
 
 ## LINK DEPLOY
-https://frontend-production-48c1.up.railway.app/
+https://frontend-production-48c1.up.railway.app/\
+
+##LINK VIDEO DEMO
+https://drive.google.com/drive/folders/1fvTKIMYq9dfHjMOreMvhl0TB5pmFCzdV
+
 ## LNIK WORKFLOW
 https://docs.google.com/document/d/1kOYRXs0noKdzSWT_Hqm0gXm0XnzzzgErYjTdLjcHwIs/edit?tab=t.wi74v9yh9pbt
 
