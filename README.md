@@ -1,4 +1,9 @@
 # P-013 — Vinpearl Multilingual Travel Agent
+
+## LINK ARCHITECTURE DIAGRAM
+
+https://docs.google.com/document/d/1R3XtwiKt8Pi7U_XpSM57luqbYPXar0SjAWXT3rkGi4Q/edit?usp=sharing
+
 ## LINK SCHEMAS
 
 https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/edit?tab=t.0#heading=h.xaz1qb3z4105
