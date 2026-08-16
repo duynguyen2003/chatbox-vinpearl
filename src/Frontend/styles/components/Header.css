@@ -53,7 +53,8 @@
 
 .header__brand-logo {
   display: block;
-  width: 122px;
+  width: 130px;
+  max-height: 48px;
   height: auto;
   object-fit: contain;
   transition: transform 180ms ease;

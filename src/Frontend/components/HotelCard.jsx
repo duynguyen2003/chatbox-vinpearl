@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, BedDouble, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import SmartImage from './SmartImage'
 import '../styles/components/HotelCard.css'
 
 const FALLBACK_HOTEL_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'
@@ -22,14 +23,11 @@ function HotelCard({ hotel }) {
   return (
     <article className="hotel-card">
       <div className="hotel-card__media">
-        <img
+        <SmartImage
           className="hotel-card__image"
           src={imgSrc}
           alt={hotel.name}
-          onError={(e) => {
-            e.currentTarget.onerror = null
-            e.currentTarget.src = FALLBACK_HOTEL_IMAGE
-          }}
+          variant="hotel"
         />
         <div className="hotel-card__media-overlay" />
         <div className="hotel-card__type-badge">{hotel.kind || t.property}</div>

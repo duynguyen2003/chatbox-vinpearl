@@ -21,6 +21,9 @@ from ..services.source_reranker import get_source_reranker
 
 router = APIRouter(prefix="/api/v1", tags=["agent"])
 
+_POLICY_INTENTS = {"policy", "payment"}
+_POLICY_SOURCE_TYPES = {"policy_document", "policy_section", "policy_block", "faq"}
+
 URL_KEYS = (
     "source_url",
     "canonical_url",
@@ -188,6 +191,12 @@ def _build_sources(state: dict) -> list[SourceItem]:
     }
     retrieved_documents = state.get("retrieved_documents", []) or []
     answer = str(state.get("answer") or "")
+    detected_intents = {
+        str(value)
+        for value in state.get("detected_intents", [])
+        if str(value).strip()
+    }
+    policy_only = bool(detected_intents & _POLICY_INTENTS)
 
     # Citation selection happens AFTER answer generation. The answer may mention
     # only a subset of the retrieved context (e.g. Grand World Hanoi), so showing
@@ -199,7 +208,7 @@ def _build_sources(state: dict) -> list[SourceItem]:
             answer=answer,
             retrieved_documents=retrieved_documents,
             destination_ids=destination_ids,
-            max_sources=5,
+            max_sources=20 if policy_only else 5,
         )
     except Exception as exc:
         print(f"[SOURCE RERANK] fallback because of error: {exc}")
@@ -227,6 +236,18 @@ def _build_sources(state: dict) -> list[SourceItem]:
                 continue
             filtered_documents.append(item)
         documents = filtered_documents
+
+    if policy_only:
+        documents = [
+            item
+            for item in documents
+            if str(
+                (item.get("metadata", {}) or {}).get("entity_type")
+                or (item.get("metadata", {}) or {}).get("category")
+                or ""
+            )
+            in _POLICY_SOURCE_TYPES
+        ]
 
     # Safety guard: even a reranked source must not contradict the hard
     # destination. If reranking found fewer than five trustworthy sources, return

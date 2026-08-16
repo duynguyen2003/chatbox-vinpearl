@@ -14,6 +14,7 @@ export const LOGOS = {
 export const HERO_BANNERS = {
   aboutHero: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1920&q=80',
   homeHero: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80',
+  promotionsHero: '/src/Frontend/image/uu-dai-khuyen-mai_1684378388.jpg.webp',
 }
 
 export const HOTEL_IMAGES = {

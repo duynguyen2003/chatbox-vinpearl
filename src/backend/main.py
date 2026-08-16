@@ -9,6 +9,7 @@ from src.backend.agents.graph import agent_graph
 from src.backend.api.about_routes import router as about_router
 from src.backend.api.auth_routes import router as auth_router
 from src.backend.api.catalog_routes import router as catalog_router
+from src.backend.api.discovery_routes import router as discovery_router
 from src.backend.api.promotions_routes import router as promotions_router
 from src.backend.api.routes import router as agent_router
 from src.backend.api.staff_routes import router as staff_router
@@ -43,6 +44,7 @@ app.include_router(staff_router)
 app.include_router(ticket_router)
 app.include_router(promotions_router)
 app.include_router(catalog_router)
+app.include_router(discovery_router)
 app.include_router(about_router)
 
 

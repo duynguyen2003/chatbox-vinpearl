@@ -245,6 +245,33 @@
   outline: none;
 }
 
+.hero-search__field .custom-select__trigger {
+  min-height: 34px;
+  border: 0;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.5);
+  border-radius: 0;
+  padding: 4px 0;
+  color: #f1f5f9;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.hero-search__field .custom-select__trigger:hover,
+.hero-search__field .custom-select--open .custom-select__trigger {
+  border-color: #c9a45c;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hero-search__field .custom-select__value {
+  color: #f1f5f9;
+}
+
+.hero-search__field .custom-select__chevron {
+  color: #c9a45c;
+}
+
 .hero-search__control:focus {
   border-color: #c9a45c;
 }

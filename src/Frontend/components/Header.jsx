@@ -62,6 +62,7 @@ function Header() {
   ]
 
   const currentLang = languages.find((item) => item.code === language) || languages[0]
+
   function handleLogout() {
     logout()
     setMobileMenuOpen(false)
@@ -89,8 +90,8 @@ function Header() {
               {t.navHotels}
             </Link>
             <Link
-              className={`header__link ${location.pathname === '/' && location.hash === '#experiences' ? 'header__link--active' : ''}`}
-              to="/#experiences"
+              className={`header__link ${location.pathname.startsWith('/experiences') ? 'header__link--active' : ''}`}
+              to="/experiences"
             >
               {t.navExperiences}
             </Link>
@@ -107,8 +108,8 @@ function Header() {
               {t.navNews}
             </Link>
             <Link
-              className={`header__link ${location.pathname === '/support' ? 'header__link--active' : ''}`}
-              to="/support"
+              className={`header__link ${location.pathname.startsWith('/meetings') ? 'header__link--active' : ''}`}
+              to="/meetings"
             >
               {t.navMeetings}
             </Link>
@@ -118,12 +119,6 @@ function Header() {
             {user?.role === 'admin' && (
               <Link className={`header__link ${location.pathname.startsWith('/admin') ? 'header__link--active' : ''}`} to="/admin/staff">{t.staffMembers}</Link>
             )}
-            <Link
-              className={`header__link ${location.pathname === '/regulations' && location.search.includes('doc=') ? 'header__link--active' : ''}`}
-              to="/regulations?doc=ab8c79e6ba880330"
-            >
-              {t.navRegulations}
-            </Link>
           </nav>
 
           <div className="header__actions">
@@ -271,14 +266,14 @@ function Header() {
           </Link>
           <Link
             className="header__drawer-link"
-            to="/promotions"
+            to="/experiences"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.navExperiences}
           </Link>
           <Link
             className="header__drawer-link"
-            to="/"
+            to="/promotions"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.navOffers}
@@ -292,17 +287,10 @@ function Header() {
           </Link>
           <Link
             className="header__drawer-link"
-            to="/support"
+            to="/meetings"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.navMeetings}
-          </Link>
-          <Link
-            className="header__drawer-link"
-            to="/regulations?doc=ab8c79e6ba880330"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            {t.navRegulations}
           </Link>
           {user && (user.role === 'staff' || user.role === 'admin') && (
             <Link className="header__drawer-link" to="/staff/tickets" onClick={() => setMobileMenuOpen(false)}>{t.staffTickets}</Link>

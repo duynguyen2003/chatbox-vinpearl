@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import CustomSelect from './CustomSelect'
 import '../styles/components/HeroSearch.css'
 
 function HeroSearch({ children, destinations = [] }) {
@@ -89,19 +90,16 @@ function HeroSearch({ children, destinations = [] }) {
                 <MapPin className="hero-search__label-icon" />
                 <span>{t.searchDest}</span>
               </label>
-              <select
-                className="hero-search__control"
+              <CustomSelect
                 id="hero-destination"
                 value={destination}
-                onChange={(event) => setDestination(event.target.value)}
-              >
-                <option value="all">{t.allDestinations}</option>
-                {destinations.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: 'all', label: t.allDestinations },
+                  ...destinations.map((item) => ({ value: item.id, label: item.name })),
+                ]}
+                onChange={(val) => setDestination(val)}
+                aria-label={t.searchDest}
+              />
             </div>
 
             <div className="hero-search__field">
@@ -137,18 +135,19 @@ function HeroSearch({ children, destinations = [] }) {
                 <Users className="hero-search__label-icon" />
                 <span>{t.searchGuests}</span>
               </label>
-              <select
-                className="hero-search__control"
+              <CustomSelect
                 id="hero-guests"
                 value={guests}
-                onChange={(event) => setGuests(event.target.value)}
-              >
-                <option value="2 Adults">{t.adults2}</option>
-                <option value="2 Adults, 1 Child">{t.adults2Child1}</option>
-                <option value="2 Adults, 2 Children">{t.adults2Children2}</option>
-                <option value="4 Adults (Villa)">{t.adults4Villa}</option>
-                <option value="6 Adults (Estate)">{t.adults6Estate}</option>
-              </select>
+                options={[
+                  { value: '2 Adults', label: t.adults2 },
+                  { value: '2 Adults, 1 Child', label: t.adults2Child1 },
+                  { value: '2 Adults, 2 Children', label: t.adults2Children2 },
+                  { value: '4 Adults (Villa)', label: t.adults4Villa },
+                  { value: '6 Adults (Estate)', label: t.adults6Estate },
+                ]}
+                onChange={(val) => setGuests(val)}
+                aria-label={t.searchGuests}
+              />
             </div>
 
             <button className="hero-search__submit" type="submit">

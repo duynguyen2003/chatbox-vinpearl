@@ -145,6 +145,72 @@ export async function fetchHotelById(id) {
   return res.json();
 }
 
+export async function fetchAttractions(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.destination && filters.destination !== 'all') {
+    params.set('destination', filters.destination);
+  }
+  if (filters.kind && filters.kind !== 'all') params.set('kind', filters.kind);
+  if (filters.language) params.set('lang', filters.language);
+  params.set('page', String(filters.page || 1));
+  params.set('page_size', String(filters.pageSize || 12));
+  const res = await apiFetch(`/api/v1/discovery/attractions?${params.toString()}`);
+  if (!res.ok) throw new Error(`Attractions API returned status ${res.status}`);
+  return res.json();
+}
+
+export async function fetchAttractionById(id, language = 'en') {
+  const params = new URLSearchParams({ lang: language });
+  const res = await apiFetch(`/api/v1/discovery/attractions/${encodeURIComponent(id)}?${params}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Attraction API returned status ${res.status}`);
+  return res.json();
+}
+
+export async function fetchGolfCourses(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.destination && filters.destination !== 'all') {
+    params.set('destination', filters.destination);
+  }
+  if (filters.language) params.set('lang', filters.language);
+  params.set('page', String(filters.page || 1));
+  params.set('page_size', String(filters.pageSize || 12));
+  const res = await apiFetch(`/api/v1/discovery/golf?${params.toString()}`);
+  if (!res.ok) throw new Error(`Golf API returned status ${res.status}`);
+  return res.json();
+}
+
+export async function fetchGolfCourseById(id, language = 'en') {
+  const params = new URLSearchParams({ lang: language });
+  const res = await apiFetch(`/api/v1/discovery/golf/${encodeURIComponent(id)}?${params}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Golf detail API returned status ${res.status}`);
+  return res.json();
+}
+
+export async function fetchMiceVenues(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.destination && filters.destination !== 'all') {
+    params.set('destination', filters.destination);
+  }
+  if (filters.layout && filters.layout !== 'all') params.set('layout', filters.layout);
+  if (filters.minCapacity) params.set('min_capacity', String(filters.minCapacity));
+  if (filters.language) params.set('lang', filters.language);
+  params.set('page', String(filters.page || 1));
+  params.set('page_size', String(filters.pageSize || 12));
+  const res = await apiFetch(`/api/v1/discovery/mice?${params.toString()}`);
+  if (!res.ok) throw new Error(`MICE API returned status ${res.status}`);
+  return res.json();
+}
+
+export async function fetchMiceVenueById(id, language = 'en') {
+  const params = new URLSearchParams({ lang: language });
+  const res = await apiFetch(`/api/v1/discovery/mice/${encodeURIComponent(id)}?${params}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`MICE detail API returned status ${res.status}`);
+  return res.json();
+}
+
 /**
  * Fetch promotions from the PostgreSQL-backed API.
  * @param {{destination?: string, status?: string, search?: string}} [filters]

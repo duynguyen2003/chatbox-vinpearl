@@ -8,6 +8,8 @@ không cần API key hay Chroma.
 
 import pytest
 
+from src.backend.api import routes
+
 
 @pytest.mark.asyncio
 async def test_health(client):
@@ -39,3 +41,40 @@ async def test_chat_message_too_long(client):
 async def test_unknown_route_returns_404(client):
     response = await client.get("/api/v1/khong-ton-tai")
     assert response.status_code == 404
+
+
+def test_policy_sources_exclude_unrelated_entities(monkeypatch) -> None:
+    class StubReranker:
+        def rerank(self, **_kwargs):
+            return [
+                {
+                    "metadata": {"entity_name": "Vinpearl", "entity_type": "brand"},
+                },
+                {
+                    "best_source_url": "https://vinpearl.com/vi/general-terms",
+                    "metadata": {
+                        "entity_name": "General regulations",
+                        "entity_type": "policy_document",
+                    },
+                },
+                {
+                    "best_source_url": "https://booking.vinpearl.com/promotion",
+                    "metadata": {
+                        "entity_name": "Unrelated promotion",
+                        "entity_type": "promotion",
+                    },
+                },
+            ]
+
+    monkeypatch.setattr(routes, "get_source_reranker", lambda: StubReranker())
+
+    sources = routes._build_sources(
+        {
+            "answer": '{"topics": [{"title": "Quy định trẻ em"}]}',
+            "detected_intents": ["policy"],
+            "retrieved_documents": [{"metadata": {"entity_type": "policy_document"}}],
+        }
+    )
+
+    assert [source.source_file for source in sources] == ["General regulations"]
+    assert sources[0].path == "https://vinpearl.com/vi/general-terms"
