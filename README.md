@@ -13,6 +13,9 @@ https://frontend-production-48c1.up.railway.app/\
 
 ## LINK VIDEO DEMO
 https://drive.google.com/drive/folders/1fvTKIMYq9dfHjMOreMvhl0TB5pmFCzdV
+## TEST CASE
+
+https://github.com/AI20K-Build-Phase-Cohort-3/P-013/tree/ver_0.0.2/tests/test_case
 
 ## LNIK WORKFLOW
 https://docs.google.com/document/d/1kOYRXs0noKdzSWT_Hqm0gXm0XnzzzgErYjTdLjcHwIs/edit?tab=t.wi74v9yh9pbt
