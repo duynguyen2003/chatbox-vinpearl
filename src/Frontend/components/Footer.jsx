@@ -12,10 +12,10 @@ import '../styles/components/Footer.css'
 
 const VINPEARL_LOGO_URL =
   'https://statics.vinpearl.com/files/images/new-homepage/vp-logo-blue.svg'
-const QR_CODE_URL = 'https://statics.vinpearl.com/QR-code.png' // fallback URL
-const APP_STORE_URL = 'https://statics.vinpearl.com/app-store.svg'
-const GOOGLE_PLAY_URL = 'https://statics.vinpearl.com/google-play.svg'
-const BCT_URL = 'https://statics.vinpearl.com/bocongthuong.png'
+const _QR_CODE_URL = 'https://statics.vinpearl.com/QR-code.png' // fallback URL
+const _APP_STORE_URL = 'https://statics.vinpearl.com/app-store.svg'
+const _GOOGLE_PLAY_URL = 'https://statics.vinpearl.com/google-play.svg'
+const _BCT_URL = 'https://statics.vinpearl.com/bocongthuong.png'
 
 function Footer() {
   const { t } = useLanguage()

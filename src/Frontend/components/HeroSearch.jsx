@@ -8,7 +8,6 @@ import {
   Compass,
   MapPin,
   Search,
-  Sparkles,
   Users,
 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
@@ -32,15 +31,6 @@ function HeroSearch({ children, destinations = [] }) {
     if (maxPrice) params.append('maxPrice', maxPrice)
 
     navigate(`/search?${params.toString()}`)
-  }
-
-  function handleAskAi() {
-    const destName =
-      destinations.find((item) => item.id === destination)?.name || t.vietnam
-    const budget = t.maximumPerNight.replace('{{price}}', `$${maxPrice}`)
-    const prompt = `${t.planItinerary}: ${destName}, ${guests}, ${budget}`
-
-    navigate(`/chat?prompt=${encodeURIComponent(prompt)}`)
   }
 
   return (

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
-import heroFallback from '../image/placeholders/hotel.svg'
 import '../styles/pages/Auth.css'
 
 const VINPEARL_LOGO_URL = 'https://statics.vinpearl.com/files/images/new-homepage/vp-logo-blue.svg'
@@ -41,9 +40,7 @@ function Auth({ initialTab = 'login' }) {
   const [confirmValue, setConfirmValue] = useState('')
   const [referral, setReferral] = useState('')
 
-  // terms
-  const [termsAccepted, setTermsAccepted] = useState(false)
-  const [marketingOptIn, setMarketingOptIn] = useState(false)
+
 
   useEffect(() => {
     function closeOnOutsideClick(event) {

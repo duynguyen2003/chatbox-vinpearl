@@ -120,7 +120,7 @@ function ChatWidget() {
     try {
       const response = await sendChatMessage(prompt, language)
       setMessages((prev) => [...prev, response])
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

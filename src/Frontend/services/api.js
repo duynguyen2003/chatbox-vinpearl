@@ -101,7 +101,7 @@ export function saveStoredMessages(messages) {
 export function clearStoredMessages() {
   try {
     sessionStorage.removeItem(CHAT_MESSAGES_KEY);
-  } catch (e) {
+  } catch {
     // ignore
   }
 }
@@ -340,11 +340,11 @@ export async function submitSupportTicket(ticketData) {
     phone: payload.phone,
     language: payload.language,
     subject: payload.subject,
-    content: payload.content,
     status: payload.status === 'open' ? 'Pending' : payload.status === 'in_progress' ? 'Processing' : payload.status === 'resolved' ? 'Resolved' : 'Closed',
     createdAt: new Date(payload.created_at).toLocaleDateString('vi-VN'),
   };
 }
+
 
 export async function fetchTickets() {
   if (!getAuthToken()) return [];
@@ -368,7 +368,6 @@ function generateFallbackResponse(prompt, language) {
   let text = '';
   let relatedHotels = [];
 
-  // Check if query is about regulations, bank accounts, booking contacts, check-in times
   const isRegulationsQuery =
     lower.includes('nhận phòng') ||
     lower.includes('trả phòng') ||
@@ -463,7 +462,7 @@ async function apiJson(path, options = {}) {
     ...options,
     headers: authHeaders({
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(options.headers || {}),
+      ...options.headers,
     }),
   });
   const payload = await res.json().catch(() => null);
@@ -503,7 +502,7 @@ export async function fetchCurrentUser() {
   if (!getAuthToken()) return null;
   try {
     return await apiJson('/api/v1/auth/me');
-  } catch (error) {
+  } catch {
     setAuthToken(null);
     return null;
   }
