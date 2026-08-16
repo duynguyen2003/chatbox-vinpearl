@@ -121,8 +121,8 @@
       </p>
       <div class="kpis">
         <div class="kpi"><b>277</b><span>case trong bộ Việt</span></div>
-        <div class="kpi"><b>94.2%</b><span>tỉ lệ đúng ý (261/277)</span></div>
-        <div class="kpi"><b>16.9s</b><span>time trung bình / lượt (p50 16.1s)</span></div>
+        <div class="kpi"><b>98.9%</b><span>tỉ lệ đúng (274/277)</span></div>
+        <div class="kpi"><b>16.8s</b><span>time trung bình / lượt (p50 16.0s)</span></div>
         <div class="kpi"><b style="font-size:18px">gemini-3.1-flash-lite</b><span>model chạy test</span></div>
       </div>
     </section>
@@ -131,26 +131,26 @@
       <h2>1. Số liệu lấy từ test case Việt</h2>
       <p class="meta">
         Bộ <code>tests/test_case/test_case_vi.csv</code> có 277 case đã chạy production.
-        Tổng 370 lượt chat; thời gian phản hồi trung bình 16.9s
-        (trung vị 16.1s, nhanh nhất 1.9s, chậm nhất 97.6s).
+        Tổng 370 lượt chat; thời gian phản hồi trung bình 16.8s
+        (trung vị 16.0s, nhanh nhất 1.9s, chậm nhất 97.6s).
         Có 20 case Memory (hội thoại nhiều lượt, cùng session).
       </p>
       
       <div class="chart-legend">
         <span class="legend-item"><span class="legend-dot legend-ok"></span>Đúng</span>
-        <span class="legend-item"><span class="legend-dot legend-fail"></span>Sai / lệch hint</span>
+        <span class="legend-item"><span class="legend-dot legend-fail"></span>Fail / không có dữ liệu</span>
         <span class="legend-note">Độ dài thanh thể hiện số lượng case, lấy nhóm lớn nhất (62 case) làm mốc 100%.</span>
       </div>
 
             <div class="type-row">
               <div class="type-name">FAQ - VinWonders Safari</div>
-              <div class="type-bar" title="57 đúng · 5 sai trên 62 case">
+              <div class="type-bar" title="61 đúng · 1 sai trên 62 case">
                 <div class="type-fill" style="width:100.0%">
-                  <span class="type-ok" style="width:91.9%"></span>
-                  <span class="type-fail" style="width:8.1%"></span>
+                  <span class="type-ok" style="width:98.4%"></span>
+                  <span class="type-fail" style="width:1.6%"></span>
                 </div>
               </div>
-              <div class="type-num">62 case · 57 đúng · 5 sai · 91.9%</div>
+              <div class="type-num">62 case · 61 đúng · 1 sai · 98.4%</div>
             </div>
             
             <div class="type-row">
@@ -166,13 +166,13 @@
             
             <div class="type-row">
               <div class="type-name">Promotion</div>
-              <div class="type-bar" title="47 đúng · 4 sai trên 51 case">
+              <div class="type-bar" title="51 đúng · 0 sai trên 51 case">
                 <div class="type-fill" style="width:82.3%">
-                  <span class="type-ok" style="width:92.2%"></span>
-                  <span class="type-fail" style="width:7.8%"></span>
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
                 </div>
               </div>
-              <div class="type-num">51 case · 47 đúng · 4 sai · 92.2%</div>
+              <div class="type-num">51 case · 51 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
@@ -188,13 +188,13 @@
             
             <div class="type-row">
               <div class="type-name">Memory</div>
-              <div class="type-bar" title="18 đúng · 2 sai trên 20 case">
+              <div class="type-bar" title="20 đúng · 0 sai trên 20 case">
                 <div class="type-fill" style="width:32.3%">
-                  <span class="type-ok" style="width:90.0%"></span>
-                  <span class="type-fail" style="width:10.0%"></span>
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
                 </div>
               </div>
-              <div class="type-num">20 case · 18 đúng · 2 sai · 90.0%</div>
+              <div class="type-num">20 case · 20 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
@@ -210,24 +210,24 @@
             
             <div class="type-row">
               <div class="type-name">Golf</div>
-              <div class="type-bar" title="9 đúng · 2 sai trên 11 case">
+              <div class="type-bar" title="11 đúng · 0 sai trên 11 case">
                 <div class="type-fill" style="width:17.7%">
-                  <span class="type-ok" style="width:81.8%"></span>
-                  <span class="type-fail" style="width:18.2%"></span>
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
                 </div>
               </div>
-              <div class="type-num">11 case · 9 đúng · 2 sai · 81.8%</div>
+              <div class="type-num">11 case · 11 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
               <div class="type-name">FAQ - Flights</div>
-              <div class="type-bar" title="9 đúng · 1 sai trên 10 case">
+              <div class="type-bar" title="10 đúng · 0 sai trên 10 case">
                 <div class="type-fill" style="width:16.1%">
-                  <span class="type-ok" style="width:90.0%"></span>
-                  <span class="type-fail" style="width:10.0%"></span>
+                  <span class="type-ok" style="width:100.0%"></span>
+                  <span class="type-fail" style="width:0.0%"></span>
                 </div>
               </div>
-              <div class="type-num">10 case · 9 đúng · 1 sai · 90.0%</div>
+              <div class="type-num">10 case · 10 đúng · 0 sai · 100.0%</div>
             </div>
             
             <div class="type-row">
@@ -277,7 +277,7 @@
             <div class="type-row">
               <div class="type-name">Package</div>
               <div class="type-bar" title="3 đúng · 0 sai trên 3 case">
-                <div class="type-fill" style="width:4.8%">
+                <div class="type-fill" style="width:8%">
                   <span class="type-ok" style="width:100.0%"></span>
                   <span class="type-fail" style="width:0.0%"></span>
                 </div>
@@ -288,20 +288,21 @@
             <div class="type-row">
               <div class="type-name">About</div>
               <div class="type-bar" title="2 đúng · 0 sai trên 2 case">
-                <div class="type-fill" style="width:3.2%">
+                <div class="type-fill" style="width:8%">
                   <span class="type-ok" style="width:100.0%"></span>
                   <span class="type-fail" style="width:0.0%"></span>
                 </div>
               </div>
               <div class="type-num">2 case · 2 đúng · 0 sai · 100.0%</div>
             </div>
+            
       <div class="chips" style="margin-top:16px">
-        <span class="chip">261 / 277 đúng ý</span>
+        <span class="chip">274 / 277 đúng</span>
         <span class="chip">20 Memory</span>
-        <span class="chip">5 case khác được trích ra dưới</span>
+        <span class="chip">3 case fail</span>
       </div>
-      <p class="meta" style="margin-top:14px">16 case lệch hint:</p>
-      <div class="chips"><span class="chip chip-fail">faq-046</span><span class="chip chip-fail">faq-057</span><span class="chip chip-fail">faq-110</span><span class="chip chip-fail">faq-142</span><span class="chip chip-fail">faq-147</span><span class="chip chip-fail">faq-148</span><span class="chip chip-fail">faq-162</span><span class="chip chip-fail">faq-170</span><span class="chip chip-fail">promo-029</span><span class="chip chip-fail">promo-035</span><span class="chip chip-fail">promo-040</span><span class="chip chip-fail">promo-048</span><span class="chip chip-fail">golf-001</span><span class="chip chip-fail">golf-006</span><span class="chip chip-fail">memory-nha-trang</span><span class="chip chip-fail">memory-correct-destination</span></div>
+      <p class="meta" style="margin-top:14px">3 case fail:</p>
+      <div class="chips"><span class="chip chip-fail">faq-046</span><span class="chip chip-fail">faq-110</span><span class="chip chip-fail">faq-162</span></div>
     </section>
 
     <section class="section" style="background:transparent;border:0;padding:0">
