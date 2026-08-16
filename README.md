@@ -11,7 +11,7 @@ https://docs.google.com/document/d/16cShLOudthj6GhOQR3O3OCOQw256Ucpg9pu6E7KQSgY/
 ## LINK DEPLOY
 https://frontend-production-48c1.up.railway.app/\
 
-##LINK VIDEO DEMO
+## LINK VIDEO DEMO
 https://drive.google.com/drive/folders/1fvTKIMYq9dfHjMOreMvhl0TB5pmFCzdV
 
 ## LNIK WORKFLOW
