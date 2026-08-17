@@ -43,6 +43,10 @@ data/**
 *.db
 *.sqlite
 *.sqlite3
+
+# ChromaDB local data
+storage/chroma_local/*
+!storage/chroma_local/.gitkeep
 # Logs
 logs/
 *.log
