@@ -39,9 +39,10 @@ data/**
 # Allow all JSON files recursively
 !data/**/*.json
 
+# Database files
 *.db
+*.sqlite
 *.sqlite3
-!storage/chroma_local/chroma.sqlite3
 # Logs
 logs/
 *.log
