@@ -1,3 +1,5 @@
+import { consumeNdjsonStream } from './chatStream'
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const CHAT_SESSION_KEY = 'vinpearl_chat_session_v2';
 
@@ -267,6 +269,24 @@ export async function fetchPromotionById(id) {
   return res.json();
 }
 
+function chatEventToMessage(result, language) {
+  return {
+    id: `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    sender: 'assistant',
+    text: result.answer,
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    language: result.language || language,
+    route: result.route,
+    ticketId: result.ticket_id,
+    sessionId: result.session_id,
+    sources: result.sources || [],
+    relatedHotels: [],
+  };
+}
+
 export async function sendChatMessage(prompt, language = 'en', options = {}) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
@@ -290,21 +310,7 @@ export async function sendChatMessage(prompt, language = 'en', options = {}) {
 
     const result = await res.json();
     if (result.session_id) setChatSessionId(result.session_id);
-    return {
-      id: `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      sender: 'assistant',
-      text: result.answer,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      language: result.language || language,
-      route: result.route,
-      ticketId: result.ticket_id,
-      sessionId: result.session_id,
-      sources: result.sources || [],
-      relatedHotels: [],
-    };
+    return chatEventToMessage(result, language);
   } catch (e) {
     if (import.meta.env.VITE_ENABLE_CHAT_FALLBACK === 'true') {
       console.warn('Chat API failed, using local fallback:', e);
@@ -313,6 +319,81 @@ export async function sendChatMessage(prompt, language = 'en', options = {}) {
 
     throw e;
   }
+}
+
+export async function streamChatMessage(prompt, language = 'en', options = {}) {
+  const sessionId = options.sessionId || getChatSessionId();
+  const res = await fetch(`${API_BASE_URL}/api/v1/chat/stream`, {
+    method: 'POST',
+    headers: authHeaders({
+      'Content-Type': 'application/json',
+      Accept: 'application/x-ndjson',
+    }),
+    signal: options.signal,
+    body: JSON.stringify({
+      message: prompt,
+      session_id: sessionId,
+      user_id: null,
+    }),
+  });
+
+  // A deployment may briefly run an older backend. Only fall back when the
+  // streaming route is definitively absent; retrying other failures could save
+  // the same user turn twice.
+  if (res.status === 404 || res.status === 405) {
+    return sendChatMessage(prompt, language, { ...options, sessionId });
+  }
+  if (!res.ok) {
+    const errorPayload = await res.json().catch(() => null);
+    const detail = typeof errorPayload?.detail === 'string'
+      ? errorPayload.detail
+      : `Chat streaming API returned status ${res.status}`;
+    throw new Error(detail);
+  }
+  if (!res.body) throw new Error('This browser does not expose the chat response stream.');
+
+  let finalEvent = null;
+  let pendingDelta = '';
+  let flushTimer = null;
+
+  const flushDelta = () => {
+    if (flushTimer !== null) {
+      globalThis.clearTimeout(flushTimer);
+      flushTimer = null;
+    }
+    if (!pendingDelta) return;
+    const text = pendingDelta;
+    pendingDelta = '';
+    options.onEvent?.({ type: 'delta', text });
+  };
+
+  try {
+    await consumeNdjsonStream(res.body, (event) => {
+      if (event.type === 'delta') {
+        pendingDelta += event.text || '';
+        if (flushTimer === null) {
+          flushTimer = globalThis.setTimeout(flushDelta, 40);
+        }
+        return;
+      }
+
+      flushDelta();
+      options.onEvent?.(event);
+      if (event.type === 'error') {
+        const error = new Error(event.message || 'Chat stream failed.');
+        error.code = event.code;
+        error.retryable = Boolean(event.retryable);
+        throw error;
+      }
+      if (event.type === 'final') finalEvent = event;
+    });
+  } finally {
+    flushDelta();
+  }
+
+  if (!finalEvent) throw new Error('Chat stream ended before the final response.');
+  if (finalEvent.session_id) setChatSessionId(finalEvent.session_id);
+  return chatEventToMessage(finalEvent, language);
 }
 
 export async function fetchChatSessions(limit = 50) {

@@ -7,6 +7,7 @@ import {
   RotateCcw,
   Send,
   ShieldAlert,
+  Square,
   User,
 } from 'lucide-react'
 import ChatHistorySidebar from '../components/ChatHistorySidebar'
@@ -22,9 +23,9 @@ import {
   getChatSessionId,
   loadStoredMessages,
   saveStoredMessages,
-  sendChatMessage,
   setChatSessionId,
   startNewChatSession,
+  streamChatMessage,
 } from '../services/api'
 import '../styles/pages/Chatbot.css'
 
@@ -149,6 +150,27 @@ function closeHistoryLabel(language) {
   }[language] || 'Close chat history'
 }
 
+function stopGeneratingLabel(language) {
+  return {
+    en: 'Stop generating',
+    vi: 'Dừng tạo câu trả lời',
+    ko: '답변 생성 중지',
+    ja: '回答の生成を停止',
+    zh: '停止生成回答',
+  }[language] || 'Stop generating'
+}
+
+function streamStatusLabel(language, stage) {
+  const labels = {
+    en: { analyzing: 'Understanding your request…', generating: 'Writing the answer…' },
+    vi: { analyzing: 'Đang phân tích yêu cầu…', generating: 'Đang viết câu trả lời…' },
+    ko: { analyzing: '요청을 분석하고 있습니다…', generating: '답변을 작성하고 있습니다…' },
+    ja: { analyzing: 'リクエストを分析しています…', generating: '回答を作成しています…' },
+    zh: { analyzing: '正在分析您的请求…', generating: '正在生成回答…' },
+  }
+  return labels[language]?.[stage] || labels.en[stage] || labels.en.analyzing
+}
+
 function Chatbot() {
   const { language, t } = useLanguage()
   const { user, loading: authLoading } = useAuth()
@@ -158,6 +180,8 @@ function Chatbot() {
   const messagesContainerRef = useRef(null)
   const inputRef = useRef(null)
   const previousUserIdRef = useRef(undefined)
+  const abortControllerRef = useRef(null)
+  const shouldAutoScrollRef = useRef(true)
 
   function createSystemMessage(id, localizationKey = 'chatbotWelcome') {
     return {
@@ -185,15 +209,23 @@ function Chatbot() {
   const [activeSessionId, setActiveSessionId] = useState(() => getChatSessionId())
   const [conversationReady, setConversationReady] = useState(false)
 
+  useEffect(() => () => abortControllerRef.current?.abort(), [])
+
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current
-    if (!messagesContainer) return
+    if (!messagesContainer || !shouldAutoScrollRef.current) return
 
     messagesContainer.scrollTo({
       top: messagesContainer.scrollHeight,
       behavior: messages.length > 1 ? 'smooth' : 'auto',
     })
   }, [messages, loading])
+
+  function handleMessagesScroll(event) {
+    const element = event.currentTarget
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+    shouldAutoScrollRef.current = distanceFromBottom < 96
+  }
 
   // While the assistant is responding, the input is intentionally disabled.
   // Restore focus as soon as it becomes available again so users can continue
@@ -335,14 +367,16 @@ function Chatbot() {
   }
 
   async function loadHistorySession(sessionId) {
-    if (!user || loading || historyLoading) return
+    if (!user || historyLoading) return
 
+    abortControllerRef.current?.abort()
     setHistoryLoading(true)
     try {
       const payload = await fetchChatSessionMessages(sessionId)
       const restored = (payload.messages || []).map(historyMessageToUi)
       setChatSessionId(sessionId)
       setActiveSessionId(sessionId)
+      shouldAutoScrollRef.current = true
       setMessages(
         restored.length
           ? restored
@@ -368,36 +402,82 @@ function Chatbot() {
       language,
     }
 
-    setMessages((current) => [...current, userMessage])
+    const assistantId = `assistant-stream-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    const controller = new AbortController()
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = controller
+    const streamingMessage = {
+      id: assistantId,
+      sender: 'assistant',
+      text: '',
+      timestamp: displayTime(),
+      language,
+      isStreaming: true,
+      streamStatus: 'analyzing',
+      sources: [],
+      relatedHotels: [],
+    }
+
+    shouldAutoScrollRef.current = true
+    setMessages((current) => [...current, userMessage, streamingMessage])
     setInput('')
     clearStoredDraft()
     setLoading(true)
 
     try {
-      const aiResponse = await sendChatMessage(promptText, language)
-      setMessages((current) => [...current, aiResponse])
+      const aiResponse = await streamChatMessage(promptText, language, {
+        signal: controller.signal,
+        sessionId: activeSessionId,
+        onEvent(event) {
+          if (event.type !== 'delta' && event.type !== 'status') return
+          setMessages((current) => current.map((message) => {
+            if (message.id !== assistantId) return message
+            if (event.type === 'delta') {
+              return { ...message, text: `${message.text}${event.text}` }
+            }
+            return { ...message, streamStatus: event.stage }
+          }))
+        },
+      })
+      setMessages((current) => current.map((message) => (
+        message.id === assistantId
+          ? { ...aiResponse, id: assistantId, isStreaming: false }
+          : message
+      )))
       if (aiResponse.sessionId) {
         setActiveSessionId(aiResponse.sessionId)
       }
       if (user) await refreshSessions()
     } catch (error) {
-      console.error('Chat request failed:', error)
-      setMessages((current) => [
-        ...current,
-        {
-          id: `error-${Date.now()}`,
-          sender: 'assistant',
-          text: t.assistantUnavailable,
-          timestamp: displayTime(),
-          language,
-          localizationKey: 'assistantUnavailable',
-          isError: true,
-          errorDetail: error instanceof Error ? error.message : String(error),
-        },
-      ])
+      if (error?.name === 'AbortError') {
+        setMessages((current) => current.flatMap((message) => {
+          if (message.id !== assistantId) return [message]
+          return message.text ? [{ ...message, isStreaming: false, wasStopped: true }] : []
+        }))
+      } else {
+        console.error('Chat request failed:', error)
+        setMessages((current) => current.map((message) => (
+          message.id === assistantId
+            ? {
+                ...message,
+                text: message.text || t.assistantUnavailable,
+                localizationKey: message.text ? undefined : 'assistantUnavailable',
+                isStreaming: false,
+                isError: !message.text,
+                streamError: true,
+                errorDetail: error instanceof Error ? error.message : String(error),
+              }
+            : message
+        )))
+      }
     } finally {
+      if (abortControllerRef.current === controller) abortControllerRef.current = null
       setLoading(false)
     }
+  }
+
+  function stopStreaming() {
+    abortControllerRef.current?.abort()
   }
 
   function handleFormSubmit(event) {
@@ -406,12 +486,13 @@ function Chatbot() {
   }
 
   function startFreshConversation() {
-    if (loading) return
+    abortControllerRef.current?.abort()
     const sessionId = startNewChatSession()
     setActiveSessionId(sessionId)
     setHistoryOpen(false)
     clearStoredDraft()
     setInput('')
+    shouldAutoScrollRef.current = true
     setMessages([createSystemMessage('msg-reset', 'chatbotReset')])
   }
 
@@ -489,6 +570,7 @@ function Chatbot() {
             ref={messagesContainerRef}
             className="chatbot-page__messages"
             aria-label={t.chatMessages}
+            onScroll={handleMessagesScroll}
           >
             {messages.map((message) => (
               <article
@@ -521,10 +603,17 @@ function Chatbot() {
                           : 'chatbot-page__bubble--assistant'
                     }`}
                   >
-                    {message.sender === 'user' || message.isError ? (
+                    {message.isStreaming && !message.text ? (
+                      <span className="chatbot-page__stream-status" role="status">
+                        {streamStatusLabel(language, message.streamStatus)}
+                      </span>
+                    ) : message.sender === 'user' || message.isError || message.isStreaming ? (
                       <RichMessage text={message.text} isUser={message.sender === 'user'} />
                     ) : (
                       <StructuredMessage text={message.text} sources={message.sources} />
+                    )}
+                    {message.isStreaming && message.text && (
+                      <span className="chatbot-page__stream-cursor" aria-hidden="true" />
                     )}
                     <span className="chatbot-page__timestamp">{message.timestamp}</span>
                   </div>
@@ -547,17 +636,6 @@ function Chatbot() {
               </article>
             ))}
 
-            {loading && (
-              <article className="chatbot-page__typing">
-                <div className="chatbot-page__avatar chatbot-page__avatar--assistant">
-                  <Bot className="chatbot-page__avatar-icon" />
-                </div>
-                <div className="chatbot-page__typing-bubble">
-                  <span className="chatbot-page__typing-dot" />
-                  <span>{t.chatbotThinking}</span>
-                </div>
-              </article>
-            )}
           </section>
 
           <form className="chatbot-page__form" onSubmit={handleFormSubmit}>
@@ -570,13 +648,25 @@ function Chatbot() {
               disabled={loading || !conversationReady}
               onChange={(event) => setInput(event.target.value)}
             />
-            <button
-              className="chatbot-page__send"
-              type="submit"
-              disabled={loading || !conversationReady || !input.trim()}
-            >
-              <Send className="chatbot-page__send-icon" />
-            </button>
+            {loading ? (
+              <button
+                className="chatbot-page__send chatbot-page__send--stop"
+                type="button"
+                title={stopGeneratingLabel(language)}
+                aria-label={stopGeneratingLabel(language)}
+                onClick={stopStreaming}
+              >
+                <Square className="chatbot-page__send-icon" />
+              </button>
+            ) : (
+              <button
+                className="chatbot-page__send"
+                type="submit"
+                disabled={!conversationReady || !input.trim()}
+              >
+                <Send className="chatbot-page__send-icon" />
+              </button>
+            )}
           </form>
 
           <div className="chatbot-page__escalation">

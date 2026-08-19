@@ -474,6 +474,14 @@
   background: linear-gradient(135deg, #14544a, var(--vt-navy));
 }
 
+.chatbot-page__send--stop {
+  background: linear-gradient(135deg, #b42318, #8f1d14);
+}
+
+.chatbot-page__send--stop:hover {
+  background: linear-gradient(135deg, #8f1d14, #71160f);
+}
+
 .chatbot-page__send:disabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -487,6 +495,46 @@
 .chatbot-page__send-icon {
   width: 20px;
   height: 20px;
+}
+
+.chatbot-page__stream-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vt-teal);
+  font-weight: 700;
+}
+
+.chatbot-page__stream-status::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  content: '';
+  animation: chatbot-stream-pulse 1s ease-in-out infinite;
+}
+
+.chatbot-page__stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 3px;
+  vertical-align: -0.15em;
+  background: var(--vt-teal);
+  animation: chatbot-stream-cursor 0.8s steps(1) infinite;
+}
+
+@keyframes chatbot-stream-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+}
+
+@keyframes chatbot-stream-cursor {
+  50% {
+    opacity: 0;
+  }
 }
 
 /* ── Escalation ── */
