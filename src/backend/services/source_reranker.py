@@ -8,8 +8,10 @@ from urllib.parse import urlparse
 import chromadb
 
 from src.backend.config import get_settings
-from src.backend.services.query_parser import load_destination_catalog, normalize_text
-
+from src.backend.services.query_parser import (
+    load_destination_catalog,
+    normalize_text,
+)
 
 URL_KEYS = (
     "source_url",
@@ -157,9 +159,92 @@ class SourceReranker:
         return rows
 
     @staticmethod
+    def _answer_json_payloads(answer: str) -> list[Any]:
+        """Decode complete, fenced, or prose-prefixed JSON values."""
+        text_value = str(answer or "")
+        if not text_value.strip():
+            return []
+
+        try:
+            return [json.loads(text_value)]
+        except (TypeError, ValueError, json.JSONDecodeError):
+            pass
+
+        payloads: list[Any] = []
+        decoder = json.JSONDecoder()
+        cursor = 0
+        while cursor < len(text_value):
+            object_at = text_value.find("{", cursor)
+            array_at = text_value.find("[", cursor)
+            starts = [item for item in (object_at, array_at) if item >= 0]
+            if not starts:
+                break
+            start = min(starts)
+            try:
+                payload, end = decoder.raw_decode(text_value, start)
+            except json.JSONDecodeError:
+                cursor = start + 1
+                continue
+            payloads.append(payload)
+            cursor = end
+        return payloads
+
+    @staticmethod
+    def _json_entity_values(payload: Any) -> list[str]:
+        """Collect entity-bearing values from varying structured-answer shapes."""
+        entity_keys = {
+            "title",
+            "name",
+            "entity_name",
+            "hotel_name",
+            "property_name",
+            "venue_name",
+            "destination_name",
+        }
+        values: list[str] = []
+
+        def visit(value: Any, parent_key: str = "") -> None:
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    normalized_key = str(key).strip().lower()
+                    is_scalar = isinstance(child, (str, int, float))
+                    is_entity_value = (
+                        normalized_key in entity_keys
+                        or normalized_key == "context"
+                        or (normalized_key == "text" and parent_key == "context")
+                    )
+                    if is_scalar and is_entity_value:
+                        values.append(str(child))
+                    visit(child, normalized_key)
+            elif isinstance(value, list):
+                for child in value:
+                    visit(child, parent_key)
+
+        visit(payload)
+        return values
+
+    @staticmethod
     def _extract_answer_entities(answer: str) -> list[str]:
         """Extract entity-like phrases explicitly named in the final answer."""
         values: list[str] = []
+
+        # Structured answers may be raw JSON, fenced JSON, or JSON surrounded by
+        # prose. Walk entity-bearing keys recursively instead of assuming one
+        # exact context/topics/stops schema.
+        for payload in SourceReranker._answer_json_payloads(answer):
+            values.extend(SourceReranker._json_entity_values(payload))
+
+        # A truncated JSON value cannot be decoded, but complete entity fields
+        # before the truncation are still useful citation signals.
+        for match in re.finditer(
+            r'"(?:title|name|entity_name|hotel_name|property_name|venue_name|destination_name)"\s*:\s*"((?:\\.|[^"\\]){2,200})"',
+            answer or "",
+        ):
+            raw_value = match.group(1)
+            try:
+                values.append(json.loads(f'"{raw_value}"'))
+            except json.JSONDecodeError:
+                values.append(raw_value)
 
         # Markdown bold is the most reliable signal in current answer formatting.
         values.extend(re.findall(r"\*\*([^*\n]{2,120})\*\*", answer or ""))
@@ -236,7 +321,7 @@ class SourceReranker:
         for destination_id in destination_ids:
             item = catalog.get(destination_id) or {}
             aliases.extend(item.get("normalized_aliases", []))
-        return sorted(set(a for a in aliases if a), key=lambda x: (-len(x), x))
+        return sorted({alias for alias in aliases if alias}, key=lambda x: (-len(x), x))
 
     @classmethod
     def _matches_destination(

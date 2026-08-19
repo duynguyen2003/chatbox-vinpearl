@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from src.backend.main import app
+from src.backend.services.db import get_engine
 
 client = TestClient(app)
 
@@ -84,6 +86,30 @@ def test_mice_detail_includes_rooms_and_capacities() -> None:
     assert payload["rooms"]
     assert any(room["capacities"] for room in payload["rooms"])
     assert client.get("/api/v1/discovery/mice/not-found").status_code == 404
+
+
+def test_mice_list_query_count_is_constant_across_page_sizes() -> None:
+    engine = get_engine()
+
+    def count_queries(page_size: int) -> int:
+        statements = 0
+
+        def before_cursor_execute(*_args) -> None:
+            nonlocal statements
+            statements += 1
+
+        event.listen(engine, "before_cursor_execute", before_cursor_execute)
+        try:
+            response = client.get(
+                "/api/v1/discovery/mice",
+                params={"page_size": page_size},
+            )
+            assert response.status_code == 200
+        finally:
+            event.remove(engine, "before_cursor_execute", before_cursor_execute)
+        return statements
+
+    assert count_queries(1) == count_queries(20) == 5
 
 
 def test_discovery_rejects_invalid_filters() -> None:

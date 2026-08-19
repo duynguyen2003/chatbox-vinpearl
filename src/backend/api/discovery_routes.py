@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import exists, func, select
+from sqlalchemy import exists, func, literal, select, union_all
 
 from src.backend.models.discovery import (
     AttractionDetail,
@@ -29,7 +29,6 @@ from src.data_postgre.db.core import (
     MiceRoom,
     MiceRoomCapacity,
     MiceVenue,
-    Property,
     Room,
     Source,
 )
@@ -80,23 +79,46 @@ def _destination_options(db, entity, language: str) -> list[DiscoveryDestination
     ]
 
 
-def _load_property_room_images(db, ids: list[str]) -> dict[str, str]:
-    """First room image per property id; resort-style MICE venues share ids."""
-    if not ids:
+def _load_mice_images(db, venue_ids: list[str]) -> dict[str, str]:
+    """Load preferred media/room fallback images for all venues in one query."""
+    if not venue_ids:
         return {}
+
+    media_candidates = select(
+        Media.entity_id.label("venue_id"),
+        Media.url.label("url"),
+        literal(0).label("priority"),
+        Media.sort_order.label("sort_order"),
+        Media.id.label("candidate_id"),
+    ).where(
+        Media.entity_type == "mice_venue",
+        Media.entity_id.in_(venue_ids),
+    )
+    room_candidates = select(
+        Room.property_id.label("venue_id"),
+        Room.image_url.label("url"),
+        literal(1).label("priority"),
+        Room.room_index.label("sort_order"),
+        Room.id.label("candidate_id"),
+    ).where(
+        Room.property_id.in_(venue_ids),
+        Room.is_active.is_(True),
+        Room.image_url.is_not(None),
+    )
+    candidates = union_all(media_candidates, room_candidates).subquery(
+        "mice_image_candidates"
+    )
     rows = db.execute(
-        select(Property.id, Room.image_url)
-        .join(Room, Room.property_id == Property.id)
-        .where(
-            Property.id.in_(ids),
-            Room.is_active.is_(True),
-            Room.image_url.is_not(None),
+        select(candidates.c.venue_id, candidates.c.url).order_by(
+            candidates.c.venue_id,
+            candidates.c.priority,
+            candidates.c.sort_order.nullslast(),
+            candidates.c.candidate_id,
         )
-        .order_by(Property.id, Room.id)
     ).all()
     first: dict[str, str] = {}
-    for property_id, url in rows:
-        first.setdefault(property_id, url)
+    for venue_id, url in rows:
+        first.setdefault(venue_id, url)
     return first
 
 
@@ -346,21 +368,23 @@ def _load_mice_rooms(
     capacities_by_room: dict[str, list[MiceRoomCapacity]] = defaultdict(list)
     if not venue_ids:
         return rooms_by_venue, capacities_by_room
-    rooms = db.scalars(
-        select(MiceRoom)
+    rows = db.execute(
+        select(MiceRoom, MiceRoomCapacity)
+        .outerjoin(MiceRoomCapacity, MiceRoomCapacity.room_id == MiceRoom.id)
         .where(MiceRoom.venue_id.in_(venue_ids), MiceRoom.is_active.is_(True))
-        .order_by(MiceRoom.venue_id, MiceRoom.sort_order.nullslast(), MiceRoom.name)
+        .order_by(
+            MiceRoom.venue_id,
+            MiceRoom.sort_order.nullslast(),
+            MiceRoom.name,
+            MiceRoomCapacity.layout,
+        )
     ).all()
-    for room in rooms:
-        rooms_by_venue[room.venue_id].append(room)
-    room_ids = [room.id for room in rooms]
-    if room_ids:
-        capacities = db.scalars(
-            select(MiceRoomCapacity)
-            .where(MiceRoomCapacity.room_id.in_(room_ids))
-            .order_by(MiceRoomCapacity.room_id, MiceRoomCapacity.layout)
-        ).all()
-        for capacity in capacities:
+    seen_rooms: set[str] = set()
+    for room, capacity in rows:
+        if room.id not in seen_rooms:
+            rooms_by_venue[room.venue_id].append(room)
+            seen_rooms.add(room.id)
+        if capacity is not None:
             capacities_by_room[capacity.room_id].append(capacity)
     return rooms_by_venue, capacities_by_room
 
@@ -461,15 +485,9 @@ def list_mice_venues(
             .offset((page - 1) * page_size)
             .limit(page_size)
         ).all()
-        rooms_by_venue, capacities_by_room = _load_mice_rooms(
-            db, [venue.id for venue, _destination, _source in rows]
-        )
-        media_by_venue = _load_media_first(
-            db, "mice_venue", [venue.id for venue, _destination, _source in rows]
-        ) or {}
-        property_images = _load_property_room_images(
-            db, [venue.id for venue, _destination, _source in rows]
-        )
+        venue_ids = [venue.id for venue, _destination, _source in rows]
+        rooms_by_venue, capacities_by_room = _load_mice_rooms(db, venue_ids)
+        images_by_venue = _load_mice_images(db, venue_ids)
         return MiceVenueListResponse(
             items=[
                 _mice_summary(
@@ -479,8 +497,7 @@ def list_mice_venues(
                     rooms_by_venue.get(venue.id, []),
                     capacities_by_room,
                     lang,
-                    media_url=media_by_venue.get(venue.id)
-                    or property_images.get(venue.id),
+                    media_url=images_by_venue.get(venue.id),
                 )
                 for venue, destination_row, source in rows
             ],
@@ -505,9 +522,7 @@ def mice_venue_detail(venue_id: str, lang: Language = "en") -> MiceVenueDetail:
         venue, destination, source = row
         rooms_by_venue, capacities_by_room = _load_mice_rooms(db, [venue.id])
         rooms = rooms_by_venue.get(venue.id, [])
-        media_url = _load_media_first(db, "mice_venue", [venue.id]).get(
-            venue.id
-        ) or _load_property_room_images(db, [venue.id]).get(venue.id)
+        media_url = _load_mice_images(db, [venue.id]).get(venue.id)
         summary = _mice_summary(
             venue,
             destination,

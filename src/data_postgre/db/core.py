@@ -932,7 +932,10 @@ class Faq(Base, Sourced):
     content_language: Mapped[str | None] = mapped_column(String(2))
     sort_order: Mapped[int | None] = mapped_column(Integer)
 
-    __table_args__ = (Index("ix_faq_category", "category", "subcategory"),)
+    __table_args__ = (
+        Index("ix_faq_category", "category", "subcategory"),
+        Index("ix_faq_question_id", "question", "id"),
+    )
 
 
 class PolicyDocument(Base, Sourced):
