@@ -267,14 +267,15 @@ export async function fetchPromotionById(id) {
   return res.json();
 }
 
-export async function sendChatMessage(prompt, language = 'en') {
+export async function sendChatMessage(prompt, language = 'en', options = {}) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
+      signal: options.signal,
       body: JSON.stringify({
         message: prompt,
-        session_id: getChatSessionId(),
+        session_id: options.sessionId || getChatSessionId(),
         user_id: null,
       }),
     });

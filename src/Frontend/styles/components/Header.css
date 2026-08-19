@@ -190,7 +190,7 @@
 
 .header__language-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 2px);
   right: 0;
   z-index: 60;
   width: 160px;
@@ -465,7 +465,6 @@
 
 @media (max-width: 560px) {
   .header__brand-logo {
-    width: 90px;
-    padding: 5px 8px;
+    width: 84px;
   }
 }

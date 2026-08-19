@@ -5,9 +5,8 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
 
-  // Keep lowercase `src/frontend` so deployment works consistently on
-  // case-sensitive Linux filesystems (Railway/Docker).
-  root: path.resolve(import.meta.dirname, 'src/frontend'),
+  // Match the tracked directory name exactly for case-sensitive Linux deploys.
+  root: path.resolve(import.meta.dirname, 'src/Frontend'),
 
   envDir: path.resolve(import.meta.dirname),
 
