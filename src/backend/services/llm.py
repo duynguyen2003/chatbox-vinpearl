@@ -2,6 +2,7 @@ import json
 import random
 import re
 import time
+from collections.abc import Iterator
 from typing import Any
 
 from litellm import completion
@@ -137,6 +138,98 @@ class LLMService:
         raise RuntimeError(
             "All Gemini API keys failed."
         ) from last_error
+
+    def stream_text(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        *,
+        temperature: float | None = None,
+    ) -> Iterator[str]:
+        """Yield final response text without retrying after visible output.
+
+        Retrying after the first emitted token would duplicate or splice two
+        provider responses in the browser. Provider/key retries are therefore
+        allowed only before any non-empty delta has been yielded.
+        """
+        last_error: Exception | None = None
+        api_keys = [key for key in [self.api_key, self.api_key_backup] if key]
+
+        if not api_keys:
+            raise RuntimeError("No LLM API key configured.")
+
+        for key_index, api_key in enumerate(api_keys, start=1):
+            for attempt in range(1, self.max_retries + 1):
+                emitted = False
+                response = None
+                try:
+                    kwargs: dict[str, Any] = {
+                        "model": self.model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                        "temperature": (
+                            self.temperature
+                            if temperature is None
+                            else float(temperature)
+                        ),
+                        "max_tokens": self.max_tokens,
+                        "timeout": self.timeout,
+                        "api_key": api_key,
+                        "stream": True,
+                    }
+                    if self.base_url:
+                        kwargs["api_base"] = self.base_url
+
+                    response = completion(**kwargs)
+                    for chunk in response:
+                        choices = getattr(chunk, "choices", None) or []
+                        if not choices:
+                            continue
+                        delta = getattr(choices[0], "delta", None)
+                        content = getattr(delta, "content", None)
+                        if not content and isinstance(delta, dict):
+                            content = delta.get("content")
+                        if not isinstance(content, str) or not content:
+                            continue
+                        emitted = True
+                        yield content
+
+                    if not emitted:
+                        raise ValueError("LLM returned an empty streamed response.")
+                    return
+
+                except (
+                    RateLimitError,
+                    ServiceUnavailableError,
+                    APIConnectionError,
+                    Timeout,
+                    APIError,
+                ) as exc:
+                    last_error = exc
+                    if emitted:
+                        raise RuntimeError(
+                            "LLM stream failed after output started."
+                        ) from exc
+
+                    print(
+                        f"Gemini streaming key {key_index} failed: "
+                        f"{type(exc).__name__} ({attempt}/{self.max_retries})"
+                    )
+                    if attempt == self.max_retries:
+                        break
+                    wait_seconds = min(5.0, (2**attempt) + random.uniform(0, 1))
+                    time.sleep(wait_seconds)
+                finally:
+                    close = getattr(response, "close", None)
+                    if callable(close):
+                        close()
+
+            if key_index < len(api_keys):
+                print("Switching to backup Gemini API key for streaming...")
+
+        raise RuntimeError("All Gemini API keys failed.") from last_error
 
     def json(
         self,

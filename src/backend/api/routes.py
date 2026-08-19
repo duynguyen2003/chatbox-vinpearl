@@ -1,8 +1,13 @@
 import re
+from queue import Queue
+from threading import Event, Thread
 from uuid import uuid4
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
+
+from src.data_postgre.db.app import AppUser
 
 from ..agents.graph import agent_graph
 from ..models.chat import (
@@ -13,9 +18,14 @@ from ..models.chat import (
     ChatSessionSummary,
     SourceItem,
 )
-from ..services.memory import MemoryService
 from ..services.auth import get_current_user, get_optional_user
-from src.data_postgre.db.app import AppUser
+from ..services.chat_stream import (
+    ChatStreamCancelled,
+    ChatStreamSink,
+    bind_chat_stream,
+    encode_ndjson,
+)
+from ..services.memory import MemoryService
 from ..services.query_parser import load_destination_catalog, normalize_text
 from ..services.source_reranker import get_source_reranker
 
@@ -190,6 +200,8 @@ def _build_sources(state: dict) -> list[SourceItem]:
         if str(value).strip()
     }
     retrieved_documents = state.get("retrieved_documents", []) or []
+    if not retrieved_documents:
+        return []
     answer = str(state.get("answer") or "")
     detected_intents = {
         str(value)
@@ -286,17 +298,25 @@ def _build_sources(state: dict) -> list[SourceItem]:
     return sources
 
 
-@router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_optional_user)) -> ChatResponse:
+def _run_chat(
+    request: ChatRequest,
+    current_user: AppUser | None,
+    *,
+    session_authorized: bool = False,
+) -> ChatResponse:
     session_id = request.session_id or f"SES-{uuid4().hex}"
     user_id = str(current_user.id) if current_user else None
 
     # Authorize/claim the session before entering LangGraph. This prevents a
     # caller from supplying another user's session UUID and inheriting its memory.
-    try:
-        MemoryService().ensure_session(session_id, user_id, channel="web")
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập phiên chat này.") from exc
+    if not session_authorized:
+        try:
+            MemoryService().ensure_session(session_id, user_id, channel="web")
+        except PermissionError as exc:
+            raise HTTPException(
+                status_code=403,
+                detail="Bạn không có quyền truy cập phiên chat này.",
+            ) from exc
 
     try:
         state = agent_graph.invoke(
@@ -356,6 +376,103 @@ def chat(request: ChatRequest, current_user: AppUser | None = Depends(get_option
             "logic_category": state.get("logic_category"),
             "logic_reason": state.get("logic_reason"),
             "logic_confidence": state.get("logic_confidence"),
+        },
+    )
+
+
+@router.post("/chat", response_model=ChatResponse)
+def chat(
+    request: ChatRequest,
+    current_user: AppUser | None = Depends(get_optional_user),
+) -> ChatResponse:
+    return _run_chat(request, current_user)
+
+
+@router.post("/chat/stream")
+def chat_stream(
+    request: ChatRequest,
+    current_user: AppUser | None = Depends(get_optional_user),
+) -> StreamingResponse:
+    session_id = request.session_id or f"SES-{uuid4().hex}"
+    normalized_request = request.model_copy(update={"session_id": session_id})
+    user_id = str(current_user.id) if current_user else None
+
+    # Reject a foreign session before response headers are sent. Once streaming
+    # starts, errors can only be represented as terminal NDJSON events.
+    try:
+        MemoryService().ensure_session(session_id, user_id, channel="web")
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền truy cập phiên chat này.",
+        ) from exc
+
+    def event_source():
+        events: Queue[dict | None] = Queue()
+        cancelled = Event()
+        request_id = f"REQ-{uuid4().hex}"
+
+        def emit(event: dict) -> None:
+            if cancelled.is_set():
+                raise ChatStreamCancelled()
+            events.put(event)
+
+        def run_agent() -> None:
+            sink = ChatStreamSink(emit=emit, is_cancelled=cancelled.is_set)
+            try:
+                with bind_chat_stream(sink):
+                    response = _run_chat(
+                        normalized_request,
+                        current_user,
+                        session_authorized=True,
+                    )
+                final_event = {
+                    "type": "final",
+                    **response.model_dump(exclude={"debug"}),
+                }
+                events.put(final_event)
+            except ChatStreamCancelled:
+                pass
+            except Exception as exc:  # noqa: BLE001 - terminal stream boundary
+                print(f"[CHAT STREAM] Generation failed: {type(exc).__name__}: {exc}")
+                events.put(
+                    {
+                        "type": "error",
+                        "code": "CHAT_STREAM_FAILED",
+                        "message": "Không thể tạo câu trả lời lúc này.",
+                        "retryable": True,
+                    }
+                )
+            finally:
+                events.put(None)
+
+        try:
+            yield encode_ndjson(
+                {
+                    "type": "start",
+                    "request_id": request_id,
+                    "session_id": session_id,
+                }
+            )
+            yield encode_ndjson({"type": "status", "stage": "analyzing"})
+
+            worker = Thread(target=run_agent, name=request_id, daemon=True)
+            worker.start()
+
+            while True:
+                event = events.get()
+                if event is None:
+                    break
+                yield encode_ndjson(event)
+        finally:
+            cancelled.set()
+
+    return StreamingResponse(
+        event_source(),
+        media_type="application/x-ndjson",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
         },
     )
 

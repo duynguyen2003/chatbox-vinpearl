@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from src.backend.agents.nodes import language as language_node
 from src.backend.agents.nodes import language_guard
+from src.backend.services.chat_stream import ChatStreamSink, bind_chat_stream
 
 
 class _FakeJsonLLM:
@@ -70,3 +71,33 @@ def test_final_language_guard_forces_target_language(monkeypatch) -> None:
     assert result["answer"] == "คำตอบภาษาไทย"
     assert "TARGET_LANGUAGE: Thai (th)" in fake.user_prompt
     assert "Do not add, remove" in fake.system_prompt
+
+
+def test_final_language_guard_streams_only_its_final_output(monkeypatch) -> None:
+    class FakeStreamingLLM:
+        def text(self, **_kwargs):
+            raise AssertionError("non-streaming LLM path must not be used")
+
+        def stream_text(self, **_kwargs):
+            yield "Xin "
+            yield "chào"
+
+    events = []
+    sink = ChatStreamSink(emit=events.append, is_cancelled=lambda: False)
+    monkeypatch.setattr(language_guard, "LLMService", FakeStreamingLLM)
+
+    with bind_chat_stream(sink):
+        result = language_guard.enforce_response_language(
+            {
+                "original_language": "vi",
+                "original_language_name": "Vietnamese",
+                "answer": "Xin chào",
+            }
+        )
+
+    assert result["answer"] == "Xin chào"
+    assert events == [
+        {"type": "status", "stage": "generating"},
+        {"type": "delta", "text": "Xin "},
+        {"type": "delta", "text": "chào"},
+    ]
