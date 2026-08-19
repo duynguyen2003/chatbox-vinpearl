@@ -30,4 +30,3 @@ assert.throws(
 )
 
 console.log('frontend streaming API contract passed')
-

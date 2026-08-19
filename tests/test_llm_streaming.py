@@ -44,4 +44,3 @@ def test_stream_text_requests_provider_stream_and_preserves_spacing(monkeypatch)
     assert captured["stream"] is True
     assert chunks == ["Xin ", "chào"]
     assert "".join(chunks) == "Xin chào"
-

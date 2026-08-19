@@ -14,4 +14,3 @@ for (const [name, source] of [['Chatbot', chatbot], ['ChatWidget', widget]]) {
   assert.match(source, /type="button"/)
   console.log(`${name} streaming contract passed`)
 }
-

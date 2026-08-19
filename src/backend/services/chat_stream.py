@@ -58,4 +58,3 @@ def encode_ndjson(event: dict) -> bytes:
     return (
         json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n"
     ).encode("utf-8")
-

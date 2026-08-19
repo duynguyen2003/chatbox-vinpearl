@@ -13,7 +13,6 @@ function parseEvent(line) {
   }
   return event
 }
-
 export function createNdjsonParser(onEvent) {
   const decoder = new TextDecoder()
   let buffer = ''
@@ -62,4 +61,3 @@ export async function consumeNdjsonStream(stream, onEvent) {
     reader.releaseLock()
   }
 }
-
