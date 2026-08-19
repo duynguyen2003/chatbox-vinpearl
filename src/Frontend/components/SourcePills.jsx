@@ -3,6 +3,64 @@ import { ExternalLink } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import '../styles/components/StructuredMessage.css'
 
+function decodeSourceValue(value) {
+  let decoded = String(value || '').trim()
+  for (let attempt = 0; attempt < 2 && decoded; attempt += 1) {
+    try {
+      const next = decodeURIComponent(decoded)
+      if (next === decoded) break
+      decoded = next
+    } catch {
+      break
+    }
+  }
+  return decoded
+}
+
+function parseUrlLike(value) {
+  const decoded = decodeSourceValue(value)
+  if (!decoded) return null
+
+  let candidate = decoded
+  if (candidate.startsWith('//')) candidate = `https:${candidate}`
+  else if (!/^[a-z][a-z\d+.-]*:\/\//i.test(candidate) && /^[\w.-]+\.[a-z]{2,}(?:[/:?#]|$)/i.test(candidate)) {
+    candidate = `https://${candidate}`
+  }
+
+  try {
+    const url = new URL(candidate)
+    if (!url.hostname) return null
+    return {
+      href: url.href,
+      label: url.hostname.replace(/^www\./, ''),
+    }
+  } catch {
+    return null
+  }
+}
+
+function shortenLabel(value, fallback) {
+  const label = decodeSourceValue(value) || fallback
+  if (label.length <= 72) return label
+  return `${label.slice(0, 69)}…`
+}
+
+function normalizeSource(source, fallbackLabel) {
+  const path = decodeSourceValue(source?.path)
+  const sourceFile = decodeSourceValue(source?.source_file)
+  const pathUrl = parseUrlLike(path)
+  const fileUrl = parseUrlLike(sourceFile)
+
+  if (pathUrl) return { href: pathUrl.href, label: pathUrl.label, title: pathUrl.href }
+  if (fileUrl) return { href: fileUrl.href, label: fileUrl.label, title: fileUrl.href }
+
+  return {
+    href: path || null,
+    label: shortenLabel(sourceFile, fallbackLabel),
+    title: path || sourceFile || fallbackLabel,
+  }
+}
+
 /**
  * SourcePills shows source citations as inline pills.
  * Displays up to `maxVisible` directly, with a "+N more" expander.
@@ -28,35 +86,27 @@ export function SourcePills({ sources }) {
       </span>
       <div className="source-pills__list">
         {visible.map((source, idx) => {
-          let label = source.source_file || sourcesLabel
-          if (source.path) {
-            try {
-              const url = new URL(source.path)
-              label = url.hostname.replace(/^www\./, '')
-            } catch {
-              // Keep source_file as label.
-            }
-          }
+          const normalized = normalizeSource(source, sourcesLabel)
 
-          if (source.path) {
+          if (normalized.href) {
             return (
               <a
                 key={`src-${idx}`}
                 className="source-pills__pill source-pills__pill--link"
-                href={source.path}
+                href={normalized.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                title={source.path}
+                title={normalized.title}
               >
-                <span>{label}</span>
+                <span>{normalized.label}</span>
                 <ExternalLink className="source-pills__ext-icon" />
               </a>
             )
           }
 
           return (
-            <span key={`src-${idx}`} className="source-pills__pill">
-              {label}
+            <span key={`src-${idx}`} className="source-pills__pill" title={normalized.title}>
+              <span>{normalized.label}</span>
             </span>
           )
         })}

@@ -38,6 +38,7 @@ function ChatWidget() {
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false)
   const [quickInput, setQuickInput] = useState('')
   const [messages, setMessages] = useState(() => {
     const storedMessages = loadStoredMessages()
@@ -73,19 +74,6 @@ function ChatWidget() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, loading, isOpen])
-
-  // The input is disabled while the assistant is answering. Once the response
-  // finishes (or the widget is opened), restore keyboard focus automatically so
-  // the user can keep typing without clicking the input again.
-  useEffect(() => {
-    if (!isOpen || loading) return undefined
-
-    const frame = window.requestAnimationFrame(() => {
-      inputRef.current?.focus({ preventScroll: true })
-    })
-
-    return () => window.cancelAnimationFrame(frame)
-  }, [isOpen, loading])
 
   // Frontend-generated error messages should follow the selected UI language.
   // Real chat history remains untouched.
@@ -142,7 +130,22 @@ function ChatWidget() {
 
   function handleTriggerClick() {
     shouldAutoScrollRef.current = true
+    setIsComposerExpanded(false)
     setIsOpen(true)
+  }
+
+  function handleInputFocus() {
+    setIsComposerExpanded(true)
+  }
+
+  function handleInputBlur() {
+    if (!quickInput.trim() && !loading) setIsComposerExpanded(false)
+  }
+
+  function handleInputKeyDown(event) {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+    event.preventDefault()
+    handleSend()
   }
 
   function handleThreadScroll(event) {
@@ -156,6 +159,7 @@ function ChatWidget() {
     if (!prompt || requestActiveRef.current) return
 
     requestActiveRef.current = true
+    setIsComposerExpanded(false)
     setQuickInput('')
 
     const userMsg = {
@@ -278,7 +282,10 @@ function ChatWidget() {
               className="chat-widget__close"
               type="button"
               aria-label={t.close}
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsComposerExpanded(false)
+                setIsOpen(false)
+              }}
             >
               <X className="chat-widget__close-icon" />
             </button>
@@ -350,14 +357,20 @@ function ChatWidget() {
             )}
           </div>
 
-          <form className="chat-widget__form" onSubmit={handleQuickSend}>
-            <input
+          <form
+            className={`chat-widget__form chat-widget__form--${isComposerExpanded ? 'expanded' : 'compact'}`}
+            onSubmit={handleQuickSend}
+          >
+            <textarea
               ref={inputRef}
               className="chat-widget__input"
-              type="text"
+              rows={1}
               placeholder={t.chatWidgetPlaceholder}
               value={quickInput}
               onChange={(event) => setQuickInput(event.target.value)}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
               disabled={loading}
             />
             {loading ? (

@@ -15,6 +15,45 @@ const LANGUAGE_OPTIONS = [
   { code: 'zh', flag: '🇨🇳', label: 'CHN' },
 ]
 
+function titleTokens(value) {
+  const text = String(value || '').trim()
+  if (!text) return []
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+    return Array.from(segmenter.segment(text), ({ segment }) => segment)
+  }
+  return Array.from(text)
+}
+
+function renderHeroTitle(lines) {
+  let charIndex = 0
+
+  return lines.map((line, lineIndex) => (
+    <span className="auth-hero__line" key={`hero-line-${lineIndex}`}>
+      {String(line || '').trim().split(/(\s+)/).map((token, tokenIndex) => {
+        if (/^\s+$/.test(token)) return token
+        return (
+          <span className="auth-hero__word" key={`hero-word-${lineIndex}-${tokenIndex}`}>
+            {titleTokens(token).map((character, characterIndex) => {
+              const currentIndex = charIndex
+              charIndex += 1
+              return (
+                <span
+                  className="auth-hero__char"
+                  key={`hero-char-${lineIndex}-${tokenIndex}-${characterIndex}`}
+                  style={{ '--auth-char-index': currentIndex }}
+                >
+                  {character}
+                </span>
+              )
+            })}
+          </span>
+        )
+      })}
+    </span>
+  ))
+}
+
 function Auth({ initialTab = 'login' }) {
   const { login, register } = useAuth()
   const { t, language, setLanguage } = useLanguage()
@@ -109,11 +148,7 @@ function Auth({ initialTab = 'login' }) {
         />
         <div className="auth-hero__overlay" />
         <div className="auth-hero__content">
-          <span className="auth-hero__eyebrow">Vinpearl</span>
-          <h1 className="auth-hero__title">
-            <span>{t.authHeroTitle1}</span>
-            <span>{t.authHeroTitle2}</span>
-          </h1>
+          <h1 className="auth-hero__title">{renderHeroTitle([t.authHeroTitle1, t.authHeroTitle2])}</h1>
           <p className="auth-hero__description">{t.authHeroDescription}</p>
         </div>
       </section>

@@ -1,5 +1,16 @@
 # AI Streaming cho Chatbot — 2026-08-19
 
+### File và kế hoạch
+
+- `src/Frontend/components/SourcePills.jsx` — chuẩn hóa URL/nhãn và fallback an toàn.
+- `src/Frontend/styles/components/StructuredMessage.css` — giới hạn chiều rộng, ellipsis.
+- `tests/frontend_streaming_page_contract.mjs` — contract URL nguồn.
+- [x] Cập nhật contract, lint/build/test và ghi kết quả.
+
+### Kết quả kiểm tra
+
+- Contract, lint, build và `git diff --check`: pass.
+- Build vẫn có cảnh báo baseline JavaScript chunk lớn hơn 500 kB.
 ## Mục tiêu đo được
 
 - [x] Thêm `POST /api/v1/chat/stream` trả NDJSON theo thứ tự `start/status/delta/final` hoặc `error`.

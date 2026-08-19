@@ -4,6 +4,8 @@ import {
   Bot,
   Headphones,
   History,
+  Maximize2,
+  Minimize2,
   RotateCcw,
   Send,
   ShieldAlert,
@@ -150,6 +152,17 @@ function closeHistoryLabel(language) {
   }[language] || 'Close chat history'
 }
 
+function fullscreenLabel(language, active) {
+  const labels = {
+    en: { open: 'Open fullscreen chat', close: 'Exit fullscreen chat' },
+    vi: { open: 'Mở chat toàn màn hình', close: 'Thoát toàn màn hình' },
+    ko: { open: '전체 화면 채팅 열기', close: '전체 화면 채팅 닫기' },
+    ja: { open: 'チャットを全画面で開く', close: '全画面チャットを閉じる' },
+    zh: { open: '打开全屏聊天', close: '退出全屏聊天' },
+  }
+  return labels[language]?.[active ? 'close' : 'open'] || labels.en[active ? 'close' : 'open']
+}
+
 function stopGeneratingLabel(language) {
   return {
     en: 'Stop generating',
@@ -208,8 +221,25 @@ function Chatbot() {
   const [sessions, setSessions] = useState([])
   const [activeSessionId, setActiveSessionId] = useState(() => getChatSessionId())
   const [conversationReady, setConversationReady] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => () => abortControllerRef.current?.abort(), [])
+
+  useEffect(() => {
+    document.body.classList.toggle('chatbot-fullscreen', isFullscreen)
+    return () => document.body.classList.remove('chatbot-fullscreen')
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (!isFullscreen) return undefined
+
+    function handleFullscreenEscape(event) {
+      if (event.key === 'Escape') setIsFullscreen(false)
+    }
+
+    window.addEventListener('keydown', handleFullscreenEscape)
+    return () => window.removeEventListener('keydown', handleFullscreenEscape)
+  }, [isFullscreen])
 
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current
@@ -497,7 +527,7 @@ function Chatbot() {
   }
 
   return (
-    <main className="chatbot-page">
+    <main className={`chatbot-page${isFullscreen ? ' chatbot-page--fullscreen' : ''}`}>
       {user && historyOpen && (
         <button
           className="chatbot-page__history-backdrop"
@@ -558,6 +588,16 @@ function Chatbot() {
               >
                 <RotateCcw className="chatbot-page__action-icon" />
                 <span>{user ? newChatLabel(language) : t.clearChat}</span>
+              </button>
+              <button
+                className="chatbot-page__fullscreen"
+                type="button"
+                title={fullscreenLabel(language, isFullscreen)}
+                aria-label={fullscreenLabel(language, isFullscreen)}
+                aria-pressed={isFullscreen}
+                onClick={() => setIsFullscreen((active) => !active)}
+              >
+                {isFullscreen ? <Minimize2 className="chatbot-page__action-icon" /> : <Maximize2 className="chatbot-page__action-icon" />}
               </button>
               <Link className="chatbot-page__support-link" to="/support">
                 <Headphones className="chatbot-page__action-icon" />

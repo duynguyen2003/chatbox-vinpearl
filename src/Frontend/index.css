@@ -17,6 +17,23 @@
   --vt-ink: #20302E;
   --vt-ink-soft: #5B6B66;
 
+  /* Shared, low-saturation palette for full and floating chat surfaces. */
+  --chat-accent: #55786D;
+  --chat-accent-strong: #46675D;
+  --chat-accent-deep: #38564D;
+  --chat-accent-soft: #E7EFEC;
+  --chat-header: #D6E2DE;
+  --chat-footer: #DFEAE6;
+  --chat-surface: #F4F7F6;
+  --chat-surface-subtle: #EDF2F0;
+  --chat-surface-raised: #FBFCFC;
+  --chat-border: rgba(70, 103, 93, 0.3);
+  --chat-border-soft: rgba(70, 103, 93, 0.16);
+  --chat-ink: #293C36;
+  --chat-ink-soft: #66766F;
+  --chat-online: #69897B;
+  --chat-shadow: rgba(47, 75, 67, 0.16);
+
   --vt-radius-card: 8px;
   --vt-radius-pill: 999px;
 

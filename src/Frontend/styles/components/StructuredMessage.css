@@ -301,6 +301,8 @@
 
 .source-pills {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
@@ -317,6 +319,8 @@
 
 .source-pills__list {
   display: flex;
+  min-width: 0;
+  flex: 1 1 0;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
@@ -324,8 +328,10 @@
 
 .source-pills__pill {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
   gap: 4px;
+  max-width: min(360px, 100%);
   border: 1px solid rgba(28, 107, 94, 0.2);
   border-radius: 6px;
   padding: 3px 10px;
@@ -333,6 +339,12 @@
   font-weight: 600;
   color: var(--vt-ink-soft);
   background: var(--vt-teal-soft);
+}
+
+.source-pills__pill > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .source-pills__pill--link {
@@ -591,5 +603,10 @@
   .source-pills {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .source-pills__list {
+    width: 100%;
+    flex: 0 1 auto;
   }
 }
