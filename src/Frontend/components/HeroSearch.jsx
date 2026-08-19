@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Award,
   Building2,
   Calendar,
+  ChevronDown,
   Clock3,
   Compass,
   MapPin,
+  Minus,
+  Plus,
   Search,
   Users,
 } from 'lucide-react'
@@ -20,8 +23,32 @@ function HeroSearch({ children, destinations = [] }) {
   const [destination, setDestination] = useState('all')
   const [checkIn, setCheckIn] = useState('2026-08-10')
   const [checkOut, setCheckOut] = useState('2026-08-13')
-  const [guests, setGuests] = useState('2 Adults')
+
+  // Vinpearl Room & Guest Counter Popover State
+  const [roomsCount, setRoomsCount] = useState(1)
+  const [adultsCount, setAdultsCount] = useState(2)
+  const [childrenCount, setChildrenCount] = useState(0)
+  const [infantsCount, setInfantsCount] = useState(0)
+  const [guestPickerOpen, setGuestPickerOpen] = useState(false)
+  const guestPickerRef = useRef(null)
   const [maxPrice] = useState('400')
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (guestPickerRef.current && !guestPickerRef.current.contains(event.target)) {
+        setGuestPickerOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function getGuestSummaryText() {
+    let summary = `${roomsCount} phòng, ${adultsCount} người lớn`
+    if (childrenCount > 0) summary += `, ${childrenCount} trẻ em`
+    if (infantsCount > 0) summary += `, ${infantsCount} em bé`
+    return summary
+  }
 
   function handleSearch(event) {
     event.preventDefault()
@@ -120,24 +147,156 @@ function HeroSearch({ children, destinations = [] }) {
               />
             </div>
 
-            <div className="hero-search__field">
+            <div className="hero-search__field" ref={guestPickerRef}>
               <label className="hero-search__label" htmlFor="hero-guests">
                 <Users className="hero-search__label-icon" />
-                <span>{t.searchGuests}</span>
+                <span>{t.searchGuests || 'SỐ KHÁCH'}</span>
               </label>
-              <CustomSelect
+
+              <button
+                type="button"
+                className="hero-search__guest-trigger"
                 id="hero-guests"
-                value={guests}
-                options={[
-                  { value: '2 Adults', label: t.adults2 },
-                  { value: '2 Adults, 1 Child', label: t.adults2Child1 },
-                  { value: '2 Adults, 2 Children', label: t.adults2Children2 },
-                  { value: '4 Adults (Villa)', label: t.adults4Villa },
-                  { value: '6 Adults (Estate)', label: t.adults6Estate },
-                ]}
-                onChange={(val) => setGuests(val)}
-                aria-label={t.searchGuests}
-              />
+                onClick={() => setGuestPickerOpen((open) => !open)}
+                aria-expanded={guestPickerOpen}
+              >
+                <span className="hero-search__guest-trigger-text">{getGuestSummaryText()}</span>
+                <ChevronDown className={`hero-search__guest-chevron ${guestPickerOpen ? 'is-open' : ''}`} />
+              </button>
+
+              {guestPickerOpen && (
+                <div className="hero-search__guest-popover">
+                  {/* Row 1: Số phòng */}
+                  <div className="hero-search__popover-row">
+                    <span className="hero-search__popover-label">Số phòng</span>
+                    <div className="hero-search__counter">
+                      <button
+                        type="button"
+                        className="hero-search__counter-btn"
+                        disabled={roomsCount <= 1}
+                        onClick={() => setRoomsCount((r) => Math.max(1, r - 1))}
+                        aria-label="Giảm số phòng"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="hero-search__counter-val">{roomsCount}</span>
+                      <button
+                        type="button"
+                        className="hero-search__counter-btn"
+                        disabled={roomsCount >= 5}
+                        onClick={() => setRoomsCount((r) => Math.min(5, r + 1))}
+                        aria-label="Tăng số phòng"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="hero-search__popover-divider" />
+
+                  {/* Title: Phòng 1 */}
+                  <div className="hero-search__popover-subtitle">
+                    Phòng 1
+                  </div>
+
+                  {/* Row 2: Grid 3 cột */}
+                  <div className="hero-search__popover-grid">
+                    {/* Người lớn */}
+                    <div className="hero-search__popover-col">
+                      <span className="hero-search__popover-sublabel">Người lớn</span>
+                      <div className="hero-search__counter">
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={adultsCount <= 1}
+                          onClick={() => setAdultsCount((a) => Math.max(1, a - 1))}
+                          aria-label="Giảm người lớn"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="hero-search__counter-val">{adultsCount}</span>
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={adultsCount >= 10}
+                          onClick={() => setAdultsCount((a) => Math.min(10, a + 1))}
+                          aria-label="Tăng người lớn"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Trẻ em */}
+                    <div className="hero-search__popover-col">
+                      <span className="hero-search__popover-sublabel">Trẻ em</span>
+                      <div className="hero-search__counter">
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={childrenCount <= 0}
+                          onClick={() => setChildrenCount((c) => Math.max(0, c - 1))}
+                          aria-label="Giảm trẻ em"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="hero-search__counter-val">{childrenCount}</span>
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={childrenCount >= 6}
+                          onClick={() => setChildrenCount((c) => Math.min(6, c + 1))}
+                          aria-label="Tăng trẻ em"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Em bé */}
+                    <div className="hero-search__popover-col">
+                      <span className="hero-search__popover-sublabel">Em bé</span>
+                      <div className="hero-search__counter">
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={infantsCount <= 0}
+                          onClick={() => setInfantsCount((i) => Math.max(0, i - 1))}
+                          aria-label="Giảm em bé"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="hero-search__counter-val">{infantsCount}</span>
+                        <button
+                          type="button"
+                          className="hero-search__counter-btn"
+                          disabled={infantsCount >= 4}
+                          onClick={() => setInfantsCount((i) => Math.min(4, i + 1))}
+                          aria-label="Tăng em bé"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hero-search__popover-divider" />
+
+                  {/* Note */}
+                  <div className="hero-search__popover-note">
+                    *Em bé: Dưới 4 tuổi / Trẻ em: Từ 4 - dưới 12 tuổi
+                  </div>
+
+                  {/* Button */}
+                  <button
+                    type="button"
+                    className="hero-search__popover-apply"
+                    onClick={() => setGuestPickerOpen(false)}
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+              )}
             </div>
 
             <button className="hero-search__submit" type="submit">

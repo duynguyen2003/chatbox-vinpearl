@@ -119,6 +119,19 @@ export async function fetchAboutInfo() {
   return res.json();
 }
 
+export async function fetchFaqs(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.category) params.set('category', filters.category);
+  if (filters.destination) params.set('destination', filters.destination);
+  params.set('page', String(filters.page || 1));
+  params.set('page_size', String(filters.pageSize || 20));
+  const query = params.toString();
+  const res = await apiFetch(`/api/v1/faqs${query ? `?${query}` : ''}`);
+  if (!res.ok) throw new Error(`FAQ API returned status ${res.status}`);
+  return res.json();
+}
+
 export async function fetchDestinations() {
   const res = await apiFetch('/api/v1/catalog/destinations');
   if (!res.ok) throw new Error(`Destinations API returned status ${res.status}`);
@@ -147,9 +160,7 @@ export async function fetchHotelById(id) {
 
 export async function fetchAttractions(filters = {}) {
   const params = new URLSearchParams();
-  if (filters.destination && filters.destination !== 'all') {
-    params.set('destination', filters.destination);
-  }
+  if (filters.destination && filters.destination !== 'all') params.set('destination', filters.destination);
   if (filters.kind && filters.kind !== 'all') params.set('kind', filters.kind);
   if (filters.language) params.set('lang', filters.language);
   params.set('page', String(filters.page || 1));
@@ -169,9 +180,7 @@ export async function fetchAttractionById(id, language = 'en') {
 
 export async function fetchGolfCourses(filters = {}) {
   const params = new URLSearchParams();
-  if (filters.destination && filters.destination !== 'all') {
-    params.set('destination', filters.destination);
-  }
+  if (filters.destination && filters.destination !== 'all') params.set('destination', filters.destination);
   if (filters.language) params.set('lang', filters.language);
   params.set('page', String(filters.page || 1));
   params.set('page_size', String(filters.pageSize || 12));
@@ -190,9 +199,7 @@ export async function fetchGolfCourseById(id, language = 'en') {
 
 export async function fetchMiceVenues(filters = {}) {
   const params = new URLSearchParams();
-  if (filters.destination && filters.destination !== 'all') {
-    params.set('destination', filters.destination);
-  }
+  if (filters.destination && filters.destination !== 'all') params.set('destination', filters.destination);
   if (filters.layout && filters.layout !== 'all') params.set('layout', filters.layout);
   if (filters.minCapacity) params.set('min_capacity', String(filters.minCapacity));
   if (filters.language) params.set('lang', filters.language);
@@ -340,11 +347,11 @@ export async function submitSupportTicket(ticketData) {
     phone: payload.phone,
     language: payload.language,
     subject: payload.subject,
+    content: payload.content,
     status: payload.status === 'open' ? 'Pending' : payload.status === 'in_progress' ? 'Processing' : payload.status === 'resolved' ? 'Resolved' : 'Closed',
     createdAt: new Date(payload.created_at).toLocaleDateString('vi-VN'),
   };
 }
-
 
 export async function fetchTickets() {
   if (!getAuthToken()) return [];
@@ -368,6 +375,7 @@ function generateFallbackResponse(prompt, language) {
   let text = '';
   let relatedHotels = [];
 
+  // Check if query is about regulations, bank accounts, booking contacts, check-in times
   const isRegulationsQuery =
     lower.includes('nhận phòng') ||
     lower.includes('trả phòng') ||

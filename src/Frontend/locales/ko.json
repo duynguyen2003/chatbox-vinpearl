@@ -26,6 +26,8 @@
     "multipleDestinations": "여러 여행지"
   },
   "ui": {
+    "featuredPromotions": "추천 프로모션",
+    "offersByDestination": "여행지별 혜택",
     "navHotels": "호텔 & 리조트",
     "navAbout": "우리 에 관한 것",
     "navExperiences": "경험",

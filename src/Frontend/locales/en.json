@@ -26,6 +26,8 @@
     "multipleDestinations": "Multiple destinations"
   },
   "ui": {
+    "featuredPromotions": "Featured promotions",
+    "offersByDestination": "Offers by destination",
     "navHotels": "Hotels & Resorts",
     "navAbout": "About Us",
     "navExperiences": "Experiences",

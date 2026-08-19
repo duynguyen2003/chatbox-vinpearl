@@ -26,6 +26,8 @@
     "multipleDestinations": "多个目的地"
   },
   "ui": {
+    "featuredPromotions": "精选优惠",
+    "offersByDestination": "按目的地查看优惠",
     "navHotels": "酒店和度假村",
     "navAbout": "关于我们",
     "navExperiences": "经验",

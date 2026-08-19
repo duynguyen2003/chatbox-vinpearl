@@ -10,10 +10,10 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import vinpearlLogoWhiteGold from '../image/vp-logo-white-gold.svg'
 import '../styles/components/Header.css'
 
-const VINPEARL_LOGO_URL =
-  'https://statics.vinpearl.com/files/img/vinpearl/vp.svg'
+const VINPEARL_LOGO_URL = vinpearlLogoWhiteGold
 
 function Header() {
   const { language, setLanguage, t } = useLanguage()
@@ -25,7 +25,6 @@ function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const langCloseTimer = useRef(null)
   const authCloseTimer = useRef(null)
-
   const isHomePage = location.pathname === '/'
 
   useEffect(() => {

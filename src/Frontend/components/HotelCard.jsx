@@ -1,6 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ArrowRight, BedDouble, CheckCircle2, MapPin, Sparkles, Users } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { openAiChat } from './ChatWidget'
 import SmartImage from './SmartImage'
 import '../styles/components/HotelCard.css'
 
@@ -8,14 +9,13 @@ const FALLBACK_HOTEL_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a
 
 function HotelCard({ hotel }) {
   const { t } = useLanguage()
-  const navigate = useNavigate()
   const price = hotel.price_from == null
     ? null
     : new Intl.NumberFormat('en-US', { style: 'currency', currency: hotel.currency || 'USD', maximumFractionDigits: 0 }).format(hotel.price_from)
 
   function handleAskAi(event) {
     event.preventDefault()
-    navigate(`/chat?prompt=${encodeURIComponent(`${t.askAiAboutThis}: ${hotel.name}`)}`)
+    openAiChat(`${t.askAiAboutThis}: ${hotel.name}`)
   }
 
   const imgSrc = hotel.images?.[0] || FALLBACK_HOTEL_IMAGE

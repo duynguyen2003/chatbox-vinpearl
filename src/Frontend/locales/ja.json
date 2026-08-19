@@ -26,6 +26,8 @@
     "multipleDestinations": "複数の目的地"
   },
   "ui": {
+    "featuredPromotions": "注目のプロモーション",
+    "offersByDestination": "目的地別のオファー",
     "navHotels": "ホテル・リゾート",
     "navAbout": "わたしたち に 関する",
     "navExperiences": "経験",

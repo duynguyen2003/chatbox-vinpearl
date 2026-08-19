@@ -8,10 +8,10 @@ import {
   Instagram
 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import vinpearlLogoWhiteGold from '../image/vp-logo-white-gold.svg'
 import '../styles/components/Footer.css'
 
-const VINPEARL_LOGO_URL =
-  'https://statics.vinpearl.com/files/images/new-homepage/vp-logo-blue.svg'
+const VINPEARL_LOGO_URL = vinpearlLogoWhiteGold
 const _QR_CODE_URL = 'https://statics.vinpearl.com/QR-code.png' // fallback URL
 const _APP_STORE_URL = 'https://statics.vinpearl.com/app-store.svg'
 const _GOOGLE_PLAY_URL = 'https://statics.vinpearl.com/google-play.svg'
