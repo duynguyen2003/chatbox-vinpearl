@@ -130,6 +130,7 @@
 ## File dự kiến thay đổi
 
 - `ruff.toml`, `requirements.txt` — cố định hành vi Ruff và loại notebook crawler khỏi lint Python.
+- `.github/workflows/ci.yml` — chạy pytest qua Python module để repository root có trong import path trên runner Ubuntu.
 - `src/backend/services/kb_scope_probe.py`, `src/backend/services/retrieval_enrichment.py` — đặt module docstring/future import đúng chuẩn.
 - `src/backend/services/faq_matcher.py`, `tests/test_faq_api.py` — bỏ biến/import không dùng.
 - `tests/test_agents/test_graph.py`, `tests/test_scope_destination_queries.py` — đồng bộ test với routing và helper hiện tại.
@@ -154,11 +155,12 @@
 - **Lint code:** đặt module docstring trước future import và bỏ biến/import không dùng; không đổi hành vi runtime.
 - **Test routing:** cập nhật expectation thiếu dữ liệu thành `no_data`, đúng với fail-safe production; chỉ tạo ticket khi support triage xác định `human_required`.
 - **Test destination:** mock đúng helper `detect_supported_destination_discovery` hiện tại và khai báo guardrail đã cho phép request.
+- **GitHub Actions:** chạy `python -m pytest` thay cho console script `pytest` để `src` import ổn định từ repository root trên Linux runner.
 
 ## Kết quả kiểm tra
 
 - `ruff check src/ tests/`: pass.
-- `pytest tests/ -v --tb=short`: `139 passed`, 1 cảnh báo deprecation từ Starlette/httpx.
+- `python -m pytest tests/ -v --tb=short`: `139 passed`, 1 cảnh báo deprecation từ Starlette/httpx.
 - `npm run lint`: pass.
 - `npm run build`: pass; còn cảnh báo baseline bundle JavaScript lớn hơn 500 kB.
 - `git diff --check`: pass.

@@ -21,3 +21,4 @@
 - Dependency linter dạng `ruff>=...` không đủ để CI tái lập: version mới có thể thay đổi baseline và làm xuất hiện hàng trăm lỗi không liên quan. Cần pin version và khai báo `lint.select` tường minh.
 - Notebook crawler có semantics theo cell, thường cố ý lặp import/hàm. Không nên ép cùng baseline Ruff với module production nếu chưa có workflow lint notebook riêng.
 - Khi test lệch với production contract đã có chú thích an toàn rõ ràng, cập nhật test theo contract; không hạ thấp fail-safe production chỉ để làm CI xanh.
+- Trên CI, `python -m pytest` ổn định hơn console script `pytest` cho project chưa đóng gói, vì Python chèn repository root vào import path và tránh `ModuleNotFoundError: src`.
