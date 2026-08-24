@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Lightweight knowledge-base evidence for the input scope guardrail.
 
 This module deliberately performs only *exact phrase* matching against canonical
@@ -14,6 +12,8 @@ words "Vinpearl" or "VinWonders" (for example, Cape Wickham Golf Links). Without
 KB evidence, an LLM-only scope gate may incorrectly reject such a request before
 RAG gets a chance to retrieve the supporting document.
 """
+
+from __future__ import annotations
 
 import re
 import unicodedata

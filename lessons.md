@@ -15,3 +15,9 @@
 - Không tự động fallback sau lỗi mạng mơ hồ vì request đầu có thể đã được lưu; chỉ fallback khi server trả 404/405 cho endpoint stream.
 - Auto-scroll mỗi delta làm người dùng không thể kéo lên đọc. Cần theo dõi khoảng cách tới cuối khung và chỉ tiếp tục auto-scroll khi người dùng vẫn đang ở gần đáy.
 - Partial structured JSON/Markdown không ổn định cho renderer card. Trong lúc stream dùng renderer văn bản an toàn, sau event `final` mới chuyển sang `StructuredMessage`.
+
+## CI và Ruff — 2026-08-24
+
+- Dependency linter dạng `ruff>=...` không đủ để CI tái lập: version mới có thể thay đổi baseline và làm xuất hiện hàng trăm lỗi không liên quan. Cần pin version và khai báo `lint.select` tường minh.
+- Notebook crawler có semantics theo cell, thường cố ý lặp import/hàm. Không nên ép cùng baseline Ruff với module production nếu chưa có workflow lint notebook riêng.
+- Khi test lệch với production contract đã có chú thích an toàn rõ ràng, cập nhật test theo contract; không hạ thấp fail-safe production chỉ để làm CI xanh.

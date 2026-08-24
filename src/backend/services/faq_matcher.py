@@ -663,7 +663,6 @@ class FAQMatcher:
 
             lexical_scores = [self._lexical_similarity(value, entry) for _, value in variants]
             lexical_score = max(lexical_scores, default=0.0)
-            lexical_variant_index = int(np.argmax(lexical_scores)) if lexical_scores else best_question_variant
 
             weighted_scores = [self._weighted_question_overlap(value, entry) for _, value in variants]
             weighted_variant_index = int(

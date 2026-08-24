@@ -1,6 +1,5 @@
 """Tests cho FAQ API endpoints và repository."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from src.backend.main import app

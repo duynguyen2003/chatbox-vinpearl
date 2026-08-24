@@ -60,6 +60,6 @@ def test_route_after_assessment_enough_info() -> None:
 
 
 @pytest.mark.parametrize("state", [{"enough_information": False}, {}])
-def test_route_after_assessment_falls_back_to_ticket(state: dict) -> None:
-    """Thiếu thông tin, hoặc thiếu luôn cả khoá, đều phải mở ticket."""
-    assert route_after_assessment(state) == "ticket"
+def test_route_after_assessment_falls_back_to_no_data(state: dict) -> None:
+    """Thiếu thông tin không được tự tạo ticket khi triage chưa yêu cầu."""
+    assert route_after_assessment(state) == "no_data"

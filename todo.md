@@ -116,3 +116,49 @@
 - Full pytest: `169 passed, 6 failed`; 6 lỗi baseline nằm ở graph fallback và scope destination tests, không có file streaming trong stack lỗi.
 - Ruff chọn `E9,F,I`: pass; `git diff --check`: pass.
 - Visual QA chưa chạy được vì phiên hiện tại không có in-app browser/Chrome được kết nối; không thay thế bằng browser tool ngoài skill đã chọn.
+
+---
+
+# Sửa GitHub Actions CI — 2026-08-24
+
+## Mục tiêu đo được
+
+- [x] `ruff check src/ tests/` chạy thành công với tập luật ổn định, được khai báo tường minh.
+- [x] Toàn bộ test backend trong workflow chạy thành công.
+- [x] Frontend lint và production build không bị regression.
+
+## File dự kiến thay đổi
+
+- `ruff.toml`, `requirements.txt` — cố định hành vi Ruff và loại notebook crawler khỏi lint Python.
+- `src/backend/services/kb_scope_probe.py`, `src/backend/services/retrieval_enrichment.py` — đặt module docstring/future import đúng chuẩn.
+- `src/backend/services/faq_matcher.py`, `tests/test_faq_api.py` — bỏ biến/import không dùng.
+- `tests/test_agents/test_graph.py`, `tests/test_scope_destination_queries.py` — đồng bộ test với routing và helper hiện tại.
+- `todo.md`, `lessons.md` — ghi kết quả và bài học.
+
+## Kế hoạch thực hiện
+
+1. [x] Thêm cấu hình Ruff tường minh và sửa các lỗi lint còn lại.
+2. [x] Cập nhật 6 test đã lệch contract so với code production.
+3. [x] Chạy lại đúng lệnh lint/test của CI và frontend lint/build.
+4. [x] Ghi kết quả, kiểm tra diff, commit và push `main`.
+
+## Kiểm tra lại kế hoạch trước khi code
+
+- [x] Không thay đổi logic production ngoài các sửa lỗi lint không đổi hành vi.
+- [x] Test routing được cập nhật theo contract fail-safe `no_data`, không đổi production về `ticket` chỉ để làm test xanh.
+- [x] Notebook crawler được loại khỏi lint, không bị format/sửa hàng loạt.
+
+## Giải thích thay đổi
+
+- **Ruff:** pin `0.16.4`, khai báo rõ các nhóm luật Python cốt lõi và loại notebook crawler khỏi phạm vi CI; nhờ đó nâng version không tự bật hàng trăm luật ngoài baseline.
+- **Lint code:** đặt module docstring trước future import và bỏ biến/import không dùng; không đổi hành vi runtime.
+- **Test routing:** cập nhật expectation thiếu dữ liệu thành `no_data`, đúng với fail-safe production; chỉ tạo ticket khi support triage xác định `human_required`.
+- **Test destination:** mock đúng helper `detect_supported_destination_discovery` hiện tại và khai báo guardrail đã cho phép request.
+
+## Kết quả kiểm tra
+
+- `ruff check src/ tests/`: pass.
+- `pytest tests/ -v --tb=short`: `139 passed`, 1 cảnh báo deprecation từ Starlette/httpx.
+- `npm run lint`: pass.
+- `npm run build`: pass; còn cảnh báo baseline bundle JavaScript lớn hơn 500 kB.
+- `git diff --check`: pass.

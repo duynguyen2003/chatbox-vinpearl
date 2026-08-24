@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Structured post-retrieval enrichment for grounded RAG answers.
 
 The vector index is intentionally optimized for semantic matching, so a selected
@@ -16,6 +14,8 @@ retrieval:
 PostgreSQL remains the source of truth; Chroma only decides which entities are
 semantically relevant.
 """
+
+from __future__ import annotations
 
 import json
 import re
