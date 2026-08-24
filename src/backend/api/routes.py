@@ -208,7 +208,11 @@ def _build_sources(state: dict) -> list[SourceItem]:
         for value in state.get("detected_intents", [])
         if str(value).strip()
     }
-    policy_only = bool(detected_intents & _POLICY_INTENTS)
+    # Treat the response as policy-only only when every detected intent is a
+    # policy/payment intent. The request planner may return a mixed intent list
+    # for an otherwise normal hotel/discovery question; filtering that mixed
+    # result down to policy documents hides the correctly reranked entity URLs.
+    policy_only = bool(detected_intents) and detected_intents.issubset(_POLICY_INTENTS)
 
     # Citation selection happens AFTER answer generation. The answer may mention
     # only a subset of the retrieved context (e.g. Grand World Hanoi), so showing

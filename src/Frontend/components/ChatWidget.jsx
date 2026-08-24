@@ -4,6 +4,7 @@ import { Bot, Send, Sparkles, Square, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { clearStoredMessages, loadStoredMessages, saveStoredMessages, streamChatMessage } from '../services/api'
+import { streamStatusLabel } from '../services/chatStatus'
 import RichMessage from './RichMessage'
 import StructuredMessage from './StructuredMessage'
 import '../styles/components/ChatWidget.css'
@@ -20,17 +21,6 @@ function stopGeneratingLabel(language) {
     ja: '回答の生成を停止',
     zh: '停止生成回答',
   }[language] || 'Stop generating'
-}
-
-function streamStatusLabel(language, stage) {
-  const labels = {
-    en: { analyzing: 'Understanding your request…', generating: 'Writing the answer…' },
-    vi: { analyzing: 'Đang phân tích yêu cầu…', generating: 'Đang viết câu trả lời…' },
-    ko: { analyzing: '요청을 분석하고 있습니다…', generating: '답변을 작성하고 있습니다…' },
-    ja: { analyzing: 'リクエストを分析しています…', generating: '回答を作成しています…' },
-    zh: { analyzing: '正在分析您的请求…', generating: '正在生成回答…' },
-  }
-  return labels[language]?.[stage] || labels.en[stage] || labels.en.analyzing
 }
 
 function ChatWidget() {

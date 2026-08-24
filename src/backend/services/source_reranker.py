@@ -464,6 +464,11 @@ class SourceReranker:
             elif entity_norm in answer_norm:
                 score += 90.0
 
+        exact_entity_match = any(
+            entity_norm == normalize_text(answer_entity)
+            for answer_entity in answer_entities
+            if normalize_text(answer_entity)
+        )
         for answer_entity in answer_entities:
             answer_entity_norm = normalize_text(answer_entity)
             if not answer_entity_norm:
@@ -474,6 +479,12 @@ class SourceReranker:
                 entity_norm in answer_entity_norm or answer_entity_norm in entity_norm
             ):
                 score += 90.0
+            elif exact_entity_match:
+                # Once this row is an exact match for a named answer entity, do
+                # not let a broad summary/highlight row win merely because its
+                # body also mentions several sibling entities. Canonical entity
+                # rows should then win through the primary-type bonus below.
+                continue
             elif cls._phrase_in_text(searchable, answer_entity_norm):
                 score += 55.0
             else:

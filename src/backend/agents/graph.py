@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from functools import wraps
+
 from langgraph.graph import END, START, StateGraph
 
 from src.backend.agents.nodes.answer import generate_answer
@@ -24,6 +27,21 @@ from src.backend.agents.nodes.static_responses import (
 )
 from src.backend.agents.nodes.ticket import create_ticket
 from src.backend.agents.state import AgentState
+from src.backend.services.chat_stream import emit_chat_status
+
+
+def _with_stream_status(
+    stage: str,
+    node: Callable[[AgentState], AgentState],
+) -> Callable[[AgentState], AgentState]:
+    """Emit meaningful progress before a potentially slow graph node runs."""
+
+    @wraps(node)
+    def wrapped(state: AgentState) -> AgentState:
+        emit_chat_status(stage)
+        return node(state)
+
+    return wrapped
 
 
 def route_after_classification(state: AgentState) -> str:
@@ -85,25 +103,37 @@ def route_after_assessment(state: AgentState) -> str:
 
 builder = StateGraph(AgentState)
 
-builder.add_node("load_memory", load_conversation_memory)
+builder.add_node("load_memory", _with_stream_status("understanding", load_conversation_memory))
 builder.add_node("language", detect_language_and_translate)
-builder.add_node("understand_request", understand_current_request)
+builder.add_node(
+    "understand_request",
+    _with_stream_status("planning", understand_current_request),
+)
 builder.add_node("resolve_context", resolve_conversation_context)
 builder.add_node("guardrail", enforce_input_guardrail)
 builder.add_node("classify", classify_input)
-builder.add_node("sensitive", sensitive_content_response)
-builder.add_node("conversation_context", conversation_context_response)
-builder.add_node("greeting", greeting_response)
-builder.add_node("out_of_scope", out_of_scope_response)
-builder.add_node("invalid_request", logical_inconsistency_response)
-builder.add_node("retrieve", retrieve_context)
-builder.add_node("support_triage", analyze_support_request)
+builder.add_node("sensitive", _with_stream_status("composing", sensitive_content_response))
+builder.add_node(
+    "conversation_context",
+    _with_stream_status("composing", conversation_context_response),
+)
+builder.add_node("greeting", _with_stream_status("composing", greeting_response))
+builder.add_node("out_of_scope", _with_stream_status("composing", out_of_scope_response))
+builder.add_node(
+    "invalid_request",
+    _with_stream_status("composing", logical_inconsistency_response),
+)
+builder.add_node("retrieve", _with_stream_status("searching", retrieve_context))
+builder.add_node(
+    "support_triage",
+    _with_stream_status("evaluating", analyze_support_request),
+)
 builder.add_node("assess", assess_information)
-builder.add_node("answer", generate_answer)
-builder.add_node("grounding", validate_grounding)
+builder.add_node("answer", _with_stream_status("composing", generate_answer))
+builder.add_node("grounding", _with_stream_status("verifying", validate_grounding))
 builder.add_node("language_guard", enforce_response_language)
-builder.add_node("no_data", no_data_response)
-builder.add_node("ticket", create_ticket)
+builder.add_node("no_data", _with_stream_status("composing", no_data_response))
+builder.add_node("ticket", _with_stream_status("composing", create_ticket))
 builder.add_node("save_memory", save_conversation_memory)
 
 # Raw user input is reviewed before memory/context/rewrite nodes can influence

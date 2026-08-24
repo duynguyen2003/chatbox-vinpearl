@@ -78,3 +78,43 @@ def test_policy_sources_exclude_unrelated_entities(monkeypatch) -> None:
 
     assert [source.source_file for source in sources] == ["General regulations"]
     assert sources[0].path == "https://vinpearl.com/vi/general-terms"
+
+
+def test_mixed_intents_keep_non_policy_sources(monkeypatch) -> None:
+    class StubReranker:
+        def rerank(self, **kwargs):
+            assert kwargs["max_sources"] == 5
+            return [
+                {
+                    "best_source_url": "https://vinpearl.com/en/hotels/vinpearl-resort-nha-trang",
+                    "metadata": {
+                        "entity_name": "Vinpearl Resort Nha Trang",
+                        "entity_type": "hotel",
+                        "destination_id": "nha-trang",
+                    },
+                },
+                {
+                    "best_source_url": "https://vinpearl.com/vi/terms-of-use",
+                    "metadata": {
+                        "entity_name": "General Terms",
+                        "entity_type": "policy_document",
+                        "destination_id": "nha-trang",
+                    },
+                },
+            ]
+
+    monkeypatch.setattr(routes, "get_source_reranker", lambda: StubReranker())
+
+    sources = routes._build_sources(
+        {
+            "answer": "Vinpearl Resort Nha Trang",
+            "detected_destination_ids": ["nha-trang"],
+            "detected_intents": ["hotel", "policy"],
+            "retrieved_documents": [{"metadata": {"entity_type": "hotel"}}],
+        }
+    )
+
+    assert [source.source_file for source in sources] == [
+        "Vinpearl Resort Nha Trang",
+        "General Terms",
+    ]

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 
 const chatbot = await readFile(new URL('../src/Frontend/pages/Chatbot.jsx', import.meta.url), 'utf8')
 const widget = await readFile(new URL('../src/Frontend/components/ChatWidget.jsx', import.meta.url), 'utf8')
+const chatStatus = await readFile(new URL('../src/Frontend/services/chatStatus.js', import.meta.url), 'utf8')
 const rootStyles = await readFile(new URL('../src/Frontend/index.css', import.meta.url), 'utf8')
 const chatbotStyles = await readFile(new URL('../src/Frontend/styles/pages/Chatbot.css', import.meta.url), 'utf8')
 const widgetStyles = await readFile(new URL('../src/Frontend/styles/components/ChatWidget.css', import.meta.url), 'utf8')
@@ -15,9 +16,15 @@ for (const [name, source] of [['Chatbot', chatbot], ['ChatWidget', widget]]) {
   assert.match(source, /abort\(\)/)
   assert.match(source, /RichMessage/)
   assert.match(source, /StructuredMessage/)
+  assert.match(source, /streamStatusLabel/)
   assert.match(source, /type="button"/)
   console.log(`${name} streaming contract passed`)
 }
+
+for (const stage of ['analyzing', 'understanding', 'planning', 'searching', 'evaluating', 'composing', 'verifying', 'generating']) {
+  assert.match(chatStatus, new RegExp(`${stage}:`))
+}
+console.log('Streaming progress labels contract passed')
 
 assert.match(widget, /const \[isComposerExpanded, setIsComposerExpanded\] = useState\(false\)/)
 assert.match(widget, /chat-widget__form--\$\{isComposerExpanded \? 'expanded' : 'compact'\}/)

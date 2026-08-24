@@ -41,3 +41,53 @@ def test_extract_entities_from_truncated_json_fields() -> None:
         "Vinpearl Golf Nha Trang",
         "Hon Tre Island",
     }
+
+
+def test_exact_entity_prefers_canonical_property_over_broad_highlight() -> None:
+    reranker = object.__new__(SourceReranker)
+    reranker._load_cache = lambda: [
+        {
+            "id": "highlight",
+            "text": (
+                "Vinpearl Beachfront Nha Trang, Vinpearl Resort Nha Trang, "
+                "Vinpearl Luxury Nha Trang"
+            ),
+            "metadata": {
+                "entity_name": "Vinpearl Beachfront Nha Trang",
+                "entity_type": "org_highlight",
+                "source_url": "https://vinpearl.com/en/about-us",
+            },
+            "searchable": (
+                "vinpearl beachfront nha trang vinpearl resort nha trang "
+                "vinpearl luxury nha trang"
+            ),
+        },
+        {
+            "id": "property",
+            "text": "Vinpearl Beachfront Nha Trang",
+            "metadata": {
+                "entity_name": "Vinpearl Beachfront Nha Trang",
+                "entity_type": "property",
+                "source_url": (
+                    "https://vinpearl.com/en/hotels/"
+                    "vinpearl-beachfront-nha-trang"
+                ),
+            },
+            "searchable": "vinpearl beachfront nha trang",
+        },
+    ]
+
+    selected = reranker.rerank(
+        answer=(
+            "**Vinpearl Beachfront Nha Trang**\n"
+            "**Vinpearl Resort Nha Trang**\n"
+            "**Vinpearl Luxury Nha Trang**"
+        ),
+        retrieved_documents=[],
+        max_sources=1,
+    )
+
+    assert selected[0]["metadata"]["entity_type"] == "property"
+    assert selected[0]["best_source_url"].endswith(
+        "/hotels/vinpearl-beachfront-nha-trang"
+    )
