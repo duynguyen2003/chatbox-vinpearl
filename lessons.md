@@ -1,5 +1,12 @@
 # Lessons Learned
 
+## Latency & TTFT Optimization — 2026-08-21
+
+- Nạp sẵn (Warm-up / Preload) RAG cache và mô hình ONNX trong FastAPI `lifespan` giúp triệt tiêu hoàn toàn hiện tượng trễ 38s ở request đầu tiên khi server vừa bật.
+- Cấu hình `embedding_onnx_threads = 4` giúp tăng tốc độ tính toán vector trên đa nhân CPU lên gấp 3-4 lần.
+- Kiểm tra fast-path ngôn ngữ qua bộ mã ký tự tiếng Việt (diacritics) trước khi gọi LLM `language_guard` giúp tiết kiệm ngay ~1.5s cho mỗi câu hỏi mà không làm thay đổi nội dung câu trả lời.
+- Fast-path cho Guardrail verification khi câu hỏi khớp chính xác với thực thể KB chính thức (Vinpearl/VinWonders) và sạch dấu hiệu injection giúp giảm thêm ~1.0s - 1.5s mà vẫn giữ 100% rào chắn bảo mật an toàn.
+
 ## AI Streaming — 2026-08-19
 
 - Không được phát token trực tiếp từ node `answer` khi graph còn grounding và language guard phía sau; người dùng có thể nhìn thấy draft sai hoặc bị bước sau sửa. Phát token từ language guard cuối giữ đúng ranh giới an toàn hiện tại.

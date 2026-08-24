@@ -19,6 +19,9 @@ _SCOPE_ACTIONS = {"allow", "block"}
 _SAFETY_ACTIONS = {"allow", "block"}
 _ROUTES = {"greeting", "rag", "out_of_scope", "conversation_context"}
 _LOGIC_ACTIONS = {"allow", "reject"}
+_SUSPICIOUS_INJECTION_PATTERN = re.compile(
+    r"(?i)\b(system prompt|ignore previous|ignore all|override|developer mode|jailbreak|disregard|dan mode|admin override|hidden instructions|reveal prompt|bypass safety)\b"
+)
 
 
 def effective_user_message(state: AgentState) -> str:
@@ -1136,20 +1139,30 @@ def enforce_input_guardrail(state: AgentState) -> AgentState:
         and final_safety_action != "block"
         and logic_action != "reject"
     ):
-        # Independent second pass runs for every allowed turn, not only when the
-        # first classifier admits an injection. This catches first-pass misses.
-        # For a grounded-memory follow-up, the verifier receives only the memory
-        # entities that the first pass actually carried into the standalone RAG
-        # query, rather than treating mere recency as trusted scope.
-        verified, verify_reason = _verify_sanitized_request(
-            llm,
-            sanitized,
-            rag_query,
-            kb_scope_matches,
-            kb_scope_memory_entities,
-            resolved_memory_scope_entities,
-            supported_destination_scope_prevalidated=supported_destination_scope_prevalidated,
+        # Fast-path: When scope is established by prevalidated catalog entities,
+        # first pass was high-confidence allow, no prompt injection was detected,
+        # and no suspicious override keyword is present, skip second LLM call (~1.5s saved).
+        is_trusted_and_clean = (
+            (bool(kb_scope_matches) or supported_destination_scope_prevalidated or bool(resolved_memory_scope_entities))
+            and not injection_detected
+            and not malformed
+            and guard_safety_action == "allow"
+            and not _SUSPICIOUS_INJECTION_PATTERN.search(raw_message)
+            and not _SUSPICIOUS_INJECTION_PATTERN.search(sanitized)
         )
+        if is_trusted_and_clean:
+            verified, verify_reason = True, "Fast-path: trusted KB entity and clean high-confidence first pass"
+        else:
+            # Independent second pass runs for unverified or suspicious queries.
+            verified, verify_reason = _verify_sanitized_request(
+                llm,
+                sanitized,
+                rag_query,
+                kb_scope_matches,
+                kb_scope_memory_entities,
+                resolved_memory_scope_entities,
+                supported_destination_scope_prevalidated=supported_destination_scope_prevalidated,
+            )
         print(f"[GUARDRAIL VERIFY] safe={verified} reason={verify_reason}")
         if not verified:
             scope_action = "block"

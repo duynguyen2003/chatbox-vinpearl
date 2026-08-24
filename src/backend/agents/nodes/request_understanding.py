@@ -223,6 +223,36 @@ def understand_current_request(state: AgentState) -> AgentState:
         }
 
     message = effective_user_message(state)
+    has_prior = bool(state.get("conversation_turns"))
+    page_context_present = bool(state.get("page_context"))
+
+    # Fast-path for self-contained single-intent questions without prior conversation turns (~1.5s saved)
+    complex_markers = (
+        "so sánh", "review chi tiết", "từng nơi", "với cả", "đồng thời",
+        "và cho biết", "tiện thể", "có 2 nơi hả", "có phải là", "gói trên",
+        "và", "hoặc", "compare"
+    )
+    if not has_prior and not page_context_present and len(message.split()) <= 20 and not any(m in message.lower() for m in complex_markers):
+        tasks = [{
+            "task_id": "t1",
+            "task_type": "general_qa",
+            "goal": message,
+            "needs_memory": False,
+            "memory_reason": "",
+            "reference_phrases": [],
+            "retrieval_intents": ["hotel", "attraction", "promotion", "policy", "booking_product"],
+            "needs_retrieval": True,
+            "depends_on": [],
+        }]
+        return {
+            "request_tasks": tasks,
+            "request_task_count": 1,
+            "request_requires_memory": False,
+            "request_understanding_summary": message,
+            "request_understanding_confidence": 1.0,
+            "request_understanding_source": "fast_path_single_turn",
+        }
+
     llm = LLMService()
     prompt = (
         "You are the CURRENT-REQUEST task planner for a Vinpearl/VinWonders customer assistant. "

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     embedding_backend: str = "onnx_int8"
     embedding_onnx_file: str = "onnx/model_qint8_avx512_vnni.onnx"
     embedding_onnx_provider: str = "CPUExecutionProvider"
-    embedding_onnx_threads: int = 1
+    embedding_onnx_threads: int = 4
     embedding_max_length: int = 512
     embedding_batch_size: int = 16
 

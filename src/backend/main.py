@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import hmac
 from uuid import uuid4
 
@@ -17,11 +18,23 @@ from src.backend.api.staff_routes import router as staff_router
 from src.backend.api.ticket_routes import router as ticket_router
 from src.backend.config import get_settings
 from src.backend.models.chat import AskRequest
+from src.backend.services.rag import get_rag_service
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Preload RAG and embedding models on startup to eliminate cold-start latency."""
+    try:
+        get_rag_service()
+    except Exception as exc:
+        print(f"[STARTUP] Warning preloading RAG service: {exc}")
+    yield
 
 
 app = FastAPI(
     title="Vinpearl Multilingual Travel Agent",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
