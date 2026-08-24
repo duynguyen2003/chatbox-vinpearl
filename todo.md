@@ -134,6 +134,7 @@
 - `src/backend/services/kb_scope_probe.py`, `src/backend/services/retrieval_enrichment.py` — đặt module docstring/future import đúng chuẩn.
 - `src/backend/services/faq_matcher.py`, `tests/test_faq_api.py` — bỏ biến/import không dùng.
 - `tests/test_agents/test_graph.py`, `tests/test_scope_destination_queries.py` — đồng bộ test với routing và helper hiện tại.
+- `tests/conftest.py`, `tests/test_discovery_api.py`, `tests/test_faq_api.py` — phân tách rõ integration tests cần PostgreSQL đã seed; skip có lý do khi CI không cấp database.
 - `todo.md`, `lessons.md` — ghi kết quả và bài học.
 
 ## Kế hoạch thực hiện
@@ -156,11 +157,13 @@
 - **Test routing:** cập nhật expectation thiếu dữ liệu thành `no_data`, đúng với fail-safe production; chỉ tạo ticket khi support triage xác định `human_required`.
 - **Test destination:** mock đúng helper `detect_supported_destination_discovery` hiện tại và khai báo guardrail đã cho phép request.
 - **GitHub Actions:** chạy `python -m pytest` thay cho console script `pytest` để `src` import ổn định từ repository root trên Linux runner.
+- **Database integration tests:** dùng fixture `loaded_database` để chỉ chạy các API/data assertions khi PostgreSQL đã seed; runner không có DB sẽ skip có lý do thay vì thất bại do hạ tầng thiếu.
 
 ## Kết quả kiểm tra
 
 - `ruff check src/ tests/`: pass.
 - `python -m pytest tests/ -v --tb=short`: `139 passed`, 1 cảnh báo deprecation từ Starlette/httpx.
+- Mô phỏng CI không có PostgreSQL: `95 passed, 44 skipped`, không có test fail.
 - `npm run lint`: pass.
 - `npm run build`: pass; còn cảnh báo baseline bundle JavaScript lớn hơn 500 kB.
 - `git diff --check`: pass.

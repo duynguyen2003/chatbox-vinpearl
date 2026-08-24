@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import event
 
@@ -7,6 +8,7 @@ from src.backend.services.db import get_engine
 client = TestClient(app)
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_attractions_support_filters_and_pagination() -> None:
     response = client.get("/api/v1/discovery/attractions?page=1&page_size=3&lang=vi")
     assert response.status_code == 200
@@ -28,6 +30,7 @@ def test_attractions_support_filters_and_pagination() -> None:
     )
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_attraction_detail_and_missing_item() -> None:
     listing = client.get("/api/v1/discovery/attractions?page_size=1").json()
     attraction_id = listing["items"][0]["id"]
@@ -39,6 +42,7 @@ def test_attraction_detail_and_missing_item() -> None:
     assert client.get("/api/v1/discovery/attractions/not-found").status_code == 404
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_golf_list_and_detail_include_features() -> None:
     response = client.get("/api/v1/discovery/golf?page_size=20")
     assert response.status_code == 200
@@ -55,10 +59,12 @@ def test_golf_list_and_detail_include_features() -> None:
     assert any(item["image_url"] for item in detail_payload["features"])
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_golf_missing_item_returns_404() -> None:
     assert client.get("/api/v1/discovery/golf/not-found").status_code == 404
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_mice_list_filters_by_layout_and_capacity() -> None:
     response = client.get("/api/v1/discovery/mice?page_size=20")
     assert response.status_code == 200
@@ -77,6 +83,7 @@ def test_mice_list_filters_by_layout_and_capacity() -> None:
     assert all((item["max_capacity"] or 0) >= 500 for item in filtered_items)
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_mice_detail_includes_rooms_and_capacities() -> None:
     listing = client.get("/api/v1/discovery/mice?page_size=20").json()
     venue = next(item for item in listing["items"] if item["room_count"] > 0)
@@ -88,6 +95,7 @@ def test_mice_detail_includes_rooms_and_capacities() -> None:
     assert client.get("/api/v1/discovery/mice/not-found").status_code == 404
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_mice_list_query_count_is_constant_across_page_sizes() -> None:
     engine = get_engine()
 

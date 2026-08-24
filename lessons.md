@@ -22,3 +22,4 @@
 - Notebook crawler có semantics theo cell, thường cố ý lặp import/hàm. Không nên ép cùng baseline Ruff với module production nếu chưa có workflow lint notebook riêng.
 - Khi test lệch với production contract đã có chú thích an toàn rõ ràng, cập nhật test theo contract; không hạ thấp fail-safe production chỉ để làm CI xanh.
 - Trên CI, `python -m pytest` ổn định hơn console script `pytest` cho project chưa đóng gói, vì Python chèn repository root vào import path và tránh `ModuleNotFoundError: src`.
+- Integration test phụ thuộc PostgreSQL đã seed phải khai báo precondition bằng fixture. Nếu workflow không provision database, skip có lý do rõ ràng chính xác hơn việc để test thất bại vì `localhost:5432` không tồn tại.

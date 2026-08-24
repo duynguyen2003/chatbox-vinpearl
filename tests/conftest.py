@@ -3,8 +3,25 @@ from unittest.mock import AsyncMock
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from src.backend.main import app
+from src.backend.services.db import get_engine
+
+
+@pytest.fixture(scope="session")
+def loaded_database():
+    """Require the seeded PostgreSQL dataset for integration tests."""
+    engine = get_engine()
+    try:
+        with Session(engine) as session:
+            loaded = session.scalar(text("SELECT count(*) FROM core.property"))
+    except Exception as exc:
+        pytest.skip(f"PostgreSQL test data is unavailable: {exc}")
+    if not loaded:
+        pytest.skip("PostgreSQL is not seeded; run python -m scripts.load_core")
+    return engine
 
 
 @pytest_asyncio.fixture

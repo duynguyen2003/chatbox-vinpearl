@@ -1,5 +1,6 @@
 """Tests cho FAQ API endpoints và repository."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from src.backend.main import app
@@ -7,6 +8,7 @@ from src.backend.main import app
 client = TestClient(app)
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_get_faqs_basic():
     """Test endpoint GET /api/v1/faqs trả 200 và structure đúng."""
     response = client.get("/api/v1/faqs")
@@ -24,6 +26,7 @@ def test_get_faqs_basic():
     assert data["page_size"] == 20
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_get_faqs_pagination():
     """Test pagination params."""
     response = client.get("/api/v1/faqs?page=1&page_size=5")
@@ -35,6 +38,7 @@ def test_get_faqs_pagination():
     assert len(data["items"]) <= 5
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_get_faqs_search():
     """Test search parameter."""
     response = client.get("/api/v1/faqs?q=booking")
@@ -43,6 +47,7 @@ def test_get_faqs_search():
     assert isinstance(data["items"], list)
 
 
+@pytest.mark.usefixtures("loaded_database")
 def test_get_faqs_category_filter():
     """Test category filter."""
     # First get categories
