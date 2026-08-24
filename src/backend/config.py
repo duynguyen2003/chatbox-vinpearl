@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     llm_api_key: str | None = None
     llm_api_key_backup: str | None = None
     llm_base_url: str | None = None
+    llm_fallback_model: str | None = None
+    llm_fallback_api_key: str | None = None
+    llm_fallback_base_url: str | None = None
     llm_temperature: float = 0.2
     llm_max_tokens: int = 1500
     llm_timeout: float = 60.0

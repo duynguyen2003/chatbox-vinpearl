@@ -167,3 +167,55 @@
 - `npm run lint`: pass.
 - `npm run build`: pass; còn cảnh báo baseline bundle JavaScript lớn hơn 500 kB.
 - `git diff --check`: pass.
+
+---
+
+# Rà soát local full-stack — 2026-08-24
+
+## Mục tiêu đo được
+
+- [x] `.venv` và `.env` nạp được cấu hình backend mà không lộ secret hoặc ghi nhầm vào Git.
+- [x] PostgreSQL ở Alembic head và pass toàn bộ baseline data tests.
+- [x] Chroma collection hiệu lực có document và RAG query trả stream `final`, không có event `error`.
+- [x] Backend health/catalog/FAQ/discovery và frontend/chatbox chạy được local.
+- [x] Full backend tests, Ruff, frontend lint/build đều pass sau khi hoàn thiện.
+
+## File dự kiến thêm/sửa
+
+- `src/backend/config.py`, `src/backend/services/llm.py`, `.env.example`, `tests/test_llm_streaming.py` — đọc và failover sang fallback model/key/base URL đã khai báo trong `.env`.
+- `src/backend/tests/test_price_estimate_logic_enrichment_regression.py` — đồng bộ expectation với deterministic contradiction precheck confidence `1.0`.
+- `.env` (Git ignore) — đổi tên Chroma path cũ sang `CHROMA_DIR` canonical mà backend thực sự đọc.
+- `todo.md`, `lessons.md` — kế hoạch, kết quả và bài học audit.
+- `storage/chroma_local/` — dữ liệu runtime bị Git ignore, được dựng lại từ PostgreSQL.
+
+## Kế hoạch thực hiện
+
+1. [x] Kiểm tra dependency, tên biến `.env`, migration và baseline PostgreSQL.
+2. [x] Dựng lại Chroma collection đang được backend sử dụng.
+3. [x] Smoke-test backend API, greeting stream và truy vấn RAG thực.
+4. [x] Chạy frontend, kiểm tra chatbox/UI và proxy API.
+5. [x] Chạy regression, dọn test session, ghi kết quả và commit nếu có code thay đổi.
+
+## Kiểm tra lại kế hoạch trước khi code
+
+- [x] Không xóa `.venv` người dùng vừa cung cấp; `node_modules` đang cần cho frontend nên được giữ lại.
+- [x] Không in giá trị secret từ `.env`; chỉ kiểm tra tên biến và trạng thái có/không.
+- [x] Chroma có thể tái tạo từ PostgreSQL; chỉ reset đúng collection local hiệu lực.
+
+## Giải thích thay đổi
+
+- **Cấu hình LLM:** bổ sung fallback model/key/base URL riêng, giữ `LLM_API_KEY_BACKUP` cho key dự phòng cùng primary provider; log chỉ nêu nhãn endpoint, không log credential.
+- **Failover:** cả timeout, connection/API/rate-limit và authentication error đều chuyển sang provider kế tiếp trước khi trả lỗi an toàn.
+- **Local `.env`:** đổi `CHROMA_PERSIST_DIR` cũ thành `CHROMA_DIR=./storage/chroma_local`; file vẫn bị Git ignore.
+- **Regression:** deterministic contradiction precheck là authority với confidence `1.0`; test được đồng bộ theo contract này.
+
+## Kết quả kiểm tra
+
+- Python `.venv`: `3.11.9`; `pip check`: không có dependency hỏng. `node_modules` đủ package theo lockfile và được giữ lại để chạy FE.
+- PostgreSQL: Alembic `c42a7e91d5f0 (head)`; `30 passed` baseline data tests; `4.302` business rows trên `35` bảng được loader bao phủ.
+- Chroma: collection `vinpearl_multilingual_e5_small_onnx_int8` có `4.618` documents sau full reset/ingest.
+- Backend: health, destinations, FAQ, golf, about đều HTTP `200`; greeting stream và RAG stream đều kết thúc `final`, RAG có citation và không có event `error`.
+- Vite: trang local, catalog proxy và chat stream proxy đều HTTP `200`; ba frontend contract suites pass. Visual browser QA không chạy được vì phiên không có browser kết nối.
+- Regression: `189 passed`; Ruff pass; frontend lint pass; production build pass (còn cảnh báo baseline chunk > 500 kB).
+- Fallback endpoint đã được code và unit test xác minh, nhưng token fallback hiện tại trả `401 Invalid token`; primary Gemini vẫn hoạt động.
+- Đã xóa đúng `4` smoke-test sessions và `6` messages do lần audit này tạo ra.

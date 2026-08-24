@@ -3,18 +3,28 @@ import random
 import re
 import time
 from collections.abc import Iterator
+from dataclasses import dataclass
 from typing import Any
 
 from litellm import completion
 from litellm.exceptions import (
     APIConnectionError,
     APIError,
+    AuthenticationError,
     RateLimitError,
     ServiceUnavailableError,
     Timeout,
 )
 
 from src.backend.config import get_settings
+
+
+@dataclass(frozen=True)
+class _ProviderConfig:
+    label: str
+    model: str
+    api_key: str
+    base_url: str | None
 
 
 class LLMService:
@@ -25,11 +35,43 @@ class LLMService:
         self.api_key = settings.llm_api_key
         self.api_key_backup = settings.llm_api_key_backup
         self.base_url = settings.llm_base_url
+        self.fallback_model = settings.llm_fallback_model
+        self.fallback_api_key = settings.llm_fallback_api_key
+        self.fallback_base_url = settings.llm_fallback_base_url
 
         self.temperature = settings.llm_temperature
         self.max_tokens = settings.llm_max_tokens
         self.timeout = settings.llm_timeout
         self.max_retries = settings.llm_max_retries
+
+    def _provider_configs(self) -> list[_ProviderConfig]:
+        """Return configured endpoints without ever logging credential values."""
+        providers: list[_ProviderConfig] = []
+        if self.api_key:
+            providers.append(
+                _ProviderConfig("primary", self.model, self.api_key, self.base_url)
+            )
+        if self.api_key_backup:
+            providers.append(
+                _ProviderConfig(
+                    "primary backup key",
+                    self.model,
+                    self.api_key_backup,
+                    self.base_url,
+                )
+            )
+
+        fallback_api_key = getattr(self, "fallback_api_key", None)
+        if fallback_api_key:
+            providers.append(
+                _ProviderConfig(
+                    "fallback endpoint",
+                    getattr(self, "fallback_model", None) or self.model,
+                    fallback_api_key,
+                    getattr(self, "fallback_base_url", None),
+                )
+            )
+        return providers
 
     def text(
         self,
@@ -40,22 +82,13 @@ class LLMService:
     ) -> str:
         last_error: Exception | None = None
 
-        api_keys = [
-            key
-            for key in [
-                self.api_key,
-                self.api_key_backup,
-            ]
-            if key
-        ]
+        providers = self._provider_configs()
 
-        if not api_keys:
-            raise RuntimeError(
-                "No LLM API key configured."
-            )
+        if not providers:
+            raise RuntimeError("No LLM API key configured.")
 
-        for key_index, api_key in enumerate(
-            api_keys,
+        for provider_index, provider in enumerate(
+            providers,
             start=1,
         ):
             for attempt in range(
@@ -64,7 +97,7 @@ class LLMService:
             ):
                 try:
                     kwargs: dict[str, Any] = {
-                        "model": self.model,
+                        "model": provider.model,
                         "messages": [
                             {
                                 "role": "system",
@@ -80,11 +113,11 @@ class LLMService:
                         ),
                         "max_tokens": self.max_tokens,
                         "timeout": self.timeout,
-                        "api_key": api_key,
+                        "api_key": provider.api_key,
                     }
 
-                    if self.base_url:
-                        kwargs["api_base"] = self.base_url
+                    if provider.base_url:
+                        kwargs["api_base"] = provider.base_url
 
                     response = completion(**kwargs)
 
@@ -105,13 +138,14 @@ class LLMService:
                     RateLimitError,
                     ServiceUnavailableError,
                     APIConnectionError,
+                    AuthenticationError,
                     Timeout,
                     APIError,
                 ) as exc:
                     last_error = exc
 
                     print(
-                        f"Gemini key {key_index} "
+                        f"LLM {provider.label} "
                         f"failed: "
                         f"{type(exc).__name__} "
                         f"({attempt}/"
@@ -129,15 +163,10 @@ class LLMService:
 
                     time.sleep(wait_seconds)
 
-            if key_index < len(api_keys):
-                print(
-                    "Switching to backup "
-                    "Gemini API key..."
-                )
+            if provider_index < len(providers):
+                print(f"Switching to {providers[provider_index].label}...")
 
-        raise RuntimeError(
-            "All Gemini API keys failed."
-        ) from last_error
+        raise RuntimeError("All configured LLM endpoints failed.") from last_error
 
     def stream_text(
         self,
@@ -153,18 +182,18 @@ class LLMService:
         allowed only before any non-empty delta has been yielded.
         """
         last_error: Exception | None = None
-        api_keys = [key for key in [self.api_key, self.api_key_backup] if key]
+        providers = self._provider_configs()
 
-        if not api_keys:
+        if not providers:
             raise RuntimeError("No LLM API key configured.")
 
-        for key_index, api_key in enumerate(api_keys, start=1):
+        for provider_index, provider in enumerate(providers, start=1):
             for attempt in range(1, self.max_retries + 1):
                 emitted = False
                 response = None
                 try:
                     kwargs: dict[str, Any] = {
-                        "model": self.model,
+                        "model": provider.model,
                         "messages": [
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": user_prompt},
@@ -176,11 +205,11 @@ class LLMService:
                         ),
                         "max_tokens": self.max_tokens,
                         "timeout": self.timeout,
-                        "api_key": api_key,
+                        "api_key": provider.api_key,
                         "stream": True,
                     }
-                    if self.base_url:
-                        kwargs["api_base"] = self.base_url
+                    if provider.base_url:
+                        kwargs["api_base"] = provider.base_url
 
                     response = completion(**kwargs)
                     for chunk in response:
@@ -204,6 +233,7 @@ class LLMService:
                     RateLimitError,
                     ServiceUnavailableError,
                     APIConnectionError,
+                    AuthenticationError,
                     Timeout,
                     APIError,
                 ) as exc:
@@ -214,7 +244,7 @@ class LLMService:
                         ) from exc
 
                     print(
-                        f"Gemini streaming key {key_index} failed: "
+                        f"LLM {provider.label} streaming failed: "
                         f"{type(exc).__name__} ({attempt}/{self.max_retries})"
                     )
                     if attempt == self.max_retries:
@@ -226,10 +256,10 @@ class LLMService:
                     if callable(close):
                         close()
 
-            if key_index < len(api_keys):
-                print("Switching to backup Gemini API key for streaming...")
+            if provider_index < len(providers):
+                print(f"Switching to {providers[provider_index].label} for streaming...")
 
-        raise RuntimeError("All Gemini API keys failed.") from last_error
+        raise RuntimeError("All configured LLM endpoints failed.") from last_error
 
     def json(
         self,

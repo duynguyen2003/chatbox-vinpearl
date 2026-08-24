@@ -44,3 +44,39 @@ def test_stream_text_requests_provider_stream_and_preserves_spacing(monkeypatch)
     assert captured["stream"] is True
     assert chunks == ["Xin ", "chào"]
     assert "".join(chunks) == "Xin chào"
+
+
+def test_text_switches_to_configured_fallback_endpoint(monkeypatch) -> None:
+    service = _service()
+    service.fallback_model = "fallback-model"
+    service.fallback_api_key = "fallback-key"
+    service.fallback_base_url = "https://fallback.example/v1"
+    calls = []
+
+    class RetryableAuthenticationError(Exception):
+        pass
+
+    def fake_completion(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise RetryableAuthenticationError("primary unavailable")
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content="fallback ok"))]
+        )
+
+    monkeypatch.setattr(
+        llm_module,
+        "AuthenticationError",
+        RetryableAuthenticationError,
+    )
+    monkeypatch.setattr(llm_module, "completion", fake_completion)
+
+    answer = service.text(system_prompt="system", user_prompt="user")
+
+    assert answer == "fallback ok"
+    assert calls[0]["model"] == "test-model"
+    assert calls[0]["api_key"] == "test-key"
+    assert "api_base" not in calls[0]
+    assert calls[1]["model"] == "fallback-model"
+    assert calls[1]["api_key"] == "fallback-key"
+    assert calls[1]["api_base"] == "https://fallback.example/v1"

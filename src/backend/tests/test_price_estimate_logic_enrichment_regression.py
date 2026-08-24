@@ -226,7 +226,9 @@ def test_guardrail_rejects_high_confidence_internal_travel_contradiction(monkeyp
     assert result["scope_action"] == "allow"
     assert result["safety_action"] == "allow"
     assert result["logic_action"] == "reject"
-    assert result["logic_confidence"] == 0.99
+    # The deterministic timing precheck is authoritative and raises a detected
+    # contradiction to full confidence even when the mocked LLM reports 0.99.
+    assert result["logic_confidence"] == 1.0
     assert result["route"] == "invalid_request"
     assert result["rag_query"] == ""
 

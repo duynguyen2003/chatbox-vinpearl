@@ -23,3 +23,10 @@
 - Khi test lệch với production contract đã có chú thích an toàn rõ ràng, cập nhật test theo contract; không hạ thấp fail-safe production chỉ để làm CI xanh.
 - Trên CI, `python -m pytest` ổn định hơn console script `pytest` cho project chưa đóng gói, vì Python chèn repository root vào import path và tránh `ModuleNotFoundError: src`.
 - Integration test phụ thuộc PostgreSQL đã seed phải khai báo precondition bằng fixture. Nếu workflow không provision database, skip có lý do rõ ràng chính xác hơn việc để test thất bại vì `localhost:5432` không tồn tại.
+
+## Local full-stack audit — 2026-08-24
+
+- PostgreSQL đã seed đủ không đồng nghĩa chatbot RAG sẵn sàng: Chroma là derived runtime state riêng và phải ingest lại khi collection rỗng hoặc tên collection/model thay đổi.
+- Biến fallback LLM phải gắn theo bộ ba model/key/base URL. Dùng key của provider khác như `LLM_API_KEY_BACKUP` trên primary model/base URL sẽ không tạo ra failover thực.
+- Smoke-test chat cần kiểm tra chuỗi event `start/status/delta/final`, không chỉ HTTP `200`, vì streaming endpoint có thể trả lỗi bằng event `error` sau khi header đã gửi.
+- First substantive RAG request có thể chậm do warm-up lexical/citation cache và provider retry; cần phân biệt latency này với vector-store rỗng qua log/count collection.
