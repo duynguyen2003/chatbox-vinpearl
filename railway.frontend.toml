@@ -2,13 +2,13 @@
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.frontend"
 watchPatterns = [
-  "/src/frontend/**",
+  "/src/Frontend/**",
   "/src/data_crawl/**",
   "/package.json",
   "/package-lock.json",
   "/vite.config.js",
   "/Dockerfile.frontend",
-  "/railway-frontend.toml"
+  "/railway.frontend.toml"
 ]
 
 [deploy]

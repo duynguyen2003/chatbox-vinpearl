@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY vite.config.js ./
-COPY src/frontend ./src/frontend
+COPY src/Frontend ./src/Frontend
 # Some frontend pages import JSON directly from src/data_crawl.
 COPY src/data_crawl ./src/data_crawl
 
